@@ -20,13 +20,22 @@ During implementation, maintain a short checklist below the feature. After imple
 - Clients: web, Android, and iOS in the initial release.
 - MVP feature groups: family tree; invitations and relationship verification; deceased profiles and evidence; memories, stories, and photos; privacy and administration; opt-in city discovery; audio memories; spreadsheet import.
 - The product must remain useful without AI services.
-- Initial stack is not yet validated against a real Parampara repository. Candidate: Next.js + TypeScript for web, React Native + Expo for mobile, PostgreSQL, and a managed backend/auth/storage provider such as Supabase. Final selection requires repository inspection and a short architecture decision record.
+- Stack (D-014, D-015): Turborepo + pnpm; Next.js web; Expo for iOS and Android; Convex backend and database; Clerk auth; Cloudflare R2 media. Versions are confirmed when the monorepo is scaffolded.
+- Repository: public GitHub `Rajendra-Kr12/parampara-the-legacy`, `main` protected, PR-only (D-018).
+- Original idea notes: `docs/original-brief.md` (historical; this scope and the PRD supersede it where they differ).
+
+## Current status (2026-10-10)
+
+- Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021).
+- No application code yet. Next approved step candidates: Feature 0 (agent tooling) and Feature 1 (monorepo scaffold).
+- Time-sensitive: Laya is free on Vercel AI Gateway only through 2026-10-31.
 
 ## At a glance
 
 | # | Feature | Priority | Status |
 |---|---|---|---|
-| 1 | Repository inspection and architecture decision | Foundation | Not started |
+| 0 | Agent tooling: Laya router, Greptile, CI | Foundation | Not started |
+| 1 | Monorepo scaffold and architecture validation | Foundation | Partly done (docs and decisions) |
 | 2 | Identity, family groups, invitations | P0 | Not started |
 | 3 | Canonical person records and relationship graph | P0 | Not started |
 | 4 | Kinship terminology and preferred labels | P0 | Not started |
@@ -43,35 +52,50 @@ P0/P1 express sequencing priority, not exclusion from the agreed MVP.
 
 ## Foundation decisions required
 
-- [ ] Inspect current repository, runtime versions, package manager, existing files, test tools, CI, and agent configuration.
-- [ ] Decide web/mobile monorepo strategy after inspecting the actual repository.
-- [ ] Decide backend, authentication, storage, migrations, and hosting.
+- [x] Inspect current repository (2026-10-10: documentation only, no code, no CI, no package manager yet).
+- [x] Decide web/mobile monorepo strategy (D-014: Turborepo + Next.js + Expo).
+- [x] Decide backend, authentication, and media storage (D-014, D-015). Hosting regions and migrations approach: open.
 - [ ] Confirm supported relationship types and constraints.
-- [ ] Define close-relative eligibility and the exception path when three eligible relatives are unavailable.
+- [x] Deceased-profile threshold when three eligible relatives are unavailable (D-016).
+- [ ] Define close-relative eligibility (who counts as close for each claim type).
 - [ ] Define review thresholds for new claims versus changes to established parent-child or marriage relationships.
 - [ ] Define first-launch languages/regions for kinship terminology.
 - [ ] Define profile and archival retention policy, including deletion requests and backups.
 
-## Feature 1: repository inspection and architecture
+## Feature 0: agent tooling
 
 ### Intended slice
-Understand the existing repository and establish a documented architecture before implementation.
+Make multi-harness development safe and cheap before application code: routing, automated review, and CI.
 
 ### Checklist
-- [ ] Inventory root files and feature folders.
-- [ ] Read `CLAUDE.md`, `AGENTS.md`, scope, docs, skill definitions, package manifests, migrations, and CI configuration.
-- [ ] Record existing versus proposed technologies.
-- [ ] Produce `docs/architecture.md` and update this scope.
-- [ ] Identify security, privacy, data integrity, and cost risks.
-- [ ] Present plan and wait for approval before application-code changes.
+- [ ] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback and budget cap. Decide before 2026-10-31 whether to keep it on paid Laya or self-host.
+- [ ] Map routing tiers to Firstmate dispatch profiles; verify herdr backend setup.
+- [ ] Verify skill loading in Codex, OpenCode, and Antigravity; update the harness table.
+- [ ] Apply for Greptile open-source plan and install it on the repository.
+- [ ] Add GitHub Actions CI (lint, typecheck, test, build) once code exists; then require it in the `protect-main` ruleset.
+
+## Feature 1: monorepo scaffold and architecture validation
+
+### Intended slice
+Scaffold the Turborepo with web, mobile, Convex, and shared packages, proving one trivial end-to-end path (signed-in user sees their own name) on web, iOS, and Android.
+
+### Checklist
+- [x] Inventory repository and read all docs and skills (2026-10-10).
+- [x] Record stack decisions in `docs/architecture.md` and `docs/decision-log.md`.
+- [x] Identify security, privacy, data integrity, and cost risks (architecture open items).
+- [ ] Present scaffold plan and wait for approval before application-code changes.
+- [ ] Scaffold `apps/web`, `apps/mobile`, `packages/backend`, `packages/domain`, `packages/kinship-engine`, `packages/validation`, `packages/config`.
+- [ ] Wire Clerk to Convex on both clients; verify sign-in on web, iOS simulator, Android emulator.
+- [ ] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger.
+- [ ] Resolve data-residency open item before any real data.
 
 ### Verification
-Not run. This pack is a documentation proposal, not a claim that a Parampara code repository has been inspected.
+Documentation inspection only. No code, build, or tests exist yet.
 
 ## Feature 2: identity, family groups, invitations
 
 ### Intended behavior
-Members create or claim profiles, invite relatives by email or phone, state a claimed relationship, and allow the invitee to confirm or correct it. Pending members have limited access. Account verification is not proof of kinship.
+Members create or claim profiles, invite relatives by email or phone, state a claimed relationship, and allow the invitee to confirm or correct it. Pending members have limited access. Account verification is not proof of kinship. Nobody completes registration without a disclosed relationship confirmed by the other party: the invitee confirms the relation the inviter stated, or the inviter confirms the relation the invitee disclosed. Profiles created on someone's behalf require their phone or email so they can register through the invitation link. Required profile fields follow FR-02 (D-017).
 
 ### Checklist
 - [ ] Define account lifecycle and family membership.
@@ -115,7 +139,7 @@ Verified members can propose changes. Established parent-child and marriage rela
 ## Feature 6: deceased profiles and historical evidence
 
 ### Intended behavior
-Initial approval requires three eligible close relatives where available. If the threshold cannot be met, keep the profile pending unless an explicit, documented administrator exception is allowed. Documentary evidence takes precedence; where unavailable, multiple independent testimonies may support a claim. Uncertain information remains uncertain.
+Initial approval requires three eligible close relatives. With fewer than three eligible, two approvals plus reviewed documentary evidence suffice; with fewer than two, the profile stays pending (D-016). Documentary evidence takes precedence; where unavailable, multiple independent testimonies may support a claim. Uncertain information remains uncertain.
 
 ### Checklist
 - [ ] Define field-level confidence/status.

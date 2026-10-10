@@ -46,7 +46,7 @@ Close-relative reviewers should be eligible for the claim being reviewed. Propos
 
 ## Deceased profiles
 
-Initial approval requires three eligible close relatives where available. If three eligible reviewers cannot be found, remain pending unless a documented administrator exception is allowed. Record each review separately. Do not silently reduce the threshold.
+Initial approval requires three eligible close relatives. If fewer than three eligible reviewers exist, two eligible approvals plus documentary evidence reviewed by those approvers is sufficient; with fewer than two, the profile remains pending (D-016). The proposer never counts. Record each review and its evidence references separately. Do not silently reduce the threshold beyond this rule.
 
 ## Evidence
 

@@ -1,67 +1,68 @@
-# Repository Structure Proposal
+# Repository Structure
 
-This is a documentation-first proposal inspired by the reference repository's root instructions, living scope, skills directories, docs, feature-oriented folders, and separate infrastructure. It is not a command to restructure an existing repository without inspection.
-
-## Proposed documentation and agent structure
+## Current (documentation only)
 
 ```text
-parampara/
-├── AGENTS.md
-├── CLAUDE.md
-├── README.md
-├── docs/
-│   ├── scope.md
-│   ├── product-requirements.md
-│   ├── architecture.md
-│   ├── domain-model.md
-│   ├── privacy-and-governance.md
-│   ├── coding-standards.md
-│   ├── agent-workflow.md
-│   ├── decision-log.md
-│   └── repository-structure.md
-└── .agents/
-    └── skills/
-        ├── plan-feature/
-        │   └── SKILL.md
-        ├── update-scope/
-        │   └── SKILL.md
-        ├── relationship-domain-review/
-        │   └── SKILL.md
-        ├── privacy-security-review/
-        │   └── SKILL.md
-        └── adversarial-release-review/
-            └── SKILL.md
+parampara-the-legacy/
+├── AGENTS.md                 # shared rules for every agent and harness (source of truth)
+├── CLAUDE.md                 # imports AGENTS.md + Claude Code notes
+├── README.md                 # project index
+├── .env.example              # variable names only, never values
+├── .github/
+│   └── pull_request_template.md
+├── .agents/
+│   └── skills/               # canonical skills (Codex, Firstmate, others)
+│       ├── plan-feature/
+│       ├── route-task/
+│       ├── update-scope/
+│       ├── relationship-domain-review/
+│       ├── privacy-security-review/
+│       ├── platform-parity-check/
+│       └── adversarial-release-review/
+├── .claude/
+│   └── skills -> ../.agents/skills   # symlink so Claude Code sees the same skills
+└── docs/
+    ├── scope.md              # living plan and status
+    ├── original-brief.md     # the owner's original idea notes (historical)
+    ├── product-requirements.md
+    ├── architecture.md
+    ├── domain-model.md
+    ├── privacy-and-governance.md
+    ├── coding-standards.md
+    ├── agent-workflow.md
+    ├── model-routing.md
+    ├── decision-log.md
+    └── repository-structure.md
 ```
 
-## Application folders to decide after repository inspection
+## Planned application layout (Feature 1)
 
-Potentially:
-- `apps/web/`
-- `apps/mobile/`
-- `packages/domain/`
-- `packages/kinship-engine/`
-- `packages/validation/`
-- `backend/` or framework-native server modules
-- database schema and migrations
-- tests grouped by unit, integration, end-to-end, and security behavior
+```text
+apps/
+├── web/                      # Next.js
+└── mobile/                   # Expo (iOS + Android)
+packages/
+├── backend/                  # Convex schema and functions; generated typed API
+├── domain/                   # pure TS rules: claims, thresholds, eligibility
+├── kinship-engine/           # pure TS kinship path -> term calculation
+├── validation/               # shared input schemas
+└── config/                   # shared tsconfig, lint, format settings
+tools/
+└── route-task/               # Laya classifier script (Feature 0)
+```
 
-Do not impose these names if the actual framework or existing repository has a better established convention.
+Tests sit next to the code they cover, grouped as unit, integration (Convex), end-to-end (web, mobile), and security/authorization tests. Adjust names if the scaffolding tools establish a better convention, and record the change.
 
-## What to borrow from LLM Arena
+## What was borrowed from adrianhajdin/llm-arena
 
-- Short root instructions that route agents to the living scope and detailed docs.
-- A scope file with feature status, decisions, checklists, evidence, and unresolved manual checks.
-- Feature-oriented organization rather than one giant layer-wide folder.
-- Coding standards that distinguish machine-enforced rules from human review rules.
-- Small vertical slices and explicit approval before implementation.
-- Record corrections and contradictions openly.
-- Skill directories for reusable, task-specific workflows.
-- Separate configuration/infra concerns from domain logic.
-- Real verification, not assumptions based on reading source.
+- Short root instructions that route agents to a living scope and detailed docs.
+- Scope file with feature status, decisions, checklists, evidence, and unresolved manual checks.
+- Skill directories for reusable workflows (`.agents/skills` plus a Claude-visible copy).
+- Feature-oriented organization; small vertical slices; explicit approval before implementation.
+- Clerk and Greptile, evaluated on their own merits (D-021).
 
-## What not to copy blindly
+## What was not copied
 
-- LLM Arena's exact Next.js-only architecture, vendor choices, visual style, or product-specific rules.
-- Its decision not to use a test runner. Parampara's graph, permissions, and historical workflows need repeatable automated tests.
-- Its product-specific model-cost behavior.
-- Its framework-specific `AGENTS.md` content. Parampara should have shared rules appropriate to its chosen stack.
+- Next.js-only architecture (Parampara needs native iOS and Android).
+- Prisma, PostHog, Arcjet, OpenRouter-in-app, and product-specific model-cost behavior.
+- Its decision not to use a test runner. Parampara's graph, permissions, and workflows need automated tests.

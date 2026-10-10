@@ -1,54 +1,76 @@
 # Parampara: shared agent rules
 
-These rules apply to every coding agent, reviewer, subagent, and orchestration workflow. Tool-specific files may add instructions but must not contradict this file. If instructions conflict, stop, describe the conflict, and ask for a decision when it changes product behavior or security.
+Single source of truth for every coding agent, harness, and model working in this repository (Claude Code, Codex, OpenCode, Antigravity, Firstmate crewmates, OpenRouter sessions). Harness-specific files such as `CLAUDE.md` may add notes but must not contradict this file. If instructions conflict, stop, describe the conflict, and ask the user.
 
-## Before work
+Keep this file short. Detail lives in `docs/` and `.agents/skills/`; read those only when the task needs them.
 
-- Read `docs/scope.md` and the relevant feature/domain documents.
-- Inspect the actual repository and current git state before proposing file changes.
-- Explain the intended change and why before implementing. Wait for explicit approval.
-- Do not infer that a proposed stack, dependency, command, skill, or test runner exists until verified in the repository.
-- Prefer small, vertical, end-to-end slices over broad speculative scaffolding.
+## Project in one paragraph
+
+Parampara: The Legacy is a private family legacy network for web, iOS, and Android, built simultaneously. It preserves family relationships (maternal and paternal), deceased profiles, memories, stories, photos, and audio, with Indian (Telugu first) kinship terms. Stack: Turborepo monorepo with Next.js (web), Expo (iOS/Android), Convex (database and backend), Clerk (auth), Cloudflare R2 (media). See `docs/architecture.md`.
+
+## Read before acting
+
+| When you are... | Read |
+|---|---|
+| Starting any session | `docs/scope.md` (status and next work) |
+| Planning a feature | `docs/product-requirements.md`, skill `plan-feature` |
+| Touching people, relationships, kinship, approvals | `docs/domain-model.md`, skill `relationship-domain-review` |
+| Touching personal data, media, auth, consent | `docs/privacy-and-governance.md`, skill `privacy-security-review` |
+| Choosing a model or harness for a task | `docs/model-routing.md`, skill `route-task` |
+| Changing UI or client behavior | skill `platform-parity-check` |
+| Writing code | `docs/coding-standards.md`, `docs/architecture.md` |
+| Shipping a feature | skill `adversarial-release-review`, then skill `update-scope` |
+
+Skills live in `.agents/skills/<name>/SKILL.md`. If your harness does not load skills automatically, open the file and follow it.
+
+## Workflow
+
+1. Inspect the actual repository before proposing changes. Do not assume a proposed file, dependency, command, or tool exists.
+2. For any feature or material change: state goal, affected areas, risks, and verification in a short plan. Stop and wait for explicit user approval before writing application code.
+3. Ask one focused question at a time, only for material product forks. Otherwise make a reversible, documented recommendation.
+4. Implement the smallest useful vertical slice that works on web, iOS, and Android together.
+5. Verify (see below), update `docs/scope.md`, record durable decisions in `docs/decision-log.md`.
+
+## Git and pull requests
+
+- `main` is protected: no direct pushes, no force pushes. All changes land through pull requests.
+- Branch from up-to-date `main`: `feat/<slug>`, `fix/<slug>`, `docs/<slug>`, `chore/<slug>`.
+- One feature or fix per branch and PR. Keep PRs reviewable.
+- PR description: what changed, why, risks, checks actually run, manual checks, docs updated (template in `.github/pull_request_template.md`).
+- Resolve every review conversation (Greptile, Codex, human) before merging.
+- Do not add AI agents as commit co-authors; the human owner stays accountable.
+- Never commit secrets, `.env` files, or real family data. Use synthetic fixtures.
 
 ## Product and domain invariants
 
-- One person has one canonical identity, even when connected through multiple family branches.
-- Preserve all valid maternal and paternal relationship paths.
-- Kinship labels are presentation choices derived from relationship paths and locale/custom settings; changing a label must not change the graph.
-- Keep account verification, relationship verification, and historical-claim verification separate.
-- Preserve provenance and history for sensitive changes.
-- Never convert missing or disputed facts into certainty.
-- AI suggestions require human confirmation before changing family data.
-- Private contact details, exact addresses, evidence, and restricted media must be protected by backend authorization.
-- Do not weaken approval rules or privacy controls to make a demo pass.
+- One person has one canonical identity, even when connected through multiple branches.
+- Preserve all valid maternal and paternal relationship paths, including overlaps from marriages between relatives.
+- Kinship labels are derived display choices; changing a label never changes the graph. Paternal-side label is the default when several apply.
+- Account, relationship, historical-claim, and content verification are separate states. Never a single `verified` boolean.
+- A proposer never approves their own change.
+- Missing or disputed facts are never converted into certainty.
+- AI may suggest; only humans and deterministic domain rules change family data.
+- Contact details, exact addresses, evidence, and media are protected by server-side authorization (Convex functions), never only by client rendering.
+- Never weaken approval rules or privacy controls to make a demo or test pass.
 
-## Engineering practice
+## Engineering rules
 
-- Follow SOLID and separation of concerns where they improve clarity; avoid abstraction without a concrete use.
-- Prefer pure domain functions and explicit side-effect boundaries.
-- Use strict types and avoid untyped escape hatches.
-- Validate inputs at trust boundaries.
-- Use transactions for multi-record operations that must remain consistent.
-- Make migrations reviewable, reversible where feasible, and safe for existing data.
-- Use feature-oriented organization when compatible with the actual framework and repository.
-- Do not introduce dependencies, frameworks, paid services, or new test tools without explaining why and getting approval when material.
-- Never expose raw provider exceptions, credentials, internal paths, or sensitive evidence to end users.
-- Do not run destructive commands outside the approved project directory. Flag destructive operations and ask first.
-- Do not commit secrets or real family data. Use synthetic test fixtures.
+- Apply SOLID and separation of concerns where they add clarity; explain the rationale to the user when introducing an abstraction.
+- Domain logic (`packages/domain`, `packages/kinship-engine`) is pure TypeScript with no UI, Convex, or provider imports.
+- Strict TypeScript; no `any` or untyped escape hatches. Validate inputs at every trust boundary.
+- Multi-record changes that must stay consistent run in one Convex mutation.
+- Do not add dependencies, frameworks, paid services, or test tools without explaining why and getting approval.
+- Never expose raw provider errors, credentials, or internal paths to users.
+- Do not run destructive commands, or delete anything, outside this project folder. Flag and ask first.
 
 ## Verification and reporting
 
-- Test the changed behavior and relevant failure paths, including authorization failures.
-- Run repository-supported lint, typecheck, tests, formatting checks, and production build when applicable.
-- Record commands and outcomes in the work summary or `docs/scope.md`.
-- Distinguish automated verification from manual checks and from checks not run.
-- A feature is not done merely because the UI renders.
-- Critical security, privacy, data-integrity, or migration findings block release.
+- Run the checks the repository actually supports: lint, typecheck, tests, format check, build. Never claim a check ran or passed if it did not.
+- Test failure paths, especially authorization denials and invalid relationship paths.
+- Distinguish automated checks, manual checks, and checks not run.
+- A feature is not done because the UI renders. Critical security, privacy, data-integrity, or migration findings block release.
+- Flag pre-existing lint/test failures or flaky tests you encounter; do not walk past them.
 
-## Scope and documentation
+## Model and task routing
 
-- `docs/scope.md` is the living source of truth for status and next work.
-- `docs/product-requirements.md` describes intended product behavior.
-- `docs/decision-log.md` records accepted decisions and superseded decisions.
-- If implementation evidence contradicts a plan, update the plan openly rather than silently working around it.
-- Keep root instruction files concise. Put detailed procedures in docs and skills.
+Route each task by complexity and risk using the table in `docs/model-routing.md`. High-risk areas (relationship graph, approvals, auth, privacy, migrations) always get a strong reasoning model plus an independent reviewer from a different model family. Never send real family data or secrets to any external model, including the Laya router.

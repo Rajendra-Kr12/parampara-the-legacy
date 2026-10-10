@@ -18,7 +18,7 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequence: Do not use one generic verified boolean.
 
 ## D-004: Deceased profile approval
-- Status: Accepted with edge case open
+- Status: Superseded by D-016 (2026-10-10)
 - Decision: Three eligible close relatives approve initial deceased profiles where available.
 - Open: If three eligible relatives cannot be found, profile remains pending unless an explicitly documented administrator exception is approved.
 
@@ -56,3 +56,55 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Status: Accepted
 - Decision: Plan first, wait for explicit approval, implement a small slice, verify, update scope, and record decisions.
 - Consequence: `docs/scope.md` is a living plan, not a static spec.
+
+## D-012: AGENTS.md is the single instruction source (2026-10-10)
+- Status: Accepted
+- Context: The project is worked on by Claude Code, Codex, OpenCode, Antigravity, and Firstmate. Claude Code reads `CLAUDE.md` and only falls back to `AGENTS.md` when no `CLAUDE.md` exists; the other harnesses read `AGENTS.md`.
+- Decision: Keep all shared rules in a short `AGENTS.md`. `CLAUDE.md` imports it with `@AGENTS.md` and adds only Claude-specific notes. Detail lives in `docs/` and skills.
+- Consequence: Imports load at launch, so context is saved by keeping `AGENTS.md` short, not by the import itself.
+
+## D-013: Skills location (2026-10-10)
+- Status: Accepted
+- Decision: Canonical skills live in `.agents/skills/`. `.claude/skills` is a symlink to it, because Claude Code does not read `.agents/`.
+- Consequence: Edit skills only in `.agents/skills/`. On Windows, enable symlinks (Developer Mode) or copy on checkout.
+
+## D-014: Application stack (2026-10-10)
+- Status: Accepted (versions confirmed at scaffold time)
+- Decision: Turborepo + pnpm monorepo; Next.js web; Expo (React Native) for iOS and Android; Convex for database and backend; Clerk for auth.
+- Options considered: single Expo app for all platforms; Supabase or Neon Postgres with Drizzle or Prisma; Firebase.
+- Rationale: Simultaneous web and native development with shared TypeScript domain code; Convex gives transactional mutations, realtime sync, and a generated typed API without an ORM; Clerk free tier covers 50,000 monthly retained users and supports both Next.js and Expo.
+- Risks: Convex vendor dependence (mitigated by open-source self-hosting); multi-hop graph queries are written in code rather than SQL.
+
+## D-015: Media storage (2026-10-10)
+- Status: Accepted
+- Decision: Photos and audio go to Cloudflare R2 behind a storage adapter, accessed through short-lived presigned URLs issued after Convex authorization checks. Databases hold metadata only.
+- Rationale: A family may reach ~15 GB of media. R2 costs ~$0.015/GB-month with no egress fees, versus higher storage and egress costs on Convex, Supabase, or S3.
+- Follow-up: Backblaze B2 as backup target once real data exists.
+
+## D-016: Deceased profile approval threshold (2026-10-10)
+- Status: Accepted. Supersedes D-004.
+- Decision: Initial approval needs three eligible close relatives. If fewer than three eligible relatives are available, two eligible close-relative approvals plus documentary evidence (for example a death or birth certificate) reviewed by those approvers is sufficient. With fewer than two eligible approvers, the profile stays pending.
+- Constraints: The proposer never counts as an approver. Each approval is recorded separately with evidence references.
+
+## D-017: Profile address rule (2026-10-10)
+- Status: Accepted
+- Decision: A living member registering themselves must provide a current address, which is private to them by default; only city/locality is shared, and only with opt-in discovery consent. Profiles created by others and deceased profiles take a last known address, with city optional.
+- Consequence: Supersedes the earlier "address optional" wording in the docs pack; privacy defaults in D-007 still apply.
+
+## D-018: Git workflow (2026-10-10)
+- Status: Accepted
+- Decision: Public GitHub repository `Rajendra-Kr12/parampara-the-legacy`. Ruleset `protect-main` blocks direct pushes, force pushes, and deletion of `main`; all changes merge through pull requests with review conversations resolved. Required approvals are 0 because a solo owner cannot approve their own PR; raise this when collaborators join.
+- Rationale: GitHub Free enforces rulesets only on public repositories; public also qualifies for Greptile's open-source plan. No real family data or secrets are ever committed.
+
+## D-019: Model and task routing (2026-10-10)
+- Status: Accepted; classifier not yet implemented
+- Decision: A static routing table (`docs/model-routing.md`) maps task tiers to models and harnesses. Laya, a decision model on Vercel AI Gateway, classifies task descriptions into tiers, with fallback to the static table.
+- Constraints: Laya sees task descriptions only, never family data or secrets. Free on AI Gateway only through 2026-10-31; billed afterwards.
+
+## D-020: Review tooling (2026-10-10)
+- Status: Accepted
+- Decision: Greptile reviews every PR (apply for the open-source free plan). Codex adversarial review runs before each feature shipment; when Codex implemented the change, a Claude model performs the adversarial review instead.
+
+## D-021: Relationship to llm-arena (2026-10-10)
+- Status: Accepted
+- Decision: Reuse llm-arena's documentation discipline (short root files, living scope, skills, approval gate). Clerk and Greptile are adopted on their own merits. Prisma, PostHog, Arcjet, and its Next.js-only architecture are not adopted.

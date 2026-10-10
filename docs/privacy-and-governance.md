@@ -3,7 +3,7 @@
 ## Defaults
 
 - Phone number and email: private unless the individual explicitly shares them.
-- Exact residential address: optional and private by default.
+- Exact residential address: required for self-registering living members (D-017) but private to them by default; never shown to other members.
 - City/locality discovery: opt-in.
 - Children: guardian-managed, with age-appropriate safeguards.
 - Historical evidence: restricted to assigned/authorized reviewers.

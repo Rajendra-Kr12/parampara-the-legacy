@@ -1,27 +1,48 @@
 # Parampara: The Legacy
 
-This repository documentation pack adapts the workflow and documentation patterns observed in `adrianhajdin/llm-arena` for Parampara. It contains product and engineering documentation only. It does not contain application code or make changes to the reference repository.
+A private family legacy network for web, iOS, and Android. Parampara preserves family relationships across maternal and paternal branches, deceased profiles, memories, stories, photos, and audio, with Telugu and other Indian kinship terms, verified relationships, and privacy by default.
 
-## Start here
+**Status:** documentation and agent setup only; no application code yet. See `docs/scope.md`.
 
-1. `CLAUDE.md` — Claude Code entry point.
-2. `AGENTS.md` — shared, cross-agent rules.
-3. `docs/scope.md` — living plan, current status, decisions, and next work.
-4. `docs/product-requirements.md` — product requirements and MVP behavior.
-5. `docs/architecture.md` — proposed technical architecture and decisions still requiring validation.
-6. `docs/domain-model.md` — family identity, relationship graph, kinship terminology, and verification model.
-7. `docs/privacy-and-governance.md` — access control, consent, evidence, disputes, retention, and deletion.
-8. `docs/coding-standards.md` — standards to validate against the actual repository and tooling before claiming enforcement.
-9. `docs/agent-workflow.md` — Firstmate/Herdr and model-router operating rules.
-10. `docs/decision-log.md` — durable record of product and architecture decisions.
-11. `.agents/skills/` — focused, reusable agent workflows.
+## Index
 
-## Important status note
+| File | What it is |
+|---|---|
+| `AGENTS.md` | Shared rules for every agent and harness (source of truth) |
+| `CLAUDE.md` | Imports `AGENTS.md`, adds Claude Code notes |
+| `docs/scope.md` | Living plan: status, features, checklists, next work |
+| `docs/product-requirements.md` | Product requirements and acceptance criteria |
+| `docs/architecture.md` | Stack, layers, media storage, security boundaries, open items |
+| `docs/domain-model.md` | People, relationship graph, kinship terms, verification |
+| `docs/privacy-and-governance.md` | Access control, consent, evidence, disputes, retention |
+| `docs/coding-standards.md` | Coding standards and verification |
+| `docs/agent-workflow.md` | Firstmate, herdr, delegation, branch and PR flow |
+| `docs/model-routing.md` | Which model and harness handle which task; Laya router |
+| `docs/decision-log.md` | Accepted and superseded decisions (D-001 onwards) |
+| `docs/repository-structure.md` | Current and planned folder layout |
+| `docs/original-brief.md` | The owner's original idea notes (historical) |
+| `.agents/skills/` | Reusable agent workflows (also visible to Claude Code via `.claude/skills`) |
 
-This is a documentation baseline and planning proposal, not proof that a repository has been initialized or that a technology stack, dependency, test framework, skill, or CI workflow has been installed. Before implementation, the agent must inspect the actual Parampara repository and reconcile this pack with its existing files. Do not overwrite existing work blindly.
+## Skills
 
-## Product summary
+| Skill | Use when |
+|---|---|
+| `plan-feature` | Before building or changing anything |
+| `route-task` | Choosing model, harness, and reviewer |
+| `relationship-domain-review` | Changes to people, relationships, kinship, approvals |
+| `privacy-security-review` | Changes to personal data, auth, media, secrets |
+| `platform-parity-check` | Changes visible on web, iOS, or Android |
+| `adversarial-release-review` | Before shipping a feature |
+| `update-scope` | After decisions, progress, or verification |
 
-Parampara is a private, relationship-aware family network that preserves family history, supports maternal and paternal family branches, represents multiple valid relationship paths, and helps relatives maintain stories, photos, audio memories, and connections across generations.
+## Stack
 
-The MVP includes family trees, invitations and relationship verification, deceased profiles and historical evidence, memories and stories, photos, privacy controls, opt-in city discovery, audio memories, and spreadsheet import. Web, Android, and iOS are in scope for the initial release, with shared domain rules and backend authorization.
+Turborepo + pnpm, Next.js (web), Expo (iOS and Android), Convex (backend and database), Clerk (auth), Cloudflare R2 (media), Greptile and Codex (review). Details and rationale in `docs/architecture.md`.
+
+## Contributing
+
+`main` is protected. Create a branch (`feat/`, `fix/`, `docs/`, `chore/`), open a pull request, and resolve all review conversations before merging. Never commit secrets or real family data. Copy `.env.example` to `.env.local` for local keys.
+
+## Origins
+
+The documentation workflow (short root instructions, living scope, skills, approval gate) was adapted from `adrianhajdin/llm-arena`. Its product-specific stack was not copied; see D-021 in `docs/decision-log.md`.

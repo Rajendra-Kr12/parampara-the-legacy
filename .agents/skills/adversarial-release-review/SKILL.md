@@ -1,16 +1,18 @@
 ---
 name: adversarial-release-review
-description: Independently challenge a Parampara feature before shipment, focusing on security, privacy, relationship integrity, migrations, and cross-platform regressions.
+description: Independently challenge a Parampara feature before shipment or before merging a feature PR, focusing on security, privacy, relationship integrity, migrations, and web/iOS/Android regressions. Use when a feature is believed done.
 ---
 
 # Adversarial release review
 
-1. Read the approved plan, acceptance criteria, changed files, and relevant domain docs.
-2. Assume the implementation has hidden failure modes; test the assumptions rather than restating the implementation.
-3. Attempt unauthorized reads/writes, self-approval, reviewer spoofing, conflicting concurrent edits, duplicate imports, and invalid relationship paths as relevant.
-4. Inspect migration safety, rollback/recovery options, audit completeness, and data preservation.
-5. Inspect mobile/web parity and accessibility where the feature changes UI.
-6. Run the available targeted checks. Never claim tests were run if they were not.
-7. Classify findings as critical, high, medium, or low and include reproduction evidence.
-8. Block release for unresolved critical security, privacy, or data-integrity findings.
-9. Record remediation and retest results in the release handoff and `docs/scope.md`.
+1. Read the approved plan, acceptance criteria, changed files (`git diff main...HEAD`), and relevant domain docs.
+2. Independence: the reviewer must be a different model family from the implementer. If Claude implemented, use Codex; if Codex implemented, use a Claude model (Opus or Fable).
+3. Codex path: the user runs `/codex:adversarial-review --base main` in Claude Code (it cannot be invoked by the model), or runs a review in Codex CLI on the branch. Record the output.
+4. Assume hidden failure modes. Attempt unauthorized reads and writes, self-approval, reviewer spoofing, conflicting concurrent edits, duplicate imports, and invalid relationship paths as relevant.
+5. Inspect migration safety, rollback and recovery options, audit completeness, and data preservation.
+6. Run skill `platform-parity-check` when UI or client behavior changed.
+7. Check the Greptile review on the PR; every conversation must be resolved or answered.
+8. Run the available targeted checks. Never claim tests or reviews ran if they did not.
+9. Classify findings as critical, high, medium, or low with reproduction evidence.
+10. Block release for unresolved critical security, privacy, or data-integrity findings.
+11. Record remediation and retest results in the PR description and `docs/scope.md`.
