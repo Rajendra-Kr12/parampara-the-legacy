@@ -71,7 +71,9 @@ Make multi-harness development safe and cheap before application code: routing, 
 - [ ] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback and budget cap. Decide before 2026-10-31 whether to keep it on paid Laya or self-host.
 - [ ] Map routing tiers to Firstmate dispatch profiles; verify herdr backend setup.
 - [ ] Verify skill loading in Codex, OpenCode, and Antigravity; update the harness table.
-- [ ] Apply for Greptile open-source plan and install it on the repository.
+- [x] Install Greptile (free Starter plan) on the repository (2026-10-10, done by owner).
+- [x] Add `.greptile/` review rules and doc context (2026-10-10).
+- [ ] Confirm Greptile detects the config and posts a review on PR #1.
 - [ ] Add GitHub Actions CI (lint, typecheck, test, build) once code exists; then require it in the `protect-main` ruleset.
 
 ## Feature 1: monorepo scaffold and architecture validation

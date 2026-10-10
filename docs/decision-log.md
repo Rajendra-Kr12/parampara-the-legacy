@@ -94,7 +94,7 @@ Record durable product and architecture decisions here. Add date, status, contex
 ## D-018: Git workflow (2026-10-10)
 - Status: Accepted
 - Decision: Public GitHub repository `Rajendra-Kr12/parampara-the-legacy`. Ruleset `protect-main` blocks direct pushes, force pushes, and deletion of `main`; all changes merge through pull requests with review conversations resolved. Required approvals are 0 because a solo owner cannot approve their own PR; raise this when collaborators join.
-- Rationale: GitHub Free enforces rulesets only on public repositories; public also qualifies for Greptile's open-source plan. No real family data or secrets are ever committed.
+- Rationale: GitHub Free enforces rulesets only on public repositories. No real family data or secrets are ever committed. No open-source license is added: the code is visible but not licensed for reuse.
 
 ## D-019: Model and task routing (2026-10-10)
 - Status: Accepted; classifier not yet implemented
@@ -103,7 +103,7 @@ Record durable product and architecture decisions here. Add date, status, contex
 
 ## D-020: Review tooling (2026-10-10)
 - Status: Accepted
-- Decision: Greptile reviews every PR (apply for the open-source free plan). Codex adversarial review runs before each feature shipment; when Codex implemented the change, a Claude model performs the adversarial review instead.
+- Decision: Greptile reviews every PR on its free Starter plan (1 active developer, 50 credits per month; the open-source program needs an OSI license, which this repo deliberately lacks). To conserve credits, `.greptile/config.json` uses base effort (1 credit) and reviews only when a PR opens; comment `@greptileai` to request a re-review. Revisit the plan when collaborators join. Codex adversarial review runs before each feature shipment; when Codex implemented the change, a Claude model performs the adversarial review instead.
 
 ## D-021: Relationship to llm-arena (2026-10-10)
 - Status: Accepted

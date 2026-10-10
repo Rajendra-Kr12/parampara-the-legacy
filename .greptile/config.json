@@ -1,0 +1,62 @@
+{
+  "strictness": 2,
+  "effort": "base",
+  "autoReview": ["open"],
+  "commentTypes": ["logic", "syntax", "style"],
+  "ignorePatterns": "pnpm-lock.yaml\n**/_generated/**\n**/*.snap\n.agents/**\n.claude/**",
+  "rules": [
+    {
+      "id": "convex-auth-check",
+      "rule": "Every exported public Convex query, mutation, and action must check the caller's identity via ctx.auth before reading or writing user data. Privileged operations must use internalQuery, internalMutation, or internalAction, never public functions.",
+      "scope": ["packages/backend/**"],
+      "severity": "high"
+    },
+    {
+      "id": "no-client-trusted-permissions",
+      "rule": "Never accept role, relationship, reviewer eligibility, approval status, or consent flags from client arguments as truth. Derive them server-side from stored data.",
+      "scope": ["packages/backend/**"],
+      "severity": "high"
+    },
+    {
+      "id": "approval-atomicity",
+      "rule": "An approval, its resulting status change, and its audit event must be written in the same Convex mutation. A proposer must never be counted as an approver of their own change.",
+      "scope": ["packages/backend/**", "packages/domain/**"],
+      "severity": "high"
+    },
+    {
+      "id": "pure-domain",
+      "rule": "packages/domain and packages/kinship-engine must not import React, React Native, Next.js, Expo, Convex, Clerk, or any provider SDK. They contain pure TypeScript functions only.",
+      "scope": ["packages/domain/**", "packages/kinship-engine/**"],
+      "severity": "high"
+    },
+    {
+      "id": "labels-do-not-mutate-graph",
+      "rule": "Changing a kinship label or a viewer's preferred label must never create, delete, or modify relationship edges. Do not store a relation-to-current-user field as the source of truth.",
+      "scope": ["packages/**"],
+      "severity": "high"
+    },
+    {
+      "id": "no-public-secrets",
+      "rule": "Secrets and private keys must never appear in NEXT_PUBLIC_* or EXPO_PUBLIC_* variables, source files, fixtures, or logs. Only .env.example may list variable names, with empty values.",
+      "severity": "high"
+    },
+    {
+      "id": "private-media",
+      "rule": "R2 media must be accessed only through short-lived presigned URLs issued after an authorization check. Never make buckets or objects public, and never return permanent media URLs.",
+      "scope": ["packages/backend/**", "apps/**"],
+      "severity": "high"
+    },
+    {
+      "id": "no-any",
+      "rule": "Do not use the TypeScript any type, @ts-ignore, or non-null assertions to silence type errors. Use unknown with validation, or fix the types.",
+      "scope": ["apps/**", "packages/**"],
+      "severity": "medium"
+    },
+    {
+      "id": "shared-rules-not-duplicated",
+      "rule": "Validation and business rules used by both web and mobile must come from packages/validation or packages/domain, not be re-implemented inside apps/web or apps/mobile.",
+      "scope": ["apps/**"],
+      "severity": "medium"
+    }
+  ]
+}

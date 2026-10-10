@@ -1,0 +1,9 @@
+{
+  "files": [
+    { "path": "AGENTS.md", "description": "Shared engineering rules and product invariants for all contributors" },
+    { "path": "docs/domain-model.md", "description": "Canonical identity, relationship graph, kinship terminology, verification states", "scope": ["packages/**"] },
+    { "path": "docs/privacy-and-governance.md", "description": "Privacy defaults, access control, consent, evidence, retention rules" },
+    { "path": "docs/architecture.md", "description": "Stack, layers, media storage, and security boundaries" },
+    { "path": "docs/decision-log.md", "description": "Accepted decisions, including approval thresholds (D-016) and address rules (D-017)" }
+  ]
+}

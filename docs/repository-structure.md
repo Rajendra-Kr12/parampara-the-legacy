@@ -10,6 +10,10 @@ parampara-the-legacy/
 ├── .env.example              # variable names only, never values
 ├── .github/
 │   └── pull_request_template.md
+├── .greptile/                # Greptile review settings, rules, and doc context
+│   ├── config.json
+│   ├── rules.md
+│   └── files.json
 ├── .agents/
 │   └── skills/               # canonical skills (Codex, Firstmate, others)
 │       ├── plan-feature/

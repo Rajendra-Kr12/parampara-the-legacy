@@ -9,7 +9,7 @@ Coordinate specialized agents across Claude Code, Codex, OpenCode, Antigravity, 
 - **Firstmate** (`kunchenguid/firstmate`): one liaison agent that dispatches a crew of coding agents. Reads `AGENTS.md` and `.agents/skills/`. Use dispatch profiles to map routing tiers to harnesses.
 - **Herdr** (`ogulcancelik/herdr`, AGPL-3.0): terminal agent multiplexer; a supported Firstmate session backend. Verify the official repository before installing; several mirrors exist.
 - **Codex plugin for Claude Code**: `/codex:adversarial-review` (user-triggered only) and `/codex:review`.
-- **Greptile**: automated PR review on GitHub. Apply for the open-source free plan for this public repository.
+- **Greptile**: automated PR review on GitHub (free Starter plan: 1 developer, 50 credits per month). Reviews once when a PR opens; comment `@greptileai` on a PR to request a re-review. Review rules live in `.greptile/`; update them when `AGENTS.md` or the domain rules change.
 
 ## Plan-before-build gate
 
