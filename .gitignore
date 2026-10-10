@@ -21,3 +21,4 @@ build/
 .lavish/
 .vscode/
 CLAUDE.local.md
+.vercel/
