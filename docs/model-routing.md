@@ -59,7 +59,7 @@ The same instruction filenames can shadow `AGENTS.md`: never add `AGENTS.overrid
 - Self-hosting: weights are Apache 2.0 on Hugging Face (use the official Convai repository, not mirrors).
 - Credentials: `AI_GATEWAY_API_KEY` in a gitignored `.env.local`. Never commit it, never paste it into prompts or docs. `.env.example` lists the variable name only.
 
-### Planned classifier contract (Feature 0)
+### Classifier contract
 
 Input: the task description only (no code, no family data), plus the available-model list derived from `docs/model-catalog.md` (tier and class columns only).
 
