@@ -128,7 +128,7 @@ Each individual has one canonical person record. Relationships are separate reco
 Calculate valid labels from the relationship graph. Use paternal-side preference as the default when multiple valid labels apply, unless a more specific user preference is set. Offer other valid labels. Support language, region, and family custom.
 
 ### Checklist
-- [ ] Define terminology catalogue and locale fallback.
+- [x] Define terminology catalogue and locale fallback (D-025: English and Telugu interface, general `te-IN` term catalogue, descriptive fallback; criteria in `docs/acceptance-criteria.md`).
 - [ ] Keep labels separate from canonical relationship edges.
 - [ ] Validate initial terminology with native speakers/families.
 - [ ] Test alternate paths, missing terms, custom labels, and user preferences.

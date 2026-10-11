@@ -187,11 +187,19 @@ The specific terms below (for example Menatta for father's sister, Nanamma for f
 
 ### Locale, fallback, and custom labels
 - [ ] **AC-4.11** [P] Each catalogue entry records language, script, region or cultural context, path pattern, term, optional explanation, source, and validation status.
-- [ ] **AC-4.12** [P] When the requested locale has no term for a path, the engine falls back along a documented chain and finally to a plain descriptive phrase (for example "father's sister's husband"); it never returns an empty label or a term for a different path.
+- [ ] **AC-4.12** [P] When the requested locale has no term for a path, the engine falls back along a documented chain and finally to a plain descriptive phrase in the viewer's interface language (for example "father's sister's husband" in English, or its Telugu equivalent); it never returns an empty label or a term for a different path.
 - [ ] **AC-4.13** [P] A missing term is recorded as a catalogue gap for later review.
 - [ ] **AC-4.14** [P] A family custom label is offered alongside the catalogue labels, marked as a family custom, and applies only inside that family group.
 - [ ] **AC-4.15** [P] Newly added catalogue terms default to `unvalidated`.
-- [ ] **AC-4.16** [P] First-launch language support: **pending owner decision (open item 3)**; criteria for the launch locale set are added here once decided.
+
+### First-launch languages (D-025)
+- [ ] **AC-4.16** [P] The interface is available in English and Telugu on web, iOS, and Android, and any member can switch between them at any time; the choice persists across sessions and devices.
+- [ ] **AC-4.21** [P] Every user-facing string, including notifications, invitation emails or SMS, and error messages, exists in both languages; the build or CI fails when a translation key is missing in either language.
+- [ ] **AC-4.22** [P] A new member's interface language defaults to Telugu when the device or browser language is Telugu, otherwise English.
+- [ ] **AC-4.23** [P] Kinship terms come from the general Telugu catalogue (`te-IN`) and display in Telugu script, Latin transliteration, or both, as the viewer chooses (for example అత్త, Atta, or అత్త (Atta)); this choice is independent of the interface language.
+- [ ] **AC-4.24** [P] A regional or household variant (for example a Telangana term) is added as a family custom label, offered alongside the catalogue term, and does not change the catalogue.
+- [ ] **AC-4.25** [P] Telugu text renders correctly (conjuncts and vowel signs intact) in names, kinship terms, and interface strings on all three platforms, including in screen-reader output.
+- [ ] **AC-4.26** [F] Switching interface language changes no relationship edge, no saved label preference, and no stored content.
 
 ### Invalid paths and privacy
 - [ ] **AC-4.17** [R] Paths through `pending`, `rejected`, or `disputed` edges are not used for labels shown to anyone other than the parties to that edge.

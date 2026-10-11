@@ -150,3 +150,18 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Rationale: A living person has the final say over stories about themselves; people who can no longer speak for themselves get a two-relative check on their reputation. Extended relatives fill in only where the core circle is too small, so stories about older ancestors are not blocked forever.
 - Consequences: Story review reuses the D-023 eligibility function. Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7).
 - Reversible recommendation recorded with this decision (not owner-decided): a story whose subject has fewer than 2 eligible relatives in total stays `in_review`, and the contributor may withdraw it to drafts at any time.
+
+## D-025: First-launch languages and kinship terminology (2026-10-11)
+- Status: Accepted
+- Context: Initial languages and regional terminology were open (PRD open decision 3; scope foundation item "Define first-launch languages/regions"). Telugu comes first. The domain model warns that one Telugu vocabulary is not universal across regions or households.
+- Options considered: (A) English interface with Telugu kinship terms; (B) A plus a full Telugu translation of the interface with a language switch; (C) A plus separate Coastal Andhra, Telangana, and Rayalaseema catalogues at launch; (D) Telugu plus one or two more languages' kinship catalogues at launch.
+- Decision: Option B.
+  - Interface: English and Telugu at launch on web, iOS, and Android, with a language switch available to every member. Every user-facing string, including notifications, emails or SMS, and error messages, exists in both languages.
+  - Kinship terms: one general Telugu catalogue (`te-IN`), shown in Telugu script with a Latin transliteration; each viewer chooses script, transliteration, or both.
+  - Fallback: where Telugu has no validated term for a path, a plain description is shown in the viewer's interface language.
+  - Regional and household variants (Coastal Andhra, Telangana, Rayalaseema, family-specific): captured as family custom labels at launch and promoted into regional catalogues once validated by native speakers.
+  - Person names accept any Unicode script from day one.
+  - Other languages (for example Hindi, Tamil, Kannada) come after the pilot.
+- Rationale: Older relatives, who hold most of the family history, often read Telugu more comfortably than English. Custom labels cover regional differences without shipping unvalidated regional catalogues.
+- Consequences: Every UI change needs a reviewed Telugu translation before release, on all three platforms; Feature 1 must pick an i18n approach shared by Next.js and Expo, and CI should fail on a missing translation key. Acceptance criteria in `docs/acceptance-criteria.md` (Feature 4).
+- Reversible recommendations recorded with this decision (not owner-decided): the interface language defaults to the device or browser language when it is Telugu, otherwise English; Telugu interface strings are reviewed by a native speaker, and machine translation may draft them but never ships unreviewed.
