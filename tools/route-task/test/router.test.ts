@@ -135,3 +135,54 @@ test("refuses a task that looks like a secret or personal data", async () => {
   const personalData = await routeTask({ task: "Route this phone number: +91 98765 43210.", catalogText });
   assert.equal(personalData.status, "refused");
 });
+
+test("refuses explicit credential assignments of any length", async () => {
+  for (const task of [
+    "debug with password=hunter2secret",
+    "login failing, password: abc",
+    "the password is hunter2",
+    "set token=xyz",
+    "api_key = short",
+  ]) {
+    const result = await routeTask({ task, catalogText });
+    assert.equal(result.status, "refused", task);
+  }
+  const prose = await routeTask({ task: "Document the password reset flow copy.", catalogText });
+  assert.notEqual(prose.status, "refused");
+});
+
+test("static fallback never gives high-risk work a free model or skips independent review", async () => {
+  for (const task of [
+    "Generate many security test cases",
+    "Add many tests for family graph changes",
+    "Write bulk boilerplate for the graph of our family",
+    "Many tests for relationship edges",
+    "Generate many encryption tests",
+    "Bulk migration scripts",
+  ]) {
+    const result = await routeTask({ task, catalogText, environment: {}, loadApiKey: async () => undefined });
+    assert.equal(result.routingPath, "static", task);
+    assert.equal(result.touchesHighRiskArea, true, task);
+    assert.equal(result.needsIndependentReview, true, task);
+    assert.equal(result.model?.dataClass, "A", task);
+    assert.notEqual(result.tier, "T1", task);
+  }
+});
+
+test("a blank AI_GATEWAY_API_KEY falls through to the loaded key", async () => {
+  const environment: NodeJS.ProcessEnv = { AI_GATEWAY_API_KEY: "  " };
+  const result = await routeTask({
+    task: "Implement a public settings screen.",
+    catalogText,
+    now: promotionDate,
+    environment,
+    loadApiKey: async () => "loaded-key",
+    layaClient: { evaluate: async () => classification() },
+  });
+  assert.equal(result.routingPath, "laya");
+  assert.equal(environment.AI_GATEWAY_API_KEY, "loaded-key");
+
+  const kept: NodeJS.ProcessEnv = { AI_GATEWAY_API_KEY: "real" };
+  await routeTask({ task: "Fix a typo.", catalogText, now: promotionDate, environment: kept, loadApiKey: async () => "other", layaClient: { evaluate: async () => classification() } });
+  assert.equal(kept.AI_GATEWAY_API_KEY, "real");
+});

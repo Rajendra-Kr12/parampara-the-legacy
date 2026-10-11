@@ -38,7 +38,8 @@ function containsProhibitedData(task: string): boolean {
   const secretPatterns = [
     /-----BEGIN [A-Z ]*PRIVATE KEY-----/i,
     /(?<![A-Za-z0-9])(?:sk|rk|pk|ghp|xox[baprs])[-_][A-Za-z0-9_-]{16,}/,
-    /(?:api[_-]?key|password|secret|token)\s*[:=]\s*["']?[A-Za-z0-9_\-/+=]{16,}/i,
+    /(?<![A-Za-z0-9])(?:api[_-]?key|passw(?:or)?d|pwd|secret|token)\b\s*[:=]\s*["']?[^\s"']+/i,
+    /(?<![A-Za-z0-9])(?:passw(?:or)?d|pwd|passphrase)\s+(?:is|was)\s+["']?[^\s"']+/i,
     /authorization\s*:\s*bearer\s+[A-Za-z0-9_\-/+=.]{16,}/i,
   ];
   const personalDataPatterns = [
@@ -52,8 +53,17 @@ function hasSensitiveContext(task: string): boolean {
   return /(?:\.env(?:\.[a-z0-9_-]+)?\b|security findings?|private design rationale|confidential|personal data|\b(?:secrets?|api keys?|tokens?|passwords?)\b)/i.test(task);
 }
 
+const HIGH_RISK_PATTERN = new RegExp(
+  "\\b(?:secur\\w*|vulnerabilit\\w*|exploit\\w*|encrypt\\w*|crypto\\w*|credential\\w*|permission\\w*|access[- ]control|rbac|" +
+    "auth(?:entication|orization|orisation|z|n)?|privacy|consent|pii|retention|migrat\\w*|signed[- ]urls?|media[- ]access|" +
+    "kinship|approvals?|relationships?|genealog\\w*|lineage|ancest\\w*)\\b",
+  "i",
+);
+const FAMILY_PATTERN = /\bfamil\w*/i;
+const GRAPH_PATTERN = /\b(?:graph|tree|edges?|nodes?|relations?|kin|lineage|branch(?:es)?|paths?)\b/i;
+
 function detectsHighRiskArea(task: string): boolean {
-  return /(?:relationship graph|kinship|approval|auth(?:entication|orization)?|privacy|migration|media access|signed url)/i.test(task);
+  return HIGH_RISK_PATTERN.test(task) || (FAMILY_PATTERN.test(task) && GRAPH_PATTERN.test(task));
 }
 
 function staticClassification(task: string): Classification {
@@ -205,7 +215,7 @@ export async function routeTask(options: RouteTaskOptions): Promise<RoutingDecis
   if (key === undefined) return decision(catalog, staticClassification(task), "static", "no-api-key");
 
   try {
-    if (environment.AI_GATEWAY_API_KEY === undefined) environment.AI_GATEWAY_API_KEY = key;
+    if (!environment.AI_GATEWAY_API_KEY?.trim()) environment.AI_GATEWAY_API_KEY = key;
     const timeoutMs = options.timeoutMs ?? 10_000;
     const classification = enforceTaskSignals(
       task,
