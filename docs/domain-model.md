@@ -37,7 +37,7 @@ The initial term catalogue needs validation by native speakers and families. Do 
 
 A claim has a subject, predicate/type, object, proposer, state, evidence references, reviewer decisions, timestamps, and resolution. Sensitive changes preserve previous values and must not be overwritten silently.
 
-Close-relative reviewers should be eligible for the claim being reviewed. Proposers cannot approve their own changes. Define separate thresholds for:
+Close-relative reviewers should be eligible for the claim being reviewed. Proposers cannot approve their own changes. Eligibility circles and thresholds for each of these are owned by D-023 and `docs/acceptance-criteria.md`:
 - a newly invited person's self-confirmed relationship
 - a low-risk profile-field correction
 - a change to an established parent-child relationship
@@ -68,4 +68,4 @@ An uploaded document is evidence to assess, not automatic proof of authenticity.
 - Disputed: competing claims or versions are recorded.
 - Archived/restricted: retained under documented policy with limited access.
 
-A story dispute follows a 60-day resolution policy. Define the timer start event, extension authority, notification behavior, and exact visibility at expiry before implementation.
+A story dispute follows a 60-day resolution policy. Timer start, visibility, resolution, extension, notifications, and exceptions are defined in D-026.

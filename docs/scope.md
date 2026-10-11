@@ -57,9 +57,9 @@ P0/P1 express sequencing priority, not exclusion from the agreed MVP.
 - [x] Decide backend, authentication, and media storage (D-014, D-015). Hosting regions and migrations approach: open.
 - [ ] Confirm supported relationship types and constraints.
 - [x] Deceased-profile threshold when three eligible relatives are unavailable (D-016).
-- [ ] Define close-relative eligibility (who counts as close for each claim type).
-- [ ] Define review thresholds for new claims versus changes to established parent-child or marriage relationships.
-- [ ] Define first-launch languages/regions for kinship terminology.
+- [x] Define close-relative eligibility (who counts as close for each claim type) (D-023).
+- [x] Define review thresholds for new claims versus changes to established parent-child or marriage relationships (D-023).
+- [x] Define first-launch languages/regions for kinship terminology (D-025).
 - [ ] Define profile and archival retention policy, including deletion requests and backups.
 
 ## Feature 0: agent tooling
