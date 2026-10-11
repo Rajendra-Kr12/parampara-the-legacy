@@ -26,7 +26,7 @@ During implementation, maintain a short checklist below the feature. After imple
 
 ## Current status (2026-10-10)
 
-- Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021).
+- Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021); approval, story, language, and dispute-timer rules decided (D-023 to D-029) with testable criteria in `docs/acceptance-criteria.md`.
 - No application code yet. Next approved step candidates: Feature 0 (agent tooling) and Feature 1 (monorepo scaffold).
 - Time-sensitive: Laya is free on Vercel AI Gateway only through 2026-10-31.
 

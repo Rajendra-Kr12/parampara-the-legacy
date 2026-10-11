@@ -86,6 +86,8 @@ Contributor authorship is preserved. Family-level archival rules may preserve ap
 
 ## 8. Acceptance criteria
 
+High-level criteria are below; testable per-feature criteria (Features 2 to 8) are in `docs/acceptance-criteria.md`.
+
 - A person can be connected through maternal and paternal paths without duplicate identity.
 - The UI presents multiple valid kinship labels and stores a viewer preference separately from the graph.
 - Account, relationship, and historical verification have independent states.

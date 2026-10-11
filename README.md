@@ -11,7 +11,8 @@ A private family legacy network for web, iOS, and Android. Parampara preserves f
 | `AGENTS.md` | Shared rules for every agent and harness (source of truth) |
 | `CLAUDE.md` | Imports `AGENTS.md`, adds Claude Code notes |
 | `docs/scope.md` | Living plan: status, features, checklists, next work |
-| `docs/product-requirements.md` | Product requirements and acceptance criteria |
+| `docs/product-requirements.md` | Product requirements and high-level acceptance criteria |
+| `docs/acceptance-criteria.md` | Testable acceptance-criteria checklists per feature (Features 2 to 8) |
 | `docs/architecture.md` | Stack, layers, media storage, security boundaries, open items |
 | `docs/domain-model.md` | People, relationship graph, kinship terms, verification |
 | `docs/privacy-and-governance.md` | Access control, consent, evidence, disputes, retention |
