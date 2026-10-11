@@ -37,7 +37,7 @@ function positiveBoolean(value: string | undefined): boolean {
 function containsProhibitedData(task: string): boolean {
   const secretPatterns = [
     /-----BEGIN [A-Z ]*PRIVATE KEY-----/i,
-    /(?:sk|rk|pk|ghp|xox[baprs])[-_][A-Za-z0-9_-]{16,}/,
+    /(?<![A-Za-z0-9])(?:sk|rk|pk|ghp|xox[baprs])[-_][A-Za-z0-9_-]{16,}/,
     /(?:api[_-]?key|password|secret|token)\s*[:=]\s*["']?[A-Za-z0-9_\-/+=]{16,}/i,
     /authorization\s*:\s*bearer\s+[A-Za-z0-9_\-/+=.]{16,}/i,
   ];

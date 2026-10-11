@@ -119,6 +119,15 @@ test("static fallback is explicit for absent key, Laya failure, and paid Laya di
   assert.deepEqual([defaultCatalogPath.routingPath, defaultCatalogPath.fallbackReason], ["static", "laya-disabled-after-promotion"]);
 });
 
+test("does not refuse ordinary words that contain a key prefix", async () => {
+  for (const task of ["Update route-task-description-handling", "Review risk_management_policy_review"]) {
+    const result = await routeTask({ task, catalogText });
+    assert.notEqual(result.status, "refused");
+  }
+  const key = await routeTask({ task: "Here is sk-abcdef0123456789abcd", catalogText });
+  assert.equal(key.status, "refused");
+});
+
 test("refuses a task that looks like a secret or personal data", async () => {
   const secret = await routeTask({ task: "Use AI_GATEWAY_API_KEY=abcdef0123456789 in the task.", catalogText });
   assert.deepEqual(secret, { status: "refused", routingPath: "refused", refusalReason: "possible-secret-or-personal-data" });
