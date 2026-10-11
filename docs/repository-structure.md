@@ -35,6 +35,7 @@ parampara-the-legacy/
     ├── coding-standards.md
     ├── agent-workflow.md
     ├── model-routing.md
+    ├── model-catalog.md
     ├── decision-log.md
     └── repository-structure.md
 ```

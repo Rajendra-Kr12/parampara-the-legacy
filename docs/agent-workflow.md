@@ -2,12 +2,15 @@
 
 ## Purpose
 
-Coordinate specialized agents across Claude Code, Codex, OpenCode, Antigravity, and OpenRouter-backed sessions while keeping product decisions, architecture, and security constraints stable. The repository documents are the source of truth; model and harness choice are execution details (see `docs/model-routing.md`).
+Coordinate specialized agents across Claude Code, Codex, OpenCode, Pi, Hermes, Antigravity, and OpenRouter-backed sessions while keeping product decisions, architecture, and security constraints stable. The repository documents are the source of truth; model and harness choice are execution details (see `docs/model-routing.md`).
 
 ## Tools
 
 - **Firstmate** (`kunchenguid/firstmate`): one liaison agent that dispatches a crew of coding agents. Reads `AGENTS.md` and `.agents/skills/`. Use dispatch profiles to map routing tiers to harnesses.
 - **Herdr** (`ogulcancelik/herdr`, AGPL-3.0): terminal agent multiplexer; a supported Firstmate session backend. Verify the official repository before installing; several mirrors exist.
+- **OpenCode** with the owner's OpenCode Zen key: access to many paid models and a rotating list of free ones (see `docs/model-catalog.md`). Good for volume work at T0 and T1.
+- **Pi**: minimal terminal harness; reads `AGENTS.md` and `.agents/skills`; documented as a Firstmate harness.
+- **Hermes Agent** (Nous Research): reads `AGENTS.md`; project skills in `.agents/skills` load only after `hermes skills trust`. Not in Firstmate's documented harness list, so run it in a herdr pane or dispatch it by hand until verified.
 - **Codex plugin for Claude Code**: `/codex:adversarial-review` (user-triggered only) and `/codex:review`.
 - **Greptile**: automated PR review on GitHub (free Starter plan: 1 developer, 50 credits per month). Reviews once when a PR opens; comment `@greptileai` on a PR to request a re-review. Review rules live in `.greptile/`; update them when `AGENTS.md` or the domain rules change.
 

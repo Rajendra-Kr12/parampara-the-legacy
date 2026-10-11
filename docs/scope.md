@@ -70,7 +70,12 @@ Make multi-harness development safe and cheap before application code: routing, 
 ### Checklist
 - [ ] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback and budget cap. Decide before 2026-10-31 whether to keep it on paid Laya or self-host.
 - [ ] Map routing tiers to Firstmate dispatch profiles; verify herdr backend setup.
-- [ ] Verify skill loading in Codex, OpenCode, and Antigravity; update the harness table.
+- [x] Read official docs for OpenCode, Pi, and Hermes on instruction and skill loading; harness table updated (2026-10-11). Docs-verified only, not run.
+- [ ] Run each harness once in this repo (Claude Code, Codex, OpenCode, Pi, Hermes, Antigravity) and confirm `AGENTS.md` and the `.agents/skills` skills actually load; run `hermes skills trust` for Hermes. Update the harness table with results.
+- [ ] Confirm whether Firstmate can dispatch Hermes; if not, document the manual herdr-pane workflow.
+- [ ] Confirm how Pi and Hermes reach free OpenRouter or Nous models, and whether Zen works as a Pi custom provider; update `docs/model-catalog.md`.
+- [ ] Run one small trial task per free model class B model and record whether it is usable; re-verify `docs/model-catalog.md` (dated 2026-10-11).
+- [ ] Teach `tools/route-task` the data-class rules in `docs/model-routing.md`.
 - [x] Install Greptile (free Starter plan) on the repository (2026-10-10, done by owner).
 - [x] Add `.greptile/` review rules and doc context (2026-10-10).
 - [ ] Confirm Greptile detects the config and posts a review on PR #1.

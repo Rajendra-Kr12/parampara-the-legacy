@@ -1,6 +1,6 @@
 # Parampara: shared agent rules
 
-Single source of truth for every coding agent, harness, and model working in this repository (Claude Code, Codex, OpenCode, Antigravity, Firstmate crewmates, OpenRouter sessions). Harness-specific files such as `CLAUDE.md` may add notes but must not contradict this file. If instructions conflict, stop, describe the conflict, and ask the user.
+Single source of truth for every coding agent, harness, and model working in this repository (Claude Code, Codex, OpenCode, Pi, Hermes, Antigravity, Firstmate crewmates, OpenRouter sessions). Harness-specific files such as `CLAUDE.md` may add notes but must not contradict this file. If instructions conflict, stop, describe the conflict, and ask the user.
 
 Keep this file short. Detail lives in `docs/` and `.agents/skills/`; read those only when the task needs them.
 
@@ -73,4 +73,6 @@ Skills live in `.agents/skills/<name>/SKILL.md`. If your harness does not load s
 
 ## Model and task routing
 
-Route each task by complexity and risk using the table in `docs/model-routing.md`. High-risk areas (relationship graph, approvals, auth, privacy, migrations) always get a strong reasoning model plus an independent reviewer from a different model family. Never send real family data or secrets to any external model, including the Laya router.
+Route each task by complexity and risk using the table in `docs/model-routing.md`; model IDs, prices, and data classes are in `docs/model-catalog.md`. High-risk areas (relationship graph, approvals, auth, privacy, migrations) always get a strong reasoning model plus an independent reviewer from a different model family, and never a free model. Free models may only see public repository content, and only in the data classes the catalog allows. Never send real family data or secrets to any external model, including the Laya router.
+
+Do not create `AGENTS.override.md`, `.hermes.md`, or other files that shadow this one in some harnesses.
