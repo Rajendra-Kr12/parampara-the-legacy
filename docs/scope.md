@@ -161,7 +161,7 @@ Initial approval requires three eligible close relatives. With fewer than three 
 Personal memories represent the contributor's own experience. Historical stories make claims about people or events and can require review. Disputed versions may coexist during review. An unresolved story dispute moves to the contributor's private drafts after 60 days, subject to documented exceptions. Photos and audio inherit content permissions.
 
 ### Checklist
-- [ ] Define content types, authorship, access, and publication state.
+- [x] Define content types, authorship, access, and publication state (D-024 for story approval; criteria in `docs/acceptance-criteria.md`).
 - [ ] Define when the 60-day timer starts and who can resolve/extend it.
 - [ ] Implement private media storage and revocable access.
 - [ ] Test disputed-story expiry, contributor departure, and revoked media access.

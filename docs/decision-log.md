@@ -132,3 +132,21 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Rationale: Parentage and marriage changes are the highest-risk edits, so the people on the edge and their immediate family decide them, and a living person cannot have their own parentage or marriage changed over their objection. Older deceased ancestors often have few living core relatives, so extended relatives (grandchildren, daughters-in-law, sons-in-law) are needed or D-016 profiles would stay pending indefinitely.
 - Consequences: Eligibility is a pure function in `packages/domain`, computed server-side at decision time. Acceptance criteria in `docs/acceptance-criteria.md` (shared definitions, Feature 5, Feature 6).
 - Reversible recommendations recorded with this decision (not owner-decided; revisit if they cause problems): a living party to an edge who has not yet registered cannot approve, is notified through the contact on file, and can open a dispute after registering; a rejection by an eligible reviewer who is not a party moves the claim to `disputed` for evidence or administrator escalation rather than rejecting it outright.
+
+## D-024: Which stories need approval, and by whom (2026-10-11)
+- Status: Accepted
+- Context: FR-07 says memories need no approval and a story about a person needs approval from that person's living close relatives, but left the scope, reviewer set, and threshold to Feature 7 (PRD open decision; scope Feature 7). The original brief's example: a father's memory of the deceased grandfather is accepted, while a story about the grandfather is verified by the grandmother, uncles, or aunts.
+- Options considered: (A) only stories with tagged subjects, one approval per subject; (B) as A, but a deceased or not-registered subject needs 2 core-relative approvals; (C) every story needs approval from a core relative of the contributor, plus subject rules; (D) the family administrator approves all stories.
+- Decision: Option B.
+  - Memories (the contributor's own experience) never need approval, even when other people appear in them.
+  - A story needs approval when it names one or more people (its subjects) or makes historical claims about a family event the contributor did not experience. The contributor tags the subjects.
+  - Living, registered adult subject: the subject alone approves (1).
+  - Deceased or not-registered subject: 2 approvals from registered core relatives of the subject (D-023); when fewer than 2 core relatives are eligible, extended relatives fill the remaining approvals.
+  - Minor subject: the minor's guardian approves.
+  - A story with several subjects is published only when every subject's rule is met.
+  - The contributor never approves their own story, and one person counts once per subject.
+  - An eligible reviewer for a person who appears in an untagged memory or story can flag it as making claims about that person, which sends it to review under these rules.
+  - A rejection by any eligible reviewer starts the story dispute workflow (60-day rule, D-006).
+- Rationale: A living person has the final say over stories about themselves; people who can no longer speak for themselves get a two-relative check on their reputation. Extended relatives fill in only where the core circle is too small, so stories about older ancestors are not blocked forever.
+- Consequences: Story review reuses the D-023 eligibility function. Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7).
+- Reversible recommendation recorded with this decision (not owner-decided): a story whose subject has fewer than 2 eligible relatives in total stays `in_review`, and the contributor may withdraw it to drafts at any time.

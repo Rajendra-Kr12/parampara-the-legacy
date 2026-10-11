@@ -304,12 +304,37 @@ Sources: FR-07, FR-08, FR-12, D-006, D-008; scope Feature 7; domain model "Memor
 - [ ] **AC-7.04** [P] Before first publication, the contributor is shown the family preservation rules (FR-12) and the acknowledgement is recorded.
 
 ### Story approval
-**Pending owner decision (open item 2).** Which stories need approval, and the reviewer set and threshold, are recorded here once decided. The cases below hold regardless.
+Decided in D-024, using the eligibility circles of D-023:
+
+| Content | Approval needed |
+|---|---|
+| Memory (the contributor's own experience), even when other people appear | None |
+| Story about a living, registered adult subject | The subject alone (1) |
+| Story about a deceased or not-registered subject | 2 registered core relatives of the subject; extended relatives fill in when fewer than 2 core relatives are eligible |
+| Story about a minor | The minor's guardian |
+| Story with several subjects | Every subject's rule is met |
+
+A story is content that names one or more people (its subjects) or makes historical claims about a family event the contributor did not experience. The contributor is never counted, and one person counts once per subject.
+
 
 - [ ] **AC-7.05** [P] A story that requires approval moves `draft` to `in_review` on submission, is visible only to the contributor and its eligible reviewers while in review, and is published only when its approval rule is met.
 - [ ] **AC-7.06** [A] The contributor cannot approve their own story.
 - [ ] **AC-7.07** [A] A member who is not an eligible reviewer for the story cannot read it while it is `in_review` or approve it.
 - [ ] **AC-7.08** [R] A reviewer whose only path to the story's subject runs through a `pending`, `rejected`, or `disputed` edge is not eligible.
+- [ ] **AC-7.20** [P] Ravi publishes a memory of time spent with Venkata. It is published to Ravi's chosen audience with no approval step.
+- [ ] **AC-7.21** [P] Kiran submits a story about Padma (living, registered). It is published when Padma approves.
+- [ ] **AC-7.22** [A] For the same story, an approval by Suresh (Padma's spouse) is refused; only Padma decides a story about herself.
+- [ ] **AC-7.23** [P] Ravi submits a story about Venkata (deceased). It is published after 2 approvals from Venkata's registered core relatives other than Ravi (for example Sarada and Anil).
+- [ ] **AC-7.24** [F] For the same story, one core approval leaves it `in_review`.
+- [ ] **AC-7.25** [R] For the same story, Kiran's approval is refused: Kiran is an extended relative, and Venkata has at least 2 eligible core relatives (Sarada, Anil, Padma).
+- [ ] **AC-7.26** [P] Lakshmi submits a story about Kamala (deceased). Kamala's only eligible core relative is Suresh (Lakshmi is the contributor and Gopal is not registered), so the story is published after Suresh and one extended relative (for example Kiran) approve.
+- [ ] **AC-7.27** [P] Kiran submits a story about Gopal (living, not registered). It is published after 2 approvals from his registered core relatives (Lakshmi and Suresh).
+- [ ] **AC-7.28** [P] Ravi submits a story about Meena (a minor). It is published when Kiran, Meena's guardian, approves.
+- [ ] **AC-7.29** [P] Kiran submits a story about both Venkata and Padma. It is published only when Padma approves as subject and 2 core relatives of Venkata approve; Padma's single approval may count once for each subject.
+- [ ] **AC-7.30** [F] A story whose subject has fewer than 2 eligible relatives in total stays `in_review`; the contributor can withdraw it to drafts at any time.
+- [ ] **AC-7.31** [P] Kiran publishes an untagged memory that makes claims about Venkata. Anil, an eligible reviewer for Venkata, flags it; it moves to `in_review` under the story rules for Venkata and is hidden from the wider family until approved.
+- [ ] **AC-7.32** [A] A member who is not an eligible reviewer for any person in the content (for example Zed, or Hari while pending) cannot flag it.
+- [ ] **AC-7.33** [P] A rejection by any eligible reviewer of a story moves it to `disputed` and starts the dispute workflow below.
 
 ### Disputes and the 60-day rule
 **Pending owner decision (open item 4).** The timer start, visibility during a dispute, who can resolve or extend, notifications, and exceptions are recorded here once decided. The cases below hold regardless.
