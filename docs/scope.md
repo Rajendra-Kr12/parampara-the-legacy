@@ -69,11 +69,12 @@ Make multi-harness development safe and cheap before application code: routing, 
 
 ### Checklist
 - [ ] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback and budget cap. Decide before 2026-10-31 whether to keep it on paid Laya or self-host.
-- [ ] Map routing tiers to Firstmate dispatch profiles; verify herdr backend setup.
-- [x] Read official docs for OpenCode, Pi, and Hermes on instruction and skill loading; harness table updated (2026-10-11). Docs-verified only, not run.
-- [ ] Run each harness once in this repo (Claude Code, Codex, OpenCode, Pi, Hermes, Antigravity) and confirm `AGENTS.md` and the `.agents/skills` skills actually load; run `hermes skills trust` for Hermes. Update the harness table with results.
-- [ ] Confirm whether Firstmate can dispatch Hermes; if not, document the manual herdr-pane workflow.
-- [ ] Confirm how Pi and Hermes reach free OpenRouter or Nous models, and whether Zen works as a Pi custom provider; update `docs/model-catalog.md`.
+- [x] Map routing tiers to Firstmate dispatch profiles and document the herdr setup in `docs/harness-setup.md` (2026-10-11). The map is a proposal; no Firstmate config file was changed, and herdr lifecycle commands were not run.
+- [x] Read official docs for OpenCode, Pi, and Hermes on instruction and skill loading (2026-10-11).
+- [x] Run Claude Code, Codex, OpenCode, Pi, and Hermes once in this repo; `AGENTS.md` and skills load for the first four, Hermes only partly confirmed. Results in `docs/model-routing.md` (2026-10-11).
+- [ ] Re-run the Antigravity (agy) probe after its quota resets (429 on 2026-10-11, about 44 hours); optionally repeat Hermes with a second model.
+- [x] Firstmate cannot dispatch Hermes; manual herdr-pane workflow documented in `docs/harness-setup.md` (2026-10-11).
+- [x] Pi and Hermes access to free models recorded in `docs/model-catalog.md` and `docs/harness-setup.md` (2026-10-11). Still not tried: Zen as a Pi custom provider, Pi on OpenRouter free models.
 - [ ] Run one small trial task per free model class B model and record whether it is usable; re-verify `docs/model-catalog.md` (dated 2026-10-11).
 - [ ] Teach `tools/route-task` the data-class rules in `docs/model-routing.md`.
 - [x] Install Greptile (free Starter plan) on the repository (2026-10-10, done by owner).

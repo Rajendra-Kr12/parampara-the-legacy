@@ -18,6 +18,7 @@ A private family legacy network for web, iOS, and Android. Parampara preserves f
 | `docs/coding-standards.md` | Coding standards and verification |
 | `docs/agent-workflow.md` | Firstmate, herdr, delegation, branch and PR flow |
 | `docs/model-routing.md` | Which model and harness handle which task; Laya router |
+| `docs/harness-setup.md` | Firstmate dispatch profiles per tier, free-model access, herdr setup |
 | `docs/model-catalog.md` | Model IDs, prices, free models, and data-handling classes |
 | `docs/decision-log.md` | Accepted and superseded decisions (D-001 onwards) |
 | `docs/repository-structure.md` | Current and planned folder layout |
