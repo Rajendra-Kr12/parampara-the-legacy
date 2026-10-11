@@ -62,17 +62,17 @@ The same instruction filenames can shadow `AGENTS.md`: never add `AGENTS.overrid
 Input: the task description only (no code, no family data), plus the available-model list derived from `docs/model-catalog.md` (tier and class columns only).
 
 Questions asked of Laya:
-- `tier`: choice of `T0 | T1 | T2 | T3 | D`.
+- `tier`: choice of `T0 | T1 | T2 | T3 | R | D` (`R` = review of any kind: PR review, adversarial review, security or domain review, regardless of how small or public the content is).
 - `touches_high_risk_area`: boolean (graph, kinship, approvals, auth, privacy, migrations, media access).
 - `needs_independent_review`: boolean.
 - `involves_sensitive_context`: boolean (secrets, `.env`, real personal data, security findings, private design rationale).
 - `volume`: choice of `small | bulk` (bulk work such as many tests or boilerplate may go to cheap or free models).
 
 Decision rule:
-1. If `touches_high_risk_area` is true, minimum tier is T2 and free models are excluded.
+1. If `touches_high_risk_area` is true, minimum tier is T2 and free models are excluded. Tiers T2, T3 and R never use free models, whatever the other answers are; check this before any volume-based preference.
 2. If `involves_sensitive_context` is true, only class A models are allowed. If the task contains real secrets or family data, stop: the task must be rewritten, not routed.
 3. If the top choice probability is below 0.7, take the higher of the two most likely tiers.
-4. For T0, T1 and D with `volume = bulk` and no sensitive context, prefer a class B free model, then a cheap paid model, then the default.
+4. Only for tiers T0, T1 and D (never R, T2 or T3), with `volume = bulk` and no sensitive context, prefer a class B free model, then a cheap paid model, then the default. A task that is itself a review is tier `R`, so this rule does not apply to it. (`needs_independent_review` only says the output must later be reviewed; it does not change the model for the task itself.)
 5. Map the result to a model in the catalog, then to a harness (OpenCode, Pi, Hermes, Claude Code, Codex, Antigravity) or a Firstmate dispatch profile.
 6. If Laya is unavailable, errors, or the budget cap is hit, fall back to the static table with a human or lead-agent decision. Core work must never depend on Laya being up.
 

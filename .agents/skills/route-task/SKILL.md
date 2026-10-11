@@ -8,7 +8,7 @@ description: Choose the model, harness, and reviewer for a Parampara task using 
 1. Read the routing table in `docs/model-routing.md` and the model list, prices, and data classes in `docs/model-catalog.md`. Check the catalog's verification date; if it is older than a month, say so and re-verify the models you plan to use.
 2. Describe the task in one or two sentences, with no code, family data, or secrets.
 3. Classify it:
-   - T0 trivial and reversible, T1 routine within an approved plan, T2 high-risk domain or security, T3 hardest reasoning or architecture, D research or docs.
+   - T0 trivial and reversible, T1 routine within an approved plan, T2 high-risk domain or security, T3 hardest reasoning or architecture, R review of any kind (never a free model), D research or docs.
    - Any task touching the relationship graph, kinship engine, approvals, auth, privacy, media access, or migrations is at least T2.
 4. If the Laya router (`tools/route-task`) exists and `AI_GATEWAY_API_KEY` is configured, run it with the description and compare its answer with your classification. When they differ, take the higher tier. If Laya is unavailable, use your classification. Never block work on Laya.
 5. Pick the default model and harness for the tier, and a reviewer from a different model family for T2 and T3.
