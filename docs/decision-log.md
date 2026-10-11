@@ -203,3 +203,9 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Rationale: Every claim about the family's past concerns someone; tagging them gives the story a reviewer set from the existing rules instead of a new approval path.
 - Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7, "Event stories").
 - Reversible recommendation recorded with this decision (not owner-decided): changing the tagged subjects of a story that is in review or published restarts review under the new subject set, and removing the last subject is rejected.
+
+## D-029: One approval counts toward only one subject (2026-10-11)
+- Status: Accepted; clarifies D-024
+- Context: Review of PR #4 found that D-024's "one person counts once per subject" could be read as letting one approver satisfy several subjects' rules, which changes the threshold for a story tagging a living subject and a deceased subject.
+- Decision: No double counting across subjects. One person's approval counts toward only one subject's rule. For a story tagging a living subject and a deceased subject, the deceased subject's 2 core-relative approvals come from people other than the approver who approves as the living subject. A story tagging Venkata and Sarada needs 3 approvals in total: Sarada as subject plus 2 other core relatives of Venkata (for example Anil and Padma).
+- Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7, "Story approval", AC-7.18, AC-7.25, AC-7.26).
