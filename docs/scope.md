@@ -162,7 +162,7 @@ Personal memories represent the contributor's own experience. Historical stories
 
 ### Checklist
 - [x] Define content types, authorship, access, and publication state (D-024 for story approval; criteria in `docs/acceptance-criteria.md`).
-- [ ] Define when the 60-day timer starts and who can resolve/extend it.
+- [x] Define when the 60-day timer starts and who can resolve/extend it (D-026; criteria in `docs/acceptance-criteria.md`).
 - [ ] Implement private media storage and revocable access.
 - [ ] Test disputed-story expiry, contributor departure, and revoked media access.
 
