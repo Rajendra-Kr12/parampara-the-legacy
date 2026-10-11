@@ -53,11 +53,25 @@ Each is a separate state and is never collapsed into one `verified` flag:
 
 ### Close-relative eligibility
 
-**Pending owner decision (open item 1).** The definition of who counts as an eligible close relative for each claim type is recorded here once decided. Until then, criteria below refer to "eligible reviewers for the claim type" and the tests take the reviewer set from the domain function `eligibleReviewers(claim)`.
+Decided in D-023. Relatives are counted from the subject's point of view:
+- **Core relatives**: spouse or partner, parents, children, siblings (including half-siblings).
+- **Extended relatives**: grandparents, grandchildren, parents' siblings, siblings' children, children's spouses.
 
-Rules that already hold regardless of that decision:
+| Claim type | Who may approve | Threshold |
+|---|---|---|
+| New relationship at invitation | The other party to the invitation only | 1 |
+| Low-risk profile-field correction | The subject alone when living and registered; otherwise a core or extended relative | 1 |
+| Change to an established parent-child edge | Every living, registered party to the edge, plus core relatives of either party | 2 in total, including every living registered party; a party's rejection blocks |
+| Change to an established marriage or partner edge | Every living, registered spouse or partner, plus core relatives of either | 2 in total, including every living registered spouse; a spouse's rejection blocks |
+| Uncertain historical claim | Core or extended relatives of the subject | 2, plus evidence under D-005 |
+| Deceased profile | Core or extended relatives of the deceased; requests go to core relatives first | D-016: 3, or 2 plus reviewed documentary evidence |
+
+In the fixture family, for Venkata: core relatives are Sarada, Ravi, Anil, and Padma; extended relatives include Kiran (grandchild), Lakshmi (son's wife), and Suresh (daughter's husband). For Kamala: core relatives are Gopal (not registered, so not yet eligible), Lakshmi, and Suresh; extended relatives include Kiran, Ravi, and Padma.
+
+Rules for every claim type:
 - Eligibility is computed server-side from stored data; a client-supplied reviewer list or eligibility flag is ignored.
-- The proposer never counts as a reviewer for their own claim (AGENTS.md invariant).
+- The proposer never counts as a reviewer for their own claim (AGENTS.md invariant). When the proposer is a party to the edge, their proposal stands as their consent but never counts toward the threshold; the living-party requirement then applies to the other parties.
+- A reviewer has a verified account and is a registered member of the family group.
 - A reviewer's own relationship to the subject must run only through `accepted` edges. A path that uses a `pending`, `rejected`, or `disputed` edge, or the very edge under review, does not make anyone eligible.
 - A guardian-managed minor is never a reviewer.
 - One person counts once per claim, however many paths connect them to the subject.
@@ -197,10 +211,30 @@ Sources: FR-05, FR-11, D-003, D-005, D-010; scope Feature 5; domain model "Relat
 - [ ] **AC-5.03** [P] Reviewers can approve, reject, request evidence, or dispute. Each decision is recorded separately with reviewer, time, and evidence references.
 
 ### Eligibility and thresholds per claim type
-**Pending owner decision (open item 1).** The eligible reviewer set and approval threshold for each claim type (new invitee relationship, low-risk field correction, parent-child change, marriage or partner change, uncertain historical claim) are recorded here once decided. The cases below hold for every type.
+Eligible reviewers and thresholds per claim type follow the table in "Close-relative eligibility" above (D-023).
 
 - [ ] **AC-5.04** [P] A claim reaches `accepted` only when the required number of eligible reviewers for its type have approved, and the approval, the state change, and the audit event are written in one Convex mutation.
-- [ ] **AC-5.05** [P] A change to an established parent-child or marriage relationship requires a stricter threshold than a low-risk profile-field correction.
+- [ ] **AC-5.05** [P] A change to an established parent-child or marriage relationship requires 2 approvals including every living registered party, which is stricter than the single approval for a low-risk profile-field correction.
+
+Field corrections:
+- [ ] **AC-5.22** [P] Ravi proposes a correction to Kiran's birth year. It is accepted when Kiran approves, and only Kiran's decision counts.
+- [ ] **AC-5.23** [A] For the same correction, an approval by Lakshmi (Kiran's core relative) is refused, because a living registered subject decides their own fields.
+- [ ] **AC-5.24** [P] Kiran proposes a correction to Venkata's (deceased) name variant. It is accepted after one approval from a core or extended relative of Venkata, for example Sarada or Lakshmi.
+- [ ] **AC-5.25** [P] Lakshmi proposes a correction to Gopal's (living, not registered) birth year. It is accepted after one approval from a core or extended relative of Gopal, for example Suresh.
+
+Parent-child and marriage changes:
+- [ ] **AC-5.26** [P] Anil proposes a change to the Padma and Suresh marriage edge. It is accepted only when both Padma and Suresh approve.
+- [ ] **AC-5.27** [F] For the same change, if Padma rejects, the claim is `rejected` regardless of any other approvals, and the edge is unchanged.
+- [ ] **AC-5.28** [F] For the same change, approvals from Ravi and Lakshmi (core relatives of the spouses) without Padma and Suresh leave the claim pending.
+- [ ] **AC-5.29** [P] Ravi proposes a change to the Venkata (deceased) to Anil parent-child edge. It is accepted after Anil and one other core relative of either party (for example Sarada or Padma) approve.
+- [ ] **AC-5.30** [F] For the same change, approvals from Sarada and Padma without Anil leave the claim pending, because Anil is a living registered party.
+- [ ] **AC-5.31** [R] For the same change, Kiran's approval is refused: Kiran is an extended relative (grandchild) of Venkata, and edge changes accept only core relatives besides the parties.
+- [ ] **AC-5.32** [A] Anil proposes a change to his own parent-child edge with Venkata. Anil's approval is refused (proposer), and the claim needs 2 approvals from core relatives of either party.
+- [ ] **AC-5.33** [P] Lakshmi proposes a change to the Gopal (living, not registered) to Lakshmi parent-child edge. Gopal cannot approve until registered; the claim is accepted after 2 approvals from core relatives of either party other than Lakshmi (for example Suresh and Ravi), and Gopal is notified through the contact on file and can open a dispute after registering.
+
+Historical claims:
+- [ ] **AC-5.34** [P] A claim that Venkata was born in a given year is accepted after 2 approvals from core or extended relatives (Kiran counts) plus documentary evidence or multiple independent testimonies (D-005).
+- [ ] **AC-5.35** [F] The same claim with 2 approvals but no evidence stays `uncertain`.
 - [ ] **AC-5.06** [A] The proposer's approval of their own claim is refused and never counted.
 - [ ] **AC-5.07** [A] An approval from an ineligible member (for example Zed, a pending member, a member of another family group, or a guardian-managed minor) is refused and never counted.
 - [ ] **AC-5.08** [A] A family administrator who is not an eligible reviewer for the claim cannot approve it; administrator status alone gives no approval right.
@@ -210,7 +244,7 @@ Sources: FR-05, FR-11, D-003, D-005, D-010; scope Feature 5; domain model "Relat
 - [ ] **AC-5.12** [P] A reviewer reached through two paths (for example Padma through the paternal and maternal path) counts once.
 
 ### Reject, evidence, dispute, escalation
-- [ ] **AC-5.13** [P] A rejection by an eligible reviewer moves the claim to `disputed` (if others approved) or `rejected` (if the threshold for rejection is met), and the current value stays unchanged.
+- [ ] **AC-5.13** [P] A rejection by a living registered party to the edge (or by the living registered subject of a field correction) makes the claim `rejected`. A rejection by any other eligible reviewer moves the claim to `disputed` for evidence or escalation (AC-5.15). In both cases the current value stays unchanged.
 - [ ] **AC-5.14** [P] "Request evidence" pauses the claim in `in_review` until evidence is attached or the proposer withdraws; evidence is visible only to the claim's eligible reviewers and the submitter.
 - [ ] **AC-5.15** [P] A disputed claim can be escalated to a family administrator who is not a party to it; the administrator's resolution records the basis of the decision, and an administrator who is the proposer or the subject cannot resolve it.
 - [ ] **AC-5.16** [P] Missing or disputed facts remain `uncertain` or `disputed`; no workflow turns them into `verified` without the required approvals or evidence.
@@ -244,7 +278,9 @@ Sources: FR-02, FR-06, D-005, D-016, D-017; scope Feature 6; domain model "Decea
 - [ ] **AC-6.11** [F] Two approvals from the same person count once.
 - [ ] **AC-6.12** [P] Each approval is stored as its own record with reviewer, time, decision, and evidence references.
 - [ ] **AC-6.13** [P] The number of eligible reviewers available is computed on the server at decision time; an approval reached under the two-plus-evidence rule stays approved if more relatives join later.
-- [ ] **AC-6.14** [R] Eligibility for a deceased profile uses the close-relative definition (open item 1) and only `accepted` edges; a relative reachable only through a pending edge is not counted as available or as an approver.
+- [ ] **AC-6.14** [R] Eligibility for a deceased profile uses core and extended relatives of the deceased (D-023) through `accepted` edges only; a relative reachable only through a pending edge is not counted as available or as an approver.
+- [ ] **AC-6.22** [P] For Kamala, the registered core relatives are Lakshmi and Suresh (Gopal is not registered). With extended relatives Kiran, Ravi, and Padma also eligible, five are available, so the profile needs three approvals, and Kiran's approval counts toward them.
+- [ ] **AC-6.23** [P] Review requests for a deceased profile go to its eligible core relatives first. Extended relatives may approve at any time, and are sent requests as well when fewer than three core relatives are eligible.
 
 ### Field-level status and evidence
 - [ ] **AC-6.15** [P] Every historical field (for example birth date, death date, birthplace) carries its own status: `unverified`, `verified`, `uncertain`, or `disputed`; profile approval does not mark every field verified.

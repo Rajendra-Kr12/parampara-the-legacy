@@ -139,8 +139,8 @@ Calculate valid labels from the relationship graph. Use paternal-side preference
 Verified members can propose changes. Established parent-child and marriage relationships receive stricter review by close relatives. Reviewers must not approve their own proposal. All sensitive changes preserve old values, evidence, decisions, and timestamps.
 
 ### Checklist
-- [ ] Define eligibility for close and independent reviewers.
-- [ ] Define approval thresholds by change type.
+- [x] Define eligibility for close and independent reviewers (D-023; criteria in `docs/acceptance-criteria.md`).
+- [x] Define approval thresholds by change type (D-023).
 - [ ] Define reject, request-evidence, dispute, and escalation paths.
 - [ ] Test unauthorized approval and concurrent conflicting proposals.
 
@@ -151,7 +151,7 @@ Initial approval requires three eligible close relatives. With fewer than three 
 
 ### Checklist
 - [ ] Define field-level confidence/status.
-- [ ] Define reviewer eligibility and conflict-of-interest rules.
+- [x] Define reviewer eligibility and conflict-of-interest rules (D-023: core and extended relatives; proposer never counts).
 - [ ] Restrict evidence to authorized reviewers.
 - [ ] Test insufficient evidence, contradictory evidence, and unavailable reviewers.
 
