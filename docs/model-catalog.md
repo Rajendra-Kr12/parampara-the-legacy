@@ -60,13 +60,16 @@ Tier suggestions are starting points for the Laya classifier and humans, not ben
 
 ## Harness model access
 
-| Harness | Provider access | Free models |
+Observed on 2026-10-11 on the owner's machine, versus what documentation says. Provider key names are never recorded here.
+
+| Harness | Observed | Docs say |
 |---|---|---|
-| OpenCode | OpenCode Zen (owner has a key), plus other providers | Zen free list above |
-| Pi | Built-in providers include Anthropic, OpenAI, OpenRouter, Ollama; custom providers and models via `models.json` | OpenRouter `:free` models, local Ollama. Whether Zen works as a custom provider is not verified |
-| Hermes | Nous Portal, OpenRouter, OpenAI, or any compatible endpoint; configure with `hermes model` or `hermes setup --portal` | Nous Portal free offers and OpenRouter `:free` models rotate; verify the current list in the tools themselves. Local models via Ollama are free |
-| Claude Code, Codex, Antigravity | Own subscriptions or keys | Per their plans |
-| Vercel AI Gateway | `AI_GATEWAY_API_KEY`; credits owned by the project owner | Laya free through 2026-10-31 |
+| OpenCode 1.18.32 | `opencode models` lists 77 `opencode/*` (Zen) models plus one `freellmapi/auto`. Free ids seen: big-pickle, ling-3.0-flash-fin-free, longcat-2.5-preview-free, mimo-v2.6-flash-free, muse-spark-1.3-contributor-free, nemotron-3-ultra-free, nemotron-3.5-lightning-free, space-bunny-free. `opencode run -m opencode/space-bunny-free` answered | Zen free list above; other providers by config |
+| Pi 0.85.1 | `pi --list-models` shows only the `nvidia` provider (21 models) as configured; no OpenRouter or Zen provider is configured on this machine. `nvidia/nemotron-3-super-120b-a12b` and `z-ai/glm-5.3-flash` answered; `deepseek-ai/deepseek-v4-flash-0731` returned HTTP 410 | OpenRouter works with `OPENROUTER_API_KEY` or `/login`; custom providers via `~/.pi/agent/models.json` with `baseUrl` and per-model `id` and `api` (e.g. `openai-completions`). Whether OpenCode Zen works as a Pi custom provider: **docs-only, not tried** (Zen documents `https://opencode.ai/zen/v1/chat/completions`, used with `@ai-sdk/openai-compatible` for some models; it needs the owner's Zen key, which was not used here) |
+| Hermes 0.20.4 | Not run (trust decision pending). Local `config.yaml` (values redacted) shows `fallback_providers`: two Nous `:free` models and one custom OpenAI-compatible endpoint on localhost serving an NVIDIA model | Nous Portal, OpenRouter, OpenAI, or any compatible endpoint via `hermes model` / `hermes setup --portal`; Nous `:free` and OpenRouter `:free` models rotate |
+| Claude Code, Codex | Both ran with the owner's logged-in accounts (Claude Code on `haiku`; Codex defaulted to `gpt-5.6-terra`) | Own subscriptions or keys |
+| Antigravity (agy) 1.3.3 | `agy models` lists Gemini 3.x Flash variants with high/medium/low effort. Prompts fail with 429 individual quota, resets in about 44 hours | Own subscription |
+| Vercel AI Gateway | Not tested | `AI_GATEWAY_API_KEY`; credits owned by the project owner; Laya free through 2026-10-31 |
 
 Keys live in each harness's own config or the gitignored `.env.local`, never in this repository.
 
