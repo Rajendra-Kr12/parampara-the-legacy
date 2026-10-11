@@ -25,7 +25,7 @@ Dispatchable harnesses (docs, Firstmate `AGENTS.md` section 4): `claude`, `codex
 
 - **Pi** (observed): only the `nvidia` provider is configured on this machine; no OpenRouter provider. NVIDIA models answered (Nemotron 3 Super, GLM 5.3 Flash), one returned HTTP 410. (docs) OpenRouter needs `OPENROUTER_API_KEY` or `/login`, and `:free` suffixed model IDs are the free ones; free IDs rotate. Custom providers go in `~/.pi/agent/models.json` with a `baseUrl` and model `id`/`api`.
 - **OpenCode Zen as a Pi custom provider**: docs-only, not tried. Zen exposes `https://opencode.ai/zen/v1/chat/completions` (docs), so a `models.json` provider with that `baseUrl` and `api: openai-completions` is plausible for the models documented on that endpoint; Claude and GPT models use other Zen endpoints. Try it with one class B model before relying on it.
-- **Hermes** (docs; local config shows Nous `:free` models as fallbacks, values redacted): `hermes model` or `hermes setup --portal` selects Nous Portal, OpenRouter or a compatible endpoint. Nous Portal `:free` offers and OpenRouter `:free` models rotate; check the live list in the tool before relying on one. Not run end to end here.
+- **Hermes** (docs; local config shows Nous `:free` models as fallbacks, values redacted; the probes ran on its configured default model, whose name I did not record): `hermes model` or `hermes setup --portal` selects Nous Portal, OpenRouter or a compatible endpoint. Nous Portal `:free` offers and OpenRouter `:free` models rotate; check the live list in the tool before relying on one. Not run end to end here.
 - Data classes still apply: free means class B to D in the catalog, public repository content only.
 
 ## Herdr setup
@@ -38,13 +38,13 @@ Setup, from the docs:
 3. Each crewmate gets a task tab in the launching home's workspace, or a disposable one-task workspace by default on Herdr 0.8.0 or newer. Task worktrees still come from Treehouse. Watch with `herdr session attach <name>`; Firstmate supervises with its own peek and send scripts without attaching.
 4. Herdr is AGPL-3.0-or-later (or commercial); Firstmate runs it as a separate process.
 
-Manual Hermes workflow (docs-derived, not run): open a herdr pane in a git worktree of this repository on its own branch, run `hermes` there, give it a task and the tier from `docs/model-routing.md`, review its branch like any other PR. Do not create `.hermes.md` or `AGENTS.override.md`. Project skills in `.agents/skills` stay unloaded in Hermes until `hermes skills trust` is run for that checkout (installed `--help`); whether to run it is an owner decision, still open at the time of writing. Treat Hermes output as T0/T1 volume work with independent review.
+Manual Hermes workflow (docs-derived, not run): open a herdr pane in a git worktree of this repository on its own branch, run `hermes` there, give it a task and the tier from `docs/model-routing.md`, review its branch like any other PR. Do not create `.hermes.md` or `AGENTS.override.md`. Project skills in `.agents/skills` load in Hermes only after `hermes skills trust` for that checkout (observed 2026-10-11: trusted, probed, then `hermes skills untrust`, which reported project skills no longer load). Trust is per path, so a new worktree needs it again; it is an owner decision each time. Treat Hermes output as T0/T1 volume work with independent review.
 
 Lifecycle commands (`workspace`, `pane`, `tab`, `worktree` create or delete, `server stop`) were not run in this verification, on purpose; tasks that drive them must use a named non-default isolated lab (Firstmate `AGENTS.md`).
 
 ## Open items
 
-- Hermes: `AGENTS.md` and skill loading not run (trust decision pending).
+- Hermes: model self-report was inconsistent (one probe said no instruction files, one quoted the `AGENTS.md` heading); repeat with a second model if exact loading matters.
 - agy: not verified, quota error (429, reset about 44 hours). Re-run the probe in `docs/model-routing.md` after the reset.
 - Pi + Zen custom provider, and Pi on OpenRouter free models: not tried.
 - Laya classifier remains unimplemented (Feature 0 continues).
