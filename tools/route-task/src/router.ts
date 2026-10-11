@@ -100,8 +100,9 @@ function adjustedTier(classification: Classification): Tier {
     .sort((left, right) => right[1] - left[1]);
   const first = ranked[0];
   const second = ranked[1];
+  const total = ranked.reduce((sum, [, probability]) => sum + probability, 0);
   let tier = classification.tier;
-  if (first !== undefined && second !== undefined && first[1] < 0.7) {
+  if (total > 0 && first !== undefined && second !== undefined && first[1] < 0.7) {
     tier = MINIMUM_TIER_RANK[first[0]] >= MINIMUM_TIER_RANK[second[0]] ? first[0] : second[0];
   }
   if (classification.touchesHighRiskArea && MINIMUM_TIER_RANK[tier] < MINIMUM_TIER_RANK.T2) return "T2";
@@ -191,9 +192,8 @@ export async function loadGatewayApiKey(
     const match = /^\s*AI_GATEWAY_API_KEY\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s#]+))\s*(?:#.*)?$/m.exec(source);
     const value = match?.[1] ?? match?.[2] ?? match?.[3];
     return value?.trim() || undefined;
-  } catch (error: unknown) {
-    if (error instanceof Error && "code" in error && error.code === "ENOENT") return undefined;
-    throw error;
+  } catch {
+    return undefined;
   }
 }
 
