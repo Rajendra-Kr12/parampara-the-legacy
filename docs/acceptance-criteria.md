@@ -65,6 +65,7 @@ Decided in D-023. Relatives are counted from the subject's point of view:
 | Change to an established marriage or partner edge | Every living, registered spouse or partner, plus core relatives of either | 2 in total, including every living registered spouse; a spouse's rejection blocks |
 | Uncertain historical claim | Core or extended relatives of the subject | 2, plus evidence under D-005 |
 | Deceased profile | Core or extended relatives of the deceased; requests go to core relatives first | D-016: 3, or 2 plus reviewed documentary evidence |
+| New edges connecting a new deceased profile (D-027) | Each living registered person on a proposed edge confirms their own edge | Accepted with the profile once the D-016 threshold is met |
 
 In the fixture family, for Venkata: core relatives are Sarada, Ravi, Anil, and Padma; extended relatives include Kiran (grandchild), Lakshmi (son's wife), and Suresh (daughter's husband). For Kamala: core relatives are Gopal (not registered, so not yet eligible), Lakshmi, and Suresh; extended relatives include Kiran, Ravi, and Padma.
 
@@ -288,18 +289,31 @@ Sources: FR-02, FR-06, D-005, D-016, D-017; scope Feature 6; domain model "Decea
 - [ ] **AC-6.11** [F] Two approvals from the same person count once.
 - [ ] **AC-6.12** [P] Each approval is stored as its own record with reviewer, time, decision, and evidence references.
 - [ ] **AC-6.13** [P] The number of eligible reviewers available is computed on the server at decision time; an approval reached under the two-plus-evidence rule stays approved if more relatives join later.
-- [ ] **AC-6.14** [R] Eligibility for a deceased profile uses core and extended relatives of the deceased (D-023) through `accepted` edges only; a relative reachable only through a pending edge is not counted as available or as an approver.
+- [ ] **AC-6.14** [R] Eligibility for a deceased profile uses core and extended relatives of the deceased (D-023) through `accepted` edges, or through a connecting edge the reviewer confirmed themselves (D-027); a relative reachable only through someone else's pending edge is not counted as available or as an approver.
 - [ ] **AC-6.15** [P] For Kamala, the registered core relatives are Lakshmi and Suresh (Gopal is not registered). With extended relatives Kiran, Ravi, and Padma also eligible, five are available, so the profile needs three approvals, and Kiran's approval counts toward them.
 - [ ] **AC-6.16** [P] Review requests for a deceased profile go to its eligible core relatives first. Extended relatives may approve at any time, and are sent requests as well when fewer than three core relatives are eligible.
 
+### Connecting a new deceased profile (D-027)
+Worked example: Venkata has no profile yet. Ravi proposes Venkata's deceased profile together with four connecting edges: spouse of Sarada, and parent of Ravi, Anil, and Padma.
+
+- [ ] **AC-6.17** [P] The claim stores the profile and its four proposed edges together, all `pending`; Sarada, Anil, and Padma are each asked to confirm their own edge, and Ravi's own edge stands on his proposal.
+- [ ] **AC-6.18** [P] Sarada, Anil, and Padma each confirm their own edge and approve the profile. The D-016 threshold of three is met, and the profile and all four edges become `accepted` in one Convex mutation with one audit event per decision.
+- [ ] **AC-6.19** [F] If that final mutation fails, neither the profile nor any edge is accepted.
+- [ ] **AC-6.20** [R] Anil's approval of the profile does not count until he has confirmed his own edge; before that, he has no accepted path to Venkata.
+- [ ] **AC-6.21** [R] Kiran is not eligible while the claim is pending: Kiran's only path to Venkata runs through Ravi's proposed edge, which Kiran did not confirm and which is not yet accepted.
+- [ ] **AC-6.22** [A] Ravi cannot confirm an edge on behalf of Sarada, Anil, or Padma, and his own approval of the profile is refused.
+- [ ] **AC-6.23** [F] Anil rejects his edge. That edge is not created, Anil gains no eligibility through it, and the claim continues with the remaining edges; with only Sarada and Padma eligible, the profile needs both approvals plus reviewed documentary evidence (D-016).
+- [ ] **AC-6.24** [F] If fewer than two people named on proposed edges confirm, and no other eligible relative exists through accepted edges, the profile and its edges stay `pending`.
+- [ ] **AC-6.25** [P] A proposed edge to a living person who is not registered (for example Gopal) does not block the profile; it stays `pending` after the profile is accepted, until that person registers and confirms it.
+
 ### Field-level status and evidence
-- [ ] **AC-6.17** [P] Every historical field (for example birth date, death date, birthplace) carries its own status: `unverified`, `verified`, `uncertain`, or `disputed`; profile approval does not mark every field verified.
-- [ ] **AC-6.18** [P] Two conflicting birth dates leave the birth-date field `disputed` with both values and their evidence kept; the rest of the profile is unaffected.
-- [ ] **AC-6.19** [P] A field becomes `verified` from documentary evidence reviewed by eligible reviewers, or from multiple independent testimonies when documents are unavailable (D-005); otherwise it stays `uncertain`.
-- [ ] **AC-6.20** [P] Testimonies count as independent only when given by different people; one person submitting two testimonies counts once.
-- [ ] **AC-6.21** [P] An uploaded document is recorded as evidence to assess; uploading it does not change any field status by itself.
-- [ ] **AC-6.22** [A] Evidence files and testimony text are readable only by the claim's eligible reviewers and the submitter; other members, including a family administrator who is not a reviewer, are denied through the API and through media URLs.
-- [ ] **AC-6.23** [P] An administrator resolving an escalated historical claim records the basis of the decision, and the record is kept in the audit history.
+- [ ] **AC-6.26** [P] Every historical field (for example birth date, death date, birthplace) carries its own status: `unverified`, `verified`, `uncertain`, or `disputed`; profile approval does not mark every field verified.
+- [ ] **AC-6.27** [P] Two conflicting birth dates leave the birth-date field `disputed` with both values and their evidence kept; the rest of the profile is unaffected.
+- [ ] **AC-6.28** [P] A field becomes `verified` from documentary evidence reviewed by eligible reviewers, or from multiple independent testimonies when documents are unavailable (D-005); otherwise it stays `uncertain`.
+- [ ] **AC-6.29** [P] Testimonies count as independent only when given by different people; one person submitting two testimonies counts once.
+- [ ] **AC-6.30** [P] An uploaded document is recorded as evidence to assess; uploading it does not change any field status by itself.
+- [ ] **AC-6.31** [A] Evidence files and testimony text are readable only by the claim's eligible reviewers and the submitter; other members, including a family administrator who is not a reviewer, are denied through the API and through media URLs.
+- [ ] **AC-6.32** [P] An administrator resolving an escalated historical claim records the basis of the decision, and the record is kept in the audit history.
 
 ---
 
@@ -324,7 +338,7 @@ Decided in D-024, using the eligibility circles of D-023:
 | Story about a minor | The minor's guardian |
 | Story with several subjects | Every subject's rule is met |
 
-A story is content that names one or more people (its subjects) or makes historical claims about a family event the contributor did not experience. The contributor is never counted, and one person counts once per subject.
+A story is content that names one or more people (its subjects) or makes historical claims about a family event the contributor did not experience. A story about a family event must tag at least one subject, the person or people the event concerns (D-028). The contributor is never counted, and one person counts once per subject.
 
 - [ ] **AC-7.05** [P] A story that requires approval moves `draft` to `in_review` on submission, is visible only to the contributor and its eligible reviewers while in review, and is published only when its approval rule is met.
 - [ ] **AC-7.06** [A] The contributor cannot approve their own story.
@@ -345,6 +359,14 @@ A story is content that names one or more people (its subjects) or makes histori
 - [ ] **AC-7.21** [A] A member who is not an eligible reviewer for any person in the content (for example Zed, or Hari while pending) cannot flag it.
 - [ ] **AC-7.22** [P] A rejection by any eligible reviewer of a story moves it to `disputed` and starts the dispute workflow below.
 
+Event stories (D-028):
+- [ ] **AC-7.23** [F] Submitting a story with no tagged subject is rejected, with a message asking the contributor to tag the person or people the event concerns, or to save it as a memory if it is their own experience.
+- [ ] **AC-7.24** [P] Kiran submits a story about the ancestral home being destroyed in a flood, tagged with Venkata as head of the household at the time. It follows the D-024 rule for Venkata (2 approvals from his registered core relatives).
+- [ ] **AC-7.25** [P] An event story tagged with Venkata and Sarada is published only when Sarada approves as a living registered subject and 2 core relatives of Venkata approve.
+- [ ] **AC-7.26** [P] Ravi, who lived through the flood, records it as a memory of his own experience; it needs no approval.
+- [ ] **AC-7.27** [P] Changing the tagged subjects of a story that is in review or published restarts review under the new subject set.
+- [ ] **AC-7.28** [F] Removing the last tagged subject from a submitted story is rejected.
+
 ### Disputes and the 60-day rule
 Decided in D-026 (filling in D-006). Worked example: Ravi's published story about Venkata (approved by Sarada and Anil) is disputed by Padma. Its eligible reviewers are Venkata's core relatives other than Ravi: Sarada, Anil, and Padma. Kiran is the family administrator.
 
@@ -360,46 +382,46 @@ Who can see a story while it is disputed:
 | Any other administrator (Kiran before escalation), and everyone else in the story's audience (Lakshmi, Suresh) | No |
 
 Opening a dispute:
-- [ ] **AC-7.23** [P] An eligible reviewer of the story can open a dispute on a story that is in review or published, and may attach an alternative version; the original and alternative versions are linked while the dispute is open.
-- [ ] **AC-7.24** [P] When Padma opens the dispute, in the same Convex mutation the story becomes `disputed`, the timer starts, and the story and its versions are hidden from everyone not listed as "Yes" in the table above.
-- [ ] **AC-7.25** [A] While the dispute is open, Lakshmi, Suresh, and Kiran (administrator, not escalated) are denied the story, its versions, and the dispute record through every query and every media path; no signed URL is issued for its photos or audio.
-- [ ] **AC-7.26** [P] When Anil disputes Kiran's story about Venkata and Padma (AC-7.18), Padma can still see it as a living registered subject; for a disputed story about Meena, Kiran can still see it as her guardian.
-- [ ] **AC-7.27** [A] A member who is not an eligible reviewer of the story (for example Kiran for the story about Venkata, as an extended relative where enough core relatives exist, or Zed) cannot open a dispute.
-- [ ] **AC-7.28** [F] A member who already has an open dispute on a story cannot open a second one on the same story.
+- [ ] **AC-7.29** [P] An eligible reviewer of the story can open a dispute on a story that is in review or published, and may attach an alternative version; the original and alternative versions are linked while the dispute is open.
+- [ ] **AC-7.30** [P] When Padma opens the dispute, in the same Convex mutation the story becomes `disputed`, the timer starts, and the story and its versions are hidden from everyone not listed as "Yes" in the table above.
+- [ ] **AC-7.31** [A] While the dispute is open, Lakshmi, Suresh, and Kiran (administrator, not escalated) are denied the story, its versions, and the dispute record through every query and every media path; no signed URL is issued for its photos or audio.
+- [ ] **AC-7.32** [P] When Anil disputes Kiran's story about Venkata and Padma (AC-7.18), Padma can still see it as a living registered subject; for a disputed story about Meena, Kiran can still see it as her guardian.
+- [ ] **AC-7.33** [A] A member who is not an eligible reviewer of the story (for example Kiran for the story about Venkata, as an extended relative where enough core relatives exist, or Zed) cannot open a dispute.
+- [ ] **AC-7.34** [F] A member who already has an open dispute on a story cannot open a second one on the same story.
 
 Timer:
-- [ ] **AC-7.29** [P] The deadline is the dispute-opening time plus 60 days, computed and stored on the server; a client-supplied time is ignored.
-- [ ] **AC-7.30** [P] Anil opens a second dispute on day 10. It joins the existing dispute and the deadline does not change.
-- [ ] **AC-7.31** [P] The contributor, the disputers, and the eligible reviewers are notified when the dispute opens, at day 30, 7 days before the deadline, and at expiry. Email and SMS notifications contain no story text.
+- [ ] **AC-7.35** [P] The deadline is the dispute-opening time plus 60 days, computed and stored on the server; a client-supplied time is ignored.
+- [ ] **AC-7.36** [P] Anil opens a second dispute on day 10. It joins the existing dispute and the deadline does not change.
+- [ ] **AC-7.37** [P] The contributor, the disputers, and the eligible reviewers are notified when the dispute opens, at day 30, 7 days before the deadline, and at expiry. Email and SMS notifications contain no story text.
 
 Resolution:
-- [ ] **AC-7.32** [P] When every disputing member withdraws, the dispute ends, the timer stops, and the story returns to the state and audience it had before the dispute.
-- [ ] **AC-7.33** [P] Ravi edits the story; Padma and Anil both accept the edited version; and the edited version meets the D-024 rule (2 core approvals for Venkata). The story is published to its audience as the edited version, with the earlier version kept in history.
-- [ ] **AC-7.34** [F] If only Padma accepts the edited version and Anil does not, the dispute stays open and the story stays hidden.
-- [ ] **AC-7.35** [P] Ravi escalates the dispute to Kiran, who is not a party. Kiran can then read the story, its versions, and the dispute record, and can resolve it (publish a version or move the story to drafts), recording the basis. Kiran's access ends when the dispute is resolved.
-- [ ] **AC-7.36** [A] An administrator who is the contributor, a disputer, or a subject of the story cannot receive the escalation, resolve the dispute, or extend it.
-- [ ] **AC-7.37** [P] A new dispute opened after an earlier one was resolved starts a new 60-day timer.
+- [ ] **AC-7.38** [P] When every disputing member withdraws, the dispute ends, the timer stops, and the story returns to the state and audience it had before the dispute.
+- [ ] **AC-7.39** [P] Ravi edits the story; Padma and Anil both accept the edited version; and the edited version meets the D-024 rule (2 core approvals for Venkata). The story is published to its audience as the edited version, with the earlier version kept in history.
+- [ ] **AC-7.40** [F] If only Padma accepts the edited version and Anil does not, the dispute stays open and the story stays hidden.
+- [ ] **AC-7.41** [P] Ravi escalates the dispute to Kiran, who is not a party. Kiran can then read the story, its versions, and the dispute record, and can resolve it (publish a version or move the story to drafts), recording the basis. Kiran's access ends when the dispute is resolved.
+- [ ] **AC-7.42** [A] An administrator who is the contributor, a disputer, or a subject of the story cannot receive the escalation, resolve the dispute, or extend it.
+- [ ] **AC-7.43** [P] A new dispute opened after an earlier one was resolved starts a new 60-day timer.
 
 Extension:
-- [ ] **AC-7.38** [P] Before the deadline, a family administrator who is not a party can extend the dispute once, by up to 30 days, with a recorded reason; the new deadline is stored and everyone in AC-7.31 is notified.
-- [ ] **AC-7.39** [F] A second extension, an extension longer than 30 days, an extension without a reason, and an extension requested after the deadline are all rejected.
-- [ ] **AC-7.40** [A] A member who is not a family administrator cannot extend a dispute.
+- [ ] **AC-7.44** [P] Before the deadline, a family administrator who is not a party can extend the dispute once, by up to 30 days, with a recorded reason; the new deadline is stored and everyone in AC-7.37 is notified.
+- [ ] **AC-7.45** [F] A second extension, an extension longer than 30 days, an extension without a reason, and an extension requested after the deadline are all rejected.
+- [ ] **AC-7.46** [A] A member who is not a family administrator cannot extend a dispute.
 
 Expiry and exceptions:
-- [ ] **AC-7.41** [P] If the dispute is still unresolved at the deadline, the story moves to the contributor's private drafts: only the contributor can see it, and disputers, reviewers, subjects, and administrators lose access (PRD acceptance criterion).
-- [ ] **AC-7.42** [P] The expiry move is performed by a scheduled backend job, not by a client, and happens even if no one opens the app; it writes an audit event.
-- [ ] **AC-7.43** [P] Moving a story to drafts does not delete it, its versions, or the dispute record.
-- [ ] **AC-7.44** [A] The dispute deadline cannot be changed or skipped by a client request; only the extension path in AC-7.38 changes it.
-- [ ] **AC-7.45** [P] A story under legal hold is not moved at the deadline; it stays hidden in its current state until the hold is lifted, and the hold and its release are audited.
-- [ ] **AC-7.46** [P] If the contributor has closed their account or died before the deadline, the unresolved story moves to `archived_restricted` under the preservation policy instead of to drafts.
+- [ ] **AC-7.47** [P] If the dispute is still unresolved at the deadline, the story moves to the contributor's private drafts: only the contributor can see it, and disputers, reviewers, subjects, and administrators lose access (PRD acceptance criterion).
+- [ ] **AC-7.48** [P] The expiry move is performed by a scheduled backend job, not by a client, and happens even if no one opens the app; it writes an audit event.
+- [ ] **AC-7.49** [P] Moving a story to drafts does not delete it, its versions, or the dispute record.
+- [ ] **AC-7.50** [A] The dispute deadline cannot be changed or skipped by a client request; only the extension path in AC-7.44 changes it.
+- [ ] **AC-7.51** [P] A story under legal hold is not moved at the deadline; it stays hidden in its current state until the hold is lifted, and the hold and its release are audited.
+- [ ] **AC-7.52** [P] If the contributor has closed their account or died before the deadline, the unresolved story moves to `archived_restricted` under the preservation policy instead of to drafts.
 
 ### Media
-- [ ] **AC-7.47** [P] Photos and audio can be attached to a person, memory, story, or event, and inherit the access rules of what they are attached to.
-- [ ] **AC-7.48** [P] Media is stored privately; a member allowed to see the content gets a short-lived signed URL issued after a server-side authorization check.
-- [ ] **AC-7.49** [A] A member not allowed to see the content gets no signed URL, and a direct, unsigned object URL returns access denied.
-- [ ] **AC-7.50** [A] After access is revoked (content unpublished, hidden by a dispute, moved to drafts, or the member removed), no new signed URL is issued, and any URL issued earlier stops working by its configured expiry time.
-- [ ] **AC-7.51** [F] An upload with a disallowed file type or above the configured size limit is rejected with no stored object and no metadata record.
-- [ ] **AC-7.52** [F] An interrupted upload leaves no orphaned metadata record visible to members.
+- [ ] **AC-7.53** [P] Photos and audio can be attached to a person, memory, story, or event, and inherit the access rules of what they are attached to.
+- [ ] **AC-7.54** [P] Media is stored privately; a member allowed to see the content gets a short-lived signed URL issued after a server-side authorization check.
+- [ ] **AC-7.55** [A] A member not allowed to see the content gets no signed URL, and a direct, unsigned object URL returns access denied.
+- [ ] **AC-7.56** [A] After access is revoked (content unpublished, hidden by a dispute, moved to drafts, or the member removed), no new signed URL is issued, and any URL issued earlier stops working by its configured expiry time.
+- [ ] **AC-7.57** [F] An upload with a disallowed file type or above the configured size limit is rejected with no stored object and no metadata record.
+- [ ] **AC-7.58** [F] An interrupted upload leaves no orphaned metadata record visible to members.
 
 ---
 
@@ -408,7 +430,7 @@ Expiry and exceptions:
 Sources: FR-08, FR-09, FR-11, FR-12, D-007, D-008, D-017; scope Feature 8; privacy and governance doc.
 
 ### Private by default
-- [ ] **AC-8.01** [A] Phone number, email, and exact address of a member are returned only to that member (and their guardian, for a minor). Every other caller, including a family administrator, is denied through every query and every export path.
+- [ ] **AC-8.01** [A] Unshared phone numbers and email addresses, and exact addresses under any setting, are returned only to that member (and their guardian, for a minor). Every other caller, including a family administrator, is denied through every query and every export path. Explicitly shared phone numbers and email addresses follow AC-8.02.
 - [ ] **AC-8.02** [P] A member can explicitly share their phone or email with their family group; after consent, members of that group can see it, and members of other groups cannot.
 - [ ] **AC-8.03** [P] Revoking that consent removes the contact detail from every later query and response; no cached copy is served after revocation.
 - [ ] **AC-8.04** [P] Exact addresses are never shown to other members under any setting; at most city or locality is shared, and only with discovery consent.
@@ -453,15 +475,15 @@ The retention periods and archival rules are an open PRD decision (PRD section 1
 |---|---|
 | Maternal and paternal paths without duplicate identity | AC-3.01, AC-3.04, AC-3.05, AC-3.06 |
 | Multiple valid kinship labels; preference stored separately | AC-4.02, AC-4.03, AC-4.06, AC-4.07 |
-| Independent account, relationship, historical states | AC-2.01, AC-5.30, AC-6.17 |
-| Disputed birth date stays uncertain until resolved | AC-3.14, AC-6.18, AC-6.19 |
+| Independent account, relationship, historical states | AC-2.01, AC-5.30, AC-6.26 |
+| Disputed birth date stays uncertain until resolved | AC-3.14, AC-6.27, AC-6.28 |
 | Deceased approval: three, or two plus reviewed evidence | AC-6.06 to AC-6.10 |
 | Proposer cannot approve own sensitive change | AC-3.15, AC-5.20, AC-6.10, AC-7.06 |
-| Story unresolved after 60 days not visible to wider family | AC-7.24, AC-7.41, AC-7.42 |
+| Story unresolved after 60 days not visible to wider family | AC-7.30, AC-7.47, AC-7.48 |
 | Private contact info and addresses not fetchable | AC-8.01, AC-8.04, AC-8.16 |
 | Revoking city-discovery consent removes from discovery | AC-8.05 (Feature 10 adds detail) |
 | Imported relationships not verified automatically | AC-3.17, AC-5.35 |
-| Revoked or expired media URL gives no indefinite access | AC-7.50, AC-8.17 |
+| Revoked or expired media URL gives no indefinite access | AC-7.56, AC-8.17 |
 | Every sensitive decision auditable | Shared "Audit event" definition, AC-5.33, AC-6.12, AC-8.14 |
 
 ## Decisions reflected in this file
@@ -471,6 +493,8 @@ The retention periods and archival rules are an open PRD decision (PRD section 1
 | D-023 close-relative eligibility per claim type | "Close-relative eligibility", AC-5.04 to AC-5.27, AC-6.14 to AC-6.16 |
 | D-024 which stories need approval, and by whom | "Story approval", AC-7.05 to AC-7.22 |
 | D-025 first-launch languages | AC-4.12, AC-4.16 to AC-4.22 |
-| D-026 story dispute timer rules | "Disputes and the 60-day rule", AC-7.23 to AC-7.46, AC-7.50 |
+| D-026 story dispute timer rules | "Disputes and the 60-day rule", AC-7.29 to AC-7.52, AC-7.56 |
+| D-027 connecting a new deceased profile | "Close-relative eligibility", AC-6.14, AC-6.17 to AC-6.25 |
+| D-028 event stories must tag a subject | "Story approval", AC-7.23 to AC-7.28 |
 
 Audio-specific rules (Feature 9), city-discovery search (Feature 10), and spreadsheet import (Feature 11) get their own checklists when those features are planned.

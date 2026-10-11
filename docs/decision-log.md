@@ -181,3 +181,25 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Rationale: A story that a close relative says is false or hurtful should not stay in front of the family while it is being discussed. Keeping the visible circle to the people who need it to resolve the dispute respects FR-11 (administrator status is not blanket access).
 - Consequences: Any one eligible reviewer can take a published story out of view for up to 60 days (90 with an extension) by disputing it; this is the accepted trade-off. Media attached to a hidden story follows the story's visibility. The deadline job runs as a Convex scheduled function. Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7).
 - Reversible recommendation recorded with this decision (not owner-decided): a member may open at most one dispute per story at a time, and a dispute withdrawn by every disputer ends the timer; a new dispute after resolution starts a new 60-day timer.
+
+## D-027: Connecting a new deceased profile to the family (2026-10-11)
+- Status: Accepted; extends D-016 and D-023
+- Context: Review of PR #4 (Greptile) found that D-023 covers new relationships made at invitation and changes to established relationships, but not the new relationships that connect a newly proposed deceased person to the family. A deceased person cannot confirm an invitation, and reviewers must be eligible through accepted relationships that never include the edge under review, so a new, unconnected deceased profile had no approval path.
+- Options considered: (A) the deceased-profile claim carries its proposed connecting edges, each living registered person on an edge confirms their own edge, and the profile and edges are accepted together; (B) the edges are approved first as separate relationship claims, then the profile; (C) the proposer's edge is accepted provisionally and other relatives review through it.
+- Decision: Option A.
+  - A deceased-profile claim includes the relationship edges that connect the deceased person to existing people (for example Venkata as spouse of Sarada and parent of Ravi, Anil, and Padma).
+  - Each living, registered person named on a proposed edge confirms or rejects their own edge, as the other party does at invitation. When the proposer is on an edge, their proposal stands as their consent to that edge, but the proposer never counts as an approver of the profile.
+  - A reviewer is eligible for the profile only through an edge they have confirmed themselves or through edges that are already accepted; a path through another person's unconfirmed proposed edge does not count.
+  - The D-016 threshold is unchanged. When it is met, the profile and every confirmed connecting edge are accepted together in one Convex mutation.
+- Rationale: The people who know the deceased person best are the ones the proposer names as spouse, children, or siblings; asking each of them to vouch for their own link keeps the D-016 threshold meaningful without a separate round of relationship claims.
+- Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 6, "Connecting a new deceased profile").
+- Reversible recommendations recorded with this decision (not owner-decided): a proposed edge rejected by the person on it is not created and that person gains no eligibility through it, while the rest of the claim continues; a proposed edge to a living person who is not registered stays `pending` after the profile is accepted, until that person registers and confirms it, and does not block the profile.
+
+## D-028: Event stories must tag a subject (2026-10-11)
+- Status: Accepted; amends D-024
+- Context: Review of PR #4 (Greptile) found that D-024 makes a story about a family event the contributor did not experience need approval, but every approval rule depends on a subject, so an event story naming no person (for example the ancestral home being destroyed in a flood) had no reviewer set.
+- Options considered: (A) an event story must tag at least one subject, then the D-024 subject rules apply; (B) an event story with no subject needs 2 approvals from registered adult core relatives of the contributor; (C) an event story with no subject is treated as a memory and needs no approval.
+- Decision: Option A. A story about a family event must tag at least one subject: the person or people the event concerns (for example the head of the household at the time). The D-024 rules for each tagged subject then apply. A story with no tagged subject cannot be submitted.
+- Rationale: Every claim about the family's past concerns someone; tagging them gives the story a reviewer set from the existing rules instead of a new approval path.
+- Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7, "Event stories").
+- Reversible recommendation recorded with this decision (not owner-decided): changing the tagged subjects of a story that is in review or published restarts review under the new subject set, and removing the last subject is rejected.
