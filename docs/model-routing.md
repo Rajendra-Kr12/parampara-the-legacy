@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted direction (2026-10-10, D-019; extended 2026-10-11, D-022). The static routing table below is usable today by any human or lead agent. The Laya classifier script is **not yet implemented**; it is tracked as Feature 0 in `docs/scope.md`.
+Accepted direction (2026-10-10, D-019; extended 2026-10-11, D-022). The static routing table below is usable today by any human or lead agent. The Laya classifier script is implemented in `tools/route-task` (usage in its README); the live Laya call has not yet been verified by the owner (see `docs/scope.md`).
 
 Model names, availability, pricing, and free quotas change often. The concrete model list, prices, and data-handling classes live in `docs/model-catalog.md`; verify them before relying on this table.
 

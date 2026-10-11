@@ -34,7 +34,7 @@ During implementation, maintain a short checklist below the feature. After imple
 
 | # | Feature | Priority | Status |
 |---|---|---|---|
-| 0 | Agent tooling: Laya router, Greptile, CI | Foundation | Not started |
+| 0 | Agent tooling: Laya router, Greptile, CI | Foundation | In progress |
 | 1 | Monorepo scaffold and architecture validation | Foundation | Partly done (docs and decisions) |
 | 2 | Identity, family groups, invitations | P0 | Not started |
 | 3 | Canonical person records and relationship graph | P0 | Not started |
@@ -68,7 +68,8 @@ P0/P1 express sequencing priority, not exclusion from the agreed MVP.
 Make multi-harness development safe and cheap before application code: routing, automated review, and CI.
 
 ### Checklist
-- [ ] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback and budget cap. Decide before 2026-10-31 whether to keep it on paid Laya or self-host.
+- [x] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback (2026-10-11). Automated tests only; the live Laya call is unverified. After 2026-10-31 it defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
+- [ ] Owner: run the live Laya check from `tools/route-task/README.md`, set an AI Gateway budget cap, and decide before 2026-10-31 whether to keep paid Laya or self-host.
 - [x] Map routing tiers to Firstmate dispatch profiles and document the herdr setup in `docs/harness-setup.md` (2026-10-11). The map is a proposal; no Firstmate config file was changed, and herdr lifecycle commands were not run.
 - [x] Read official docs for OpenCode, Pi, and Hermes on instruction and skill loading (2026-10-11).
 - [x] Run Claude Code, Codex, OpenCode, Pi, and Hermes once in this repo; `AGENTS.md` loading observed for the first four, skill names visible via `AGENTS.md` but skill file discovery unconfirmed, Hermes only partly confirmed. Results in `docs/model-routing.md` (2026-10-11).
@@ -76,7 +77,7 @@ Make multi-harness development safe and cheap before application code: routing, 
 - [x] Firstmate cannot dispatch Hermes; manual herdr-pane workflow documented in `docs/harness-setup.md` (2026-10-11).
 - [x] Pi and Hermes access to free models recorded in `docs/model-catalog.md` and `docs/harness-setup.md` (2026-10-11). Still not tried: Zen as a Pi custom provider, Pi on OpenRouter free models.
 - [ ] Run one small trial task per free model class B model and record whether it is usable; re-verify `docs/model-catalog.md` (dated 2026-10-11).
-- [ ] Teach `tools/route-task` the data-class rules in `docs/model-routing.md`.
+- [x] Teach `tools/route-task` the data-class rules in `docs/model-routing.md` (2026-10-11).
 - [x] Install Greptile (free Starter plan) on the repository (2026-10-10, done by owner).
 - [x] Add `.greptile/` review rules and doc context (2026-10-10).
 - [ ] Confirm Greptile detects the config and posts a review on PR #1.
