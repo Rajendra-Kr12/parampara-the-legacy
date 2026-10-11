@@ -1,6 +1,6 @@
 # Repository Structure
 
-## Current (documentation only)
+## Current (documentation and agent tooling)
 
 ```text
 parampara-the-legacy/
@@ -25,6 +25,8 @@ parampara-the-legacy/
 │       └── adversarial-release-review/
 ├── .claude/
 │   └── skills -> ../.agents/skills   # symlink so Claude Code sees the same skills
+├── tools/
+│   └── route-task/           # Laya task router (Feature 0); see its README
 └── docs/
     ├── scope.md              # living plan and status
     ├── original-brief.md     # the owner's original idea notes (historical)
@@ -53,8 +55,6 @@ packages/
 ├── kinship-engine/           # pure TS kinship path -> term calculation
 ├── validation/               # shared input schemas
 └── config/                   # shared tsconfig, lint, format settings
-tools/
-└── route-task/               # Laya classifier script (Feature 0)
 ```
 
 Tests sit next to the code they cover, grouped as unit, integration (Convex), end-to-end (web, mobile), and security/authorization tests. Adjust names if the scaffolding tools establish a better convention, and record the change.
