@@ -2,7 +2,7 @@
 
 A private family legacy network for web, iOS, and Android. Parampara preserves family relationships across maternal and paternal branches, deceased profiles, memories, stories, photos, and audio, with Telugu and other Indian kinship terms, verified relationships, and privacy by default.
 
-**Status:** documentation and agent setup only; no application code yet. See `docs/scope.md`.
+**Status:** early scaffold: workspace tooling and the Convex auth backend (`packages/backend`) exist; no web or mobile app yet. See `docs/scope.md`.
 
 ## Index
 

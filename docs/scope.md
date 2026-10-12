@@ -37,7 +37,7 @@ During implementation, maintain a short checklist below the feature. After imple
 | # | Feature | Priority | Status |
 |---|---|---|---|
 | 0 | Agent tooling: Laya router, Greptile, CI | Foundation | In progress |
-| 1 | Monorepo scaffold and architecture validation | Foundation | Partly done (docs and decisions) |
+| 1 | Monorepo scaffold and architecture validation | Foundation | Partly done (docs, decisions, workspace tooling, Convex auth backend) |
 | 2 | Identity, family groups, invitations | P0 | Not started |
 | 3 | Canonical person records and relationship graph | P0 | Not started |
 | 4 | Kinship terminology and preferred labels | P0 | Not started |

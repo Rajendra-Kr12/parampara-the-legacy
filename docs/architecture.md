@@ -2,7 +2,7 @@
 
 ## Status
 
-Stack direction accepted 2026-10-10 (D-014, D-015). No application code exists yet. Exact versions, configuration, and the open items at the end are confirmed when the monorepo is scaffolded (Feature 1) and recorded in `docs/decision-log.md`.
+Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling and `packages/backend` exist; no web or mobile app yet. Exact versions, configuration, and the open items at the end are confirmed when the monorepo is scaffolded (Feature 1) and recorded in `docs/decision-log.md`.
 
 ## Architecture principles
 
@@ -26,7 +26,7 @@ Stack direction accepted 2026-10-10 (D-014, D-015). No application code exists y
 | Auth | Clerk | Free tier covers 50,000 monthly retained users (Feb 2026); SDKs for Next.js and Expo; official Convex integration |
 | Media | Cloudflare R2 behind a storage adapter | ~$0.015/GB-month, no egress fees, S3-compatible so B2 or S3 can replace it by configuration |
 | PR review | Greptile + Codex adversarial review | Greptile on every PR; Codex before shipment |
-| CI | GitHub Actions | Lint, typecheck, test, build on every PR once code exists |
+| CI | GitHub Actions | Format, lint, typecheck, test, build on every PR |
 
 Clerk and Greptile also appear in `adrianhajdin/llm-arena`; they were chosen here on their own merits (D-021). llm-arena's Prisma, PostHog, and Arcjet choices were not adopted.
 

@@ -1,6 +1,6 @@
 # Repository Structure
 
-## Current (documentation, agent tooling, and workspace tooling)
+## Current (documentation, agent tooling, workspace tooling, and the Convex backend)
 
 ```text
 parampara-the-legacy/
@@ -32,6 +32,7 @@ parampara-the-legacy/
 ├── .prettierignore
 ├── .github/workflows/ci.yml  # format, lint, typecheck, test, build
 ├── packages/
+│   ├── backend/              # Convex schema and functions (auth and users.me so far)
 │   ├── config/               # shared tsconfig, ESLint, Prettier, enforcement probes
 │   ├── domain/               # pure TS (empty so far)
 │   ├── kinship-engine/       # pure TS (empty so far)
@@ -61,7 +62,6 @@ apps/
 ├── web/                      # Next.js
 └── mobile/                   # Expo (iOS + Android)
 packages/
-├── backend/                  # Convex schema and functions; generated typed API
 ├── domain/                   # pure TS rules: claims, thresholds, eligibility
 ├── kinship-engine/           # pure TS kinship path -> term calculation
 ├── validation/               # shared input schemas
