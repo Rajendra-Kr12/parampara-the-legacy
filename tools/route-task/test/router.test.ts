@@ -100,7 +100,7 @@ test("static fallback is explicit for absent key, Laya failure, and paid Laya di
     loadApiKey: async () => "test-key-not-used-by-mock",
     layaClient: { evaluate: async () => { throw new Error("gateway unavailable"); } },
   });
-  assert.deepEqual([failure.routingPath, failure.fallbackReason], ["static", "laya-error-or-timeout"]);
+  assert.deepEqual([failure.routingPath, failure.fallbackReason], ["static", "laya-unknown"]);
 
   const timeout = await routeTask({
     task: "Fix a typo.",
@@ -110,7 +110,7 @@ test("static fallback is explicit for absent key, Laya failure, and paid Laya di
     loadApiKey: async () => "test-key-not-used-by-mock",
     layaClient: { evaluate: async () => new Promise<Classification>(() => undefined) },
   });
-  assert.deepEqual([timeout.routingPath, timeout.fallbackReason], ["static", "laya-error-or-timeout"]);
+  assert.deepEqual([timeout.routingPath, timeout.fallbackReason], ["static", "laya-timeout"]);
 
   const paidDisabled = await routeTask({ task: "Fix a typo.", catalogText, now: afterPromotion, loadApiKey: async () => "test-key-not-used-by-mock" });
   assert.deepEqual([paidDisabled.routingPath, paidDisabled.fallbackReason], ["static", "laya-disabled-after-promotion"]);

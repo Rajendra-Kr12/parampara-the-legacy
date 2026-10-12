@@ -2,9 +2,11 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseModelCatalog } from "./catalog.js";
+import { classifyFailure, LayaTimeoutError, type FailureDiagnostic } from "./failure.js";
 import { createAiSdkLayaClient, type LayaClient } from "./laya.js";
 import type { Catalog, CatalogModel, Classification, RoutingDecision, SelectedModel, Tier, Volume } from "./types.js";
 
+const DEFAULT_TIMEOUT_MS = 30_000;
 const PROMOTION_END = Date.parse("2026-11-01T00:00:00.000Z");
 const MINIMUM_TIER_RANK: Readonly<Record<Tier, number>> = { T0: 0, D: 1, T1: 1, T2: 2, R: 3, T3: 3 };
 const STATIC_DEFAULTS: Readonly<Record<Exclude<Tier, "R">, string>> = {
@@ -28,6 +30,7 @@ export interface RouteTaskOptions {
   readonly loadApiKey?: () => Promise<string | undefined>;
   readonly layaClient?: LayaClient;
   readonly timeoutMs?: number;
+  readonly diagnose?: boolean;
 }
 
 function positiveBoolean(value: string | undefined): boolean {
@@ -148,7 +151,7 @@ function selectModel(catalog: Catalog, tier: Tier, sensitive: boolean, volume: V
   return asSelection(defaultModel, "default");
 }
 
-function decision(catalog: Catalog, classification: Classification, routingPath: "laya" | "static", fallbackReason?: RoutingDecision["fallbackReason"]): RoutingDecision {
+function decision(catalog: Catalog, classification: Classification, routingPath: "laya" | "static", fallbackReason?: RoutingDecision["fallbackReason"], diagnostic?: FailureDiagnostic): RoutingDecision {
   const tier = adjustedTier(classification);
   const sensitive = classification.involvesSensitiveContext;
   const model = selectModel(catalog, tier, sensitive, classification.volume);
@@ -157,6 +160,7 @@ function decision(catalog: Catalog, classification: Classification, routingPath:
     routingPath,
     ...(routingPath === "static" ? { requiresHumanOrLeadDecision: true } : {}),
     ...(fallbackReason === undefined ? {} : { fallbackReason }),
+    ...(diagnostic === undefined ? {} : { diagnostic }),
     tier,
     sensitiveContext: sensitive,
     touchesHighRiskArea: classification.touchesHighRiskArea,
@@ -173,7 +177,7 @@ async function evaluateWithTimeout(client: LayaClient, task: string, catalog: Ca
     return await Promise.race([
       client.evaluate({ task, catalog, timeoutMs }),
       new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error("Laya evaluation timed out.")), timeoutMs);
+        timer = setTimeout(() => reject(new LayaTimeoutError("Laya evaluation timed out.")), timeoutMs);
       }),
     ]);
   } finally {
@@ -216,13 +220,14 @@ export async function routeTask(options: RouteTaskOptions): Promise<RoutingDecis
 
   try {
     if (!environment.AI_GATEWAY_API_KEY?.trim()) environment.AI_GATEWAY_API_KEY = key;
-    const timeoutMs = options.timeoutMs ?? 10_000;
+    const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const classification = enforceTaskSignals(
       task,
       await evaluateWithTimeout(options.layaClient ?? createAiSdkLayaClient(), task, catalog, timeoutMs),
     );
     return decision(catalog, classification, "laya");
-  } catch {
-    return decision(catalog, staticClassification(task), "static", "laya-error-or-timeout");
+  } catch (error: unknown) {
+    const failure = classifyFailure(error);
+    return decision(catalog, staticClassification(task), "static", failure.category, options.diagnose === true ? failure : undefined);
   }
 }

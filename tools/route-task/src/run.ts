@@ -2,7 +2,7 @@ import { routeTask } from "./router.js";
 import type { RoutingDecision } from "./types.js";
 
 export interface CliIo {
-  readonly route?: (options: { readonly task: string }) => Promise<RoutingDecision>;
+  readonly route?: (options: { readonly task: string; readonly diagnose?: boolean }) => Promise<RoutingDecision>;
   readonly stdout: (text: string) => void;
   readonly stderr: (text: string) => void;
 }
@@ -17,11 +17,11 @@ function taskFromArguments(argumentsList: readonly string[]): string | undefined
 export async function runCli(argumentsList: readonly string[], io: CliIo): Promise<number> {
   const task = taskFromArguments(argumentsList);
   if (task === undefined) {
-    io.stderr("Usage: route-task --task <task-description>\n");
+    io.stderr("Usage: route-task --task <task-description> [--diagnose]\n");
     return 2;
   }
   try {
-    const result = await (io.route ?? routeTask)({ task });
+    const result = await (io.route ?? routeTask)({ task, diagnose: argumentsList.includes("--diagnose") });
     io.stdout(`${JSON.stringify(result, null, 2)}\n`);
     return result.status === "refused" ? 2 : 0;
   } catch {

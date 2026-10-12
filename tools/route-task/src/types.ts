@@ -1,3 +1,4 @@
+import type { FailureCategory, FailureDiagnostic } from "./failure.js";
 export const TIERS = ["T0", "T1", "T2", "T3", "R", "D"] as const;
 export type Tier = (typeof TIERS)[number];
 
@@ -42,8 +43,8 @@ export interface RoutingDecision {
   readonly fallbackReason?:
     | "no-api-key"
     | "laya-disabled-after-promotion"
-    | "laya-error-or-timeout"
-    | "invalid-laya-response";
+    | FailureCategory;
+  readonly diagnostic?: FailureDiagnostic;
   readonly refusalReason?: "possible-secret-or-personal-data";
   readonly tier?: Tier;
   readonly sensitiveContext?: boolean;

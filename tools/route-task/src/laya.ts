@@ -1,4 +1,5 @@
 import type { Experimental_DecisionResult } from "ai";
+import { LayaResponseError } from "./failure.js";
 import type { Catalog, Classification, Tier, Volume } from "./types.js";
 
 const TIER_SET = new Set<Tier>(["T0", "T1", "T2", "T3", "R", "D"]);
@@ -55,14 +56,14 @@ const BOOLEAN_THRESHOLD = 0.5;
 function choice<T extends string>(answer: { readonly choice?: unknown } | undefined, values: readonly T[], name: string): T {
   const value = answer?.choice;
   const match = values.find((candidate) => candidate === value);
-  if (match === undefined) throw new Error(`Laya did not return a valid ${name} choice.`);
+  if (match === undefined) throw new LayaResponseError(`Laya did not return a valid ${name} choice.`);
   return match;
 }
 
 function flag(answer: { readonly probability?: unknown } | undefined, name: string): boolean {
   const value = answer?.probability;
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 1) {
-    throw new Error(`Laya did not return a valid ${name} probability.`);
+    throw new LayaResponseError(`Laya did not return a valid ${name} probability.`);
   }
   return value >= BOOLEAN_THRESHOLD;
 }
@@ -70,14 +71,14 @@ function flag(answer: { readonly probability?: unknown } | undefined, name: stri
 function probabilities(answer: { readonly probabilities?: unknown } | undefined): Readonly<Record<Tier, number>> {
   const raw = answer?.probabilities;
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error("Laya did not return tier probabilities.");
+    throw new LayaResponseError("Laya did not return tier probabilities.");
   }
 
   const result = { T0: 0, T1: 0, T2: 0, T3: 0, R: 0, D: 0 } satisfies Record<Tier, number>;
   for (const tier of TIER_SET) {
     const value = Reflect.get(raw, tier);
     if (value !== undefined && (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 1)) {
-      throw new Error("Laya returned invalid tier probabilities.");
+      throw new LayaResponseError("Laya returned invalid tier probabilities.");
     }
     if (typeof value === "number") result[tier] = value;
   }
@@ -100,8 +101,8 @@ export function parseResult(result: LayaEvaluationResult): Classification {
 export function createAiSdkLayaClient(): LayaClient {
   return {
     async evaluate({ task, catalog, timeoutMs }): Promise<Classification> {
-      const { experimental_evaluate } = await import("ai");
-      const result = await experimental_evaluate({
+      const { experimental_decide } = await import("ai");
+      const result = await experimental_decide({
         model: "convaiinnovations/laya",
         state: {
           task,
@@ -111,7 +112,6 @@ export function createAiSdkLayaClient(): LayaClient {
           })),
         },
         questions: QUESTIONS,
-        providerOptions: { gateway: { only: ["boundless"] } },
         abortSignal: AbortSignal.timeout(timeoutMs),
       });
       return parseResult(result);

@@ -19,9 +19,11 @@ From the repository root:
 npm --prefix tools/route-task run route -- --task "Classify a public documentation update."
 ```
 
-At runtime, the tool reads `AI_GATEWAY_API_KEY` from the process environment or the repository `.env.local`. It never prints the key or the task text. The live Laya call uses `experimental_evaluate` from `ai` with model ID `convaiinnovations/laya` and the Boundless provider.
+At runtime, the tool reads `AI_GATEWAY_API_KEY` from the process environment or the repository `.env.local`. It never prints the key or the task text. The live Laya call uses `experimental_decide` from `ai` (7.0.128 or later; `experimental_evaluate` is its deprecated alias) with model ID `convaiinnovations/laya`. Boundless is the only provider listed for that model, so no provider restriction is passed. The default timeout is 30 seconds.
 
 Output includes `routingPath`. `laya` means the live classifier was used. `static` means the static table was used, includes a `fallbackReason`, and sets `requiresHumanOrLeadDecision`.
+
+When Laya fails, `fallbackReason` is one of `laya-timeout`, `laya-auth`, `laya-rate-limited`, `laya-model-unavailable`, `laya-provider-restricted`, `laya-bad-response`, or `laya-unknown`. It is derived from the error class and HTTP status only. Add `--diagnose` to also print a `diagnostic` object with the category, error class name, and HTTP status code. No message body, key, task text, or path is ever included.
 
 After 2026-10-31, static routing is the default. Set `ROUTE_TASK_ENABLE_PAID_LAYA=true` only after the owner has enabled a paid Laya budget in Vercel AI Gateway.
 
@@ -29,8 +31,12 @@ The tool refuses task input that appears to include secrets or personal data. Re
 
 ## Live check
 
-The live Laya call is not run by automated tests. After adding the key to the repository `.env.local`, the owner can run:
+The live Laya call is not run by automated tests. From the repository root, with the key added to the repository `.env.local`:
 
 ```sh
-npm --prefix tools/route-task run route -- --task "Classify a public documentation update."
+git checkout feat/para-router   # only if not already on the branch
+npm --prefix tools/route-task install
+npm --prefix tools/route-task run route -- --task "Classify a public documentation update." --diagnose
 ```
+
+`routingPath: "laya"` means the live call worked. If it shows `static`, report the `fallbackReason` and `diagnostic` values.

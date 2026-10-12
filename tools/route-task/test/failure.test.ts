@@ -1,0 +1,80 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+import { APICallError, LoadAPIKeyError, NoSuchModelError } from "ai";
+import { classifyFailure, LayaResponseError, LayaTimeoutError, type FailureDiagnostic } from "../src/failure.js";
+import { routeTask } from "../src/router.js";
+import { runCli } from "../src/run.js";
+
+const catalogText = await readFile(new URL("../../test/catalog.fixture.md", import.meta.url), "utf8");
+const promotionDate = Date.parse("2026-10-11T00:00:00.000Z");
+
+function named(name: string, statusCode?: number, message = "SECRET-PROVIDER-TEXT /Users/x/path"): Error {
+  const error = new Error(message);
+  error.name = name;
+  if (statusCode !== undefined) Object.assign(error, { statusCode });
+  return error;
+}
+
+function apiError(statusCode: number): APICallError {
+  return new APICallError({ message: "SECRET-PROVIDER-TEXT", url: "https://example.invalid/?key=SECRET", requestBodyValues: { task: "SECRET-TASK" }, statusCode });
+}
+
+const cases: readonly [string, unknown, FailureDiagnostic["category"], number | undefined][] = [
+  ["our timeout", new LayaTimeoutError("t"), "laya-timeout", undefined],
+  ["abort signal timeout", new DOMException("x", "TimeoutError"), "laya-timeout", undefined],
+  ["HTTP 504", apiError(504), "laya-timeout", 504],
+  ["HTTP 401", apiError(401), "laya-auth", 401],
+  ["gateway auth class", named("GatewayAuthenticationError", 401), "laya-auth", 401],
+  ["missing key class", new LoadAPIKeyError({ message: "SECRET" }), "laya-auth", undefined],
+  ["HTTP 429", apiError(429), "laya-rate-limited", 429],
+  ["gateway rate limit class", named("GatewayRateLimitError", 429), "laya-rate-limited", 429],
+  ["HTTP 404", apiError(404), "laya-model-unavailable", 404],
+  ["no such model", new NoSuchModelError({ modelId: "convaiinnovations/laya", modelType: "languageModel" }), "laya-model-unavailable", undefined],
+  ["HTTP 403", apiError(403), "laya-provider-restricted", 403],
+  ["HTTP 402", apiError(402), "laya-provider-restricted", 402],
+  ["unparseable answer", new LayaResponseError("bad"), "laya-bad-response", undefined],
+  ["gateway response class", named("GatewayResponseError", 502), "laya-bad-response", 502],
+  ["HTTP 500", apiError(500), "laya-unknown", 500],
+  ["plain error", new Error("boom"), "laya-unknown", undefined],
+  ["non-error throw", "SECRET string", "laya-unknown", undefined],
+  ["wrapped cause", Object.assign(new Error("wrapper"), { cause: apiError(429) }), "laya-rate-limited", 429],
+  ["hostile class name", named("Bad Name /Users/x", undefined), "laya-unknown", undefined],
+];
+
+for (const [label, error, category, statusCode] of cases) {
+  test(`classifies ${label} as ${category}`, () => {
+    const result = classifyFailure(error);
+    assert.equal(result.category, category);
+    assert.equal(result.statusCode, statusCode);
+    const serialized = JSON.stringify(result);
+    assert.ok(!/SECRET|\/Users|example\.invalid/.test(serialized), serialized);
+  });
+}
+
+test("fallbackReason carries the category and diagnostic appears only when requested", async () => {
+  const options = {
+    task: "Fix a typo.",
+    catalogText,
+    now: promotionDate,
+    loadApiKey: async () => "key-value-not-printed",
+    layaClient: { evaluate: async () => { throw apiError(429); } },
+  };
+  const quiet = await routeTask(options);
+  assert.equal(quiet.routingPath, "static");
+  assert.equal(quiet.fallbackReason, "laya-rate-limited");
+  assert.equal(quiet.diagnostic, undefined);
+
+  const verbose = await routeTask({ ...options, diagnose: true });
+  assert.deepEqual(verbose.diagnostic, { category: "laya-rate-limited", errorClass: "AI_APICallError", statusCode: 429 });
+  const text = JSON.stringify(verbose);
+  assert.ok(!/SECRET|key-value-not-printed|Fix a typo/.test(text));
+});
+
+test("--diagnose reaches the router and is opt-in", async () => {
+  const seen: (boolean | undefined)[] = [];
+  const io = { stdout: () => undefined, stderr: () => undefined, route: async (o: { diagnose?: boolean }) => { seen.push(o.diagnose); return { status: "routed", routingPath: "static" } as const; } };
+  await runCli(["--task", "x"], io);
+  await runCli(["--task", "x", "--diagnose"], io);
+  assert.deepEqual(seen, [false, true]);
+});
