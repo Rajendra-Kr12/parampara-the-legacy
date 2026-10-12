@@ -1,0 +1,35 @@
+{
+  "name": "@parampara/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "start": "next start",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "build": "next build"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "7.9.14",
+    "@parampara/backend": "workspace:*",
+    "convex": "1.46.0",
+    "next": "16.4.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@clerk/testing": "2.2.45",
+    "@parampara/config": "workspace:*",
+    "@playwright/test": "1.64.0",
+    "@types/node": "24.19.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}

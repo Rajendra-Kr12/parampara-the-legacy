@@ -18,6 +18,8 @@ concurrency:
 env:
   TURBO_TELEMETRY_DISABLED: "1"
   DO_NOT_TRACK: "1"
+  # Next.js ignores DO_NOT_TRACK; turbo.json passes this through to tasks.
+  NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
   # One job per check. The job names (format, lint, typecheck, test, build) are the

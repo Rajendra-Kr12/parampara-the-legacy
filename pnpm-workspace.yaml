@@ -1,5 +1,6 @@
-# Workspace members. Add apps/* and further packages/* entries as they are created.
+# Workspace members. Add further entries as they are created.
 packages:
+  - apps/*
   - packages/*
   # tools/route-task is deliberately NOT a workspace member. It uses npm with its
   # own package-lock.json and `node --test`, and pnpm, Turborepo and the CI
@@ -21,3 +22,8 @@ allowBuilds:
   # platform binary, which pnpm already installs as an @esbuild/* optional
   # dependency, so the script stays disabled.
   esbuild: false
+  # Pulled in by eslint-config-next (through eslint-import-resolver-typescript). Its
+  # postinstall (napi-postinstall) only checks or fetches the platform binary, which
+  # pnpm already installs as an @unrs/resolver-binding-* optional dependency, so the
+  # script stays disabled.
+  unrs-resolver: false

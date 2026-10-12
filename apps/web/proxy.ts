@@ -1,0 +1,16 @@
+import { clerkMiddleware } from "@clerk/nextjs/server";
+
+// Next.js 16 calls this file proxy.ts (formerly middleware.ts). clerkMiddleware()
+// makes the Clerk session available to the app and protects no route by default:
+// the home page renders for signed-out visitors, and Convex functions do their own
+// authorization through ctx.auth.
+export default clerkMiddleware();
+
+export const config = {
+  matcher: [
+    // Skip Next.js internals and static files, unless found in search params.
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes.
+    "/(api|trpc)(.*)",
+  ],
+};
