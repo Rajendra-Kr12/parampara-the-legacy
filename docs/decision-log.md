@@ -149,7 +149,7 @@ Record durable product and architecture decisions here. Add date, status, contex
   - A rejection by any eligible reviewer starts the story dispute workflow (60-day rule, D-006).
 - Rationale: A living person has the final say over stories about themselves; people who can no longer speak for themselves get a two-relative check on their reputation. Extended relatives fill in only where the core circle is too small, so stories about older ancestors are not blocked forever.
 - Consequences: Story review reuses the D-023 eligibility function. Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7).
-- Reversible recommendation recorded with this decision (not owner-decided): a story whose subject has fewer than 2 eligible relatives in total stays `in_review`, and the contributor may withdraw it to drafts at any time.
+- Reversible recommendation recorded with this decision (not owner-decided): a story about a deceased or unregistered adult subject with fewer than 2 eligible relatives in total stays `in_review`, and the contributor may withdraw it to drafts at any time.
 
 ## D-025: First-launch languages and kinship terminology (2026-10-11)
 - Status: Accepted
@@ -185,15 +185,15 @@ Record durable product and architecture decisions here. Add date, status, contex
 ## D-027: Connecting a new deceased profile to the family (2026-10-11)
 - Status: Accepted; extends D-016 and D-023
 - Context: Review of PR #4 (Greptile) found that D-023 covers new relationships made at invitation and changes to established relationships, but not the new relationships that connect a newly proposed deceased person to the family. A deceased person cannot confirm an invitation, and reviewers must be eligible through accepted relationships that never include the edge under review, so a new, unconnected deceased profile had no approval path.
-- Options considered: (A) the deceased-profile claim carries its proposed connecting edges, each living registered person on an edge confirms their own edge, and the profile and edges are accepted together; (B) the edges are approved first as separate relationship claims, then the profile; (C) the proposer's edge is accepted provisionally and other relatives review through it.
+- Options considered: (A) the deceased-profile claim carries its proposed connecting edges, each living registered person on an edge confirms their own edge, and the profile is approved and its edges accepted together; (B) the edges are approved first as separate relationship claims, then the profile; (C) the proposer's edge is accepted provisionally and other relatives review through it.
 - Decision: Option A.
   - A deceased-profile claim includes the relationship edges that connect the deceased person to existing people (for example Venkata as spouse of Sarada and parent of Ravi, Anil, and Padma).
   - Each living, registered person named on a proposed edge confirms or rejects their own edge, as the other party does at invitation. When the proposer is on an edge, their proposal stands as their consent to that edge, but the proposer never counts as an approver of the profile.
   - A reviewer is eligible for the profile only through an edge they have confirmed themselves or through edges that are already accepted; a path through another person's unconfirmed proposed edge does not count.
-  - The D-016 threshold is unchanged. When it is met, the profile and every confirmed connecting edge are accepted together in one Convex mutation.
+  - The D-016 threshold is unchanged. When it is met, the profile becomes `approved` and every confirmed connecting edge becomes `accepted`, together in one Convex mutation.
 - Rationale: The people who know the deceased person best are the ones the proposer names as spouse, children, or siblings; asking each of them to vouch for their own link keeps the D-016 threshold meaningful without a separate round of relationship claims.
 - Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 6, "Connecting a new deceased profile").
-- Reversible recommendations recorded with this decision (not owner-decided): a proposed edge rejected by the person on it is not created and that person gains no eligibility through it, while the rest of the claim continues; a proposed edge to a living person who is not registered stays `pending` after the profile is accepted, until that person registers and confirms it, and does not block the profile.
+- Reversible recommendations recorded with this decision (not owner-decided): a proposed edge rejected by the person on it is not created and that person gains no eligibility through it, while the rest of the claim continues; a proposed edge to a living person who is not registered stays `pending` after the profile is approved, until that person registers and confirms it, and does not block the profile.
 
 ## D-028: Event stories must tag a subject (2026-10-11)
 - Status: Accepted; amends D-024

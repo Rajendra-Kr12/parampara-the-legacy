@@ -65,7 +65,7 @@ Decided in D-023. Relatives are counted from the subject's point of view:
 | Change to an established marriage or partner edge | Every living, registered spouse or partner, plus core relatives of either | 2 in total, including every living registered spouse; a spouse's rejection blocks |
 | Uncertain historical claim | Core or extended relatives of the subject | 2, plus evidence under D-005 |
 | Deceased profile | Core or extended relatives of the deceased; requests go to core relatives first | D-016: 3, or 2 plus reviewed documentary evidence |
-| New edges connecting a new deceased profile (D-027) | Each living registered person on a proposed edge confirms their own edge | Accepted with the profile once the D-016 threshold is met |
+| New edges connecting a new deceased profile (D-027) | Each living registered person on a proposed edge confirms their own edge | Accepted when the profile is approved (D-016 threshold met) |
 
 In the fixture family, for Venkata: core relatives are Sarada, Ravi, Anil, and Padma; extended relatives include Kiran (grandchild), Lakshmi (son's wife), and Suresh (daughter's husband). For Kamala: core relatives are Gopal (not registered, so not yet eligible), Lakshmi, and Suresh; extended relatives include Kiran, Ravi, and Padma.
 
@@ -188,7 +188,7 @@ The specific terms below (for example Menatta for father's sister, Nanamma for f
 
 ### Locale, fallback, and custom labels
 - [ ] **AC-4.11** [P] Each catalogue entry records language, script, region or cultural context, path pattern, term, optional explanation, source, and validation status.
-- [ ] **AC-4.12** [P] When the requested locale has no term for a path, the engine falls back along a documented chain and finally to a plain descriptive phrase in the viewer's interface language (for example "father's sister's husband" in English, or its Telugu equivalent); it never returns an empty label or a term for a different path.
+- [ ] **AC-4.12** [P] When the requested locale has no validated term for a path, including when a term exists but is `unvalidated`, the engine falls back along a documented chain using only validated catalogue terms and finally to a plain descriptive phrase in the viewer's interface language (for example "father's sister's husband" in English, or its Telugu equivalent); it never returns an empty label, an unvalidated catalogue term, or a term for a different path.
 - [ ] **AC-4.13** [P] A missing term is recorded as a catalogue gap for later review.
 - [ ] **AC-4.14** [P] A family custom label is offered alongside the catalogue labels, marked as a family custom, and applies only inside that family group.
 - [ ] **AC-4.15** [P] Newly added catalogue terms default to `unvalidated`.
@@ -242,7 +242,7 @@ Parent-child and marriage changes:
 - [ ] **AC-5.17** [P] Lakshmi proposes a change to the Gopal (living, not registered) to Lakshmi parent-child edge. Gopal cannot approve until registered; the claim is accepted after 2 approvals from core relatives of either party other than Lakshmi (for example Suresh and Ravi), and Gopal is notified through the contact on file and can open a dispute after registering.
 
 Historical claims:
-- [ ] **AC-5.18** [P] A claim that Venkata was born in a given year is accepted after 2 approvals from core or extended relatives (Kiran counts) plus documentary evidence or multiple independent testimonies (D-005).
+- [ ] **AC-5.18** [P] A claim that Venkata was born in a given year is accepted after 2 approvals from core or extended relatives (Kiran counts) plus documentary evidence or multiple independent testimonies (D-005), and the birth-year field becomes `verified`.
 - [ ] **AC-5.19** [F] The same claim with 2 approvals but no evidence stays `uncertain`.
 
 Every claim type:
@@ -256,7 +256,7 @@ Every claim type:
 
 ### Reject, evidence, dispute, escalation
 - [ ] **AC-5.27** [P] A rejection by a living registered party to the edge (or by the living registered subject of a field correction) makes the claim `rejected`. A rejection by any other eligible reviewer moves the claim to `disputed` for evidence or escalation (AC-5.29). In both cases the current value stays unchanged.
-- [ ] **AC-5.28** [P] "Request evidence" pauses the claim in `in_review` until evidence is attached or the proposer withdraws; evidence is visible only to the claim's eligible reviewers and the submitter.
+- [ ] **AC-5.28** [P] "Request evidence" pauses the claim, which stays pending, until evidence is attached or the proposer withdraws; evidence is visible only to the claim's eligible reviewers and the submitter.
 - [ ] **AC-5.29** [P] A disputed claim can be escalated to a family administrator who is not a party to it; the administrator's resolution records the basis of the decision, and an administrator who is the proposer or the subject cannot resolve it.
 - [ ] **AC-5.30** [P] Missing or disputed facts remain `uncertain` or `disputed`; no workflow turns them into `verified` without the required approvals or evidence.
 
@@ -297,14 +297,14 @@ Sources: FR-02, FR-06, D-005, D-016, D-017; scope Feature 6; domain model "Decea
 Worked example: Venkata has no profile yet. Ravi proposes Venkata's deceased profile together with four connecting edges: spouse of Sarada, and parent of Ravi, Anil, and Padma.
 
 - [ ] **AC-6.17** [P] The claim stores the profile and its four proposed edges together, all `pending`; Sarada, Anil, and Padma are each asked to confirm their own edge, and Ravi's own edge stands on his proposal.
-- [ ] **AC-6.18** [P] Sarada, Anil, and Padma each confirm their own edge and approve the profile. The D-016 threshold of three is met, and the profile and all four edges become `accepted` in one Convex mutation with one audit event per decision.
-- [ ] **AC-6.19** [F] If that final mutation fails, neither the profile nor any edge is accepted.
+- [ ] **AC-6.18** [P] Sarada, Anil, and Padma each confirm their own edge and approve the profile. The D-016 threshold of three is met, and the profile becomes `approved` and all four edges become `accepted` in one Convex mutation with one audit event per decision.
+- [ ] **AC-6.19** [F] If that final mutation fails, the profile is not approved and no edge is accepted.
 - [ ] **AC-6.20** [R] Anil's approval of the profile does not count until he has confirmed his own edge; before that, he has no accepted path to Venkata.
 - [ ] **AC-6.21** [R] Kiran is not eligible while the claim is pending: Kiran's only path to Venkata runs through Ravi's proposed edge, which Kiran did not confirm and which is not yet accepted.
 - [ ] **AC-6.22** [A] Ravi cannot confirm an edge on behalf of Sarada, Anil, or Padma, and his own approval of the profile is refused.
 - [ ] **AC-6.23** [F] Anil rejects his edge. That edge is not created, Anil gains no eligibility through it, and the claim continues with the remaining edges; with only Sarada and Padma eligible, the profile needs both approvals plus reviewed documentary evidence (D-016).
 - [ ] **AC-6.24** [F] If fewer than two people named on proposed edges confirm, and no other eligible relative exists through accepted edges, the profile and its edges stay `pending`.
-- [ ] **AC-6.25** [P] A proposed edge to a living person who is not registered (for example Gopal) does not block the profile; it stays `pending` after the profile is accepted, until that person registers and confirms it.
+- [ ] **AC-6.25** [P] A proposed edge to a living person who is not registered (for example Gopal) does not block the profile; it stays `pending` after the profile is approved, until that person registers and confirms it.
 
 ### Field-level status and evidence
 - [ ] **AC-6.26** [P] Every historical field (for example birth date, death date, birthplace) carries its own status: `unverified`, `verified`, `uncertain`, or `disputed`; profile approval does not mark every field verified.
@@ -354,7 +354,7 @@ A story is content that names one or more people (its subjects) or makes histori
 - [ ] **AC-7.16** [P] Kiran submits a story about Gopal (living, not registered). It is published after 2 approvals from his registered core relatives (Lakshmi and Suresh).
 - [ ] **AC-7.17** [P] Ravi submits a story about Meena (a minor). It is published when Kiran, Meena's guardian, approves.
 - [ ] **AC-7.18** [P] Kiran submits a story about both Venkata and Padma. It is published only when Padma approves as subject and 2 other core relatives of Venkata approve; Padma's approval does not also count as one of Venkata's 2 (D-029).
-- [ ] **AC-7.19** [F] A story whose subject has fewer than 2 eligible relatives in total stays `in_review`; the contributor can withdraw it to drafts at any time.
+- [ ] **AC-7.19** [F] A story about a deceased or unregistered adult subject with fewer than 2 eligible relatives in total stays `in_review`; the contributor can withdraw it to drafts at any time.
 - [ ] **AC-7.20** [P] Kiran publishes an untagged memory that makes claims about Venkata. Anil, an eligible reviewer for Venkata, flags it; it moves to `in_review` under the story rules for Venkata and is hidden from the wider family until approved.
 - [ ] **AC-7.21** [A] A member who is not an eligible reviewer for any person in the content (for example Zed, or Hari while pending) cannot flag it.
 - [ ] **AC-7.22** [P] A rejection by any eligible reviewer of a story moves it to `disputed` and starts the dispute workflow below.
