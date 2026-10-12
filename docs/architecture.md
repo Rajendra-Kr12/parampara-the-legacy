@@ -97,7 +97,7 @@ Family metadata (people, edges, claims, stories) is small: a few MB per family, 
 ## Open items
 
 - Client apps: `apps/web` and `apps/mobile` do not exist (Feature 1 steps 3 and 4). Next.js, Expo SDK, and React are not pinned, and the Expo SDK choice, the mobile sign-in flow, and where the simulator and emulator proof runs are still undecided (D-038).
-- Sign-in is in progress. Nothing has been signed in against a real Clerk instance or Convex deployment, so no end-to-end proof path exists yet. Linking a Clerk development instance to the Convex development deployment, and the sign-in proof, are owner actions (D-038).
+- Sign-in is in progress. Nothing has been signed in against a real Clerk instance or Convex deployment, so no end-to-end proof path exists yet. The Clerk development app and the Convex development project both exist, and the Clerk issuer domain is already set in the Convex development deployment (owner-confirmed 2026-10-12, D-038). The sign-in proof itself is still to come.
 - Test stack beyond the shared packages and Convex: Playwright with `@clerk/testing` for web, `jest-expo` for mobile components, Maestro for mobile end to end (D-036). No coverage threshold.
 - CI hardening: `protect-main` has no required status checks, repository-wide action SHA pinning is off, and there is no mobile E2E workflow or Turbo remote cache (D-037). These change shared settings and need owner approval.
 - Convex codegen drift check: `convex codegen` needs `CONVEX_DEPLOYMENT`, so a drift job is still to be designed.
