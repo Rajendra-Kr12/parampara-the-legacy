@@ -57,11 +57,11 @@ Each model reviewed the same public acceptance-criteria document once, with thre
 
 | Model | Class | Known defects found | Other real findings | Verdict |
 |---|---|---|---|---|
-| step-5-preview-free | B | 1 of 3 (G3) | 7 | Secondary first pass only |
-| longcat-2.5-preview-free | B | 1 of 3 (G3) | 7 | Secondary first pass only |
-| mimo-v2.6-flash-free | C | 0 of 3 | 8 | Not recommended even as a secondary pass |
+| step-5-preview-free | B | 1 of 3 (G3) | 7 | Not suitable for any review role |
+| longcat-2.5-preview-free | B | 1 of 3 (G3) | 7 | Not suitable for any review role |
+| mimo-v2.6-flash-free | C | 0 of 3 | 8 | Not suitable for any review role |
 
-All 24 findings pointed at real text and none was invented, but the three models together missed G1 and G2. **None fits as a sole reviewer.** Per `docs/model-routing.md` free models never review T2, T3 or R work; if one is used as a first pass on public documents, a human or a paid model from another family still reads the whole document.
+All 24 findings pointed at real text and none was invented, but the three models together missed G1 and G2. **None of the free models is suitable for any review role**, whether as a sole reviewer or as a first pass. This matches D-022 and `docs/model-routing.md`: free models never do review or security work, and every review tier uses paid models with no free models. The results above are recorded as calibration facts only.
 
 ## OpenCode Zen: paid models worth routing to (class A, 2026-10-11)
 
