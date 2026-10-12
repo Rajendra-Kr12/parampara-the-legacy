@@ -1,6 +1,6 @@
 # Repository Structure
 
-## Current (documentation and agent tooling)
+## Current (documentation, agent tooling, and workspace tooling)
 
 ```text
 parampara-the-legacy/
