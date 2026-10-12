@@ -56,7 +56,7 @@ Verified members can propose changes. Changes to established parent-child and ma
 A deceased profile requires approval by three eligible close relatives. If fewer than three eligible relatives are available, two eligible approvals plus documentary evidence reviewed by those approvers is sufficient; with fewer than two, it remains pending (D-016). The proposer never counts as an approver. Documentary evidence is preferred; multiple independent testimonies may be used where documents are unavailable. Unresolved facts remain uncertain or disputed.
 
 ### FR-07: Memories and stories
-A memory is a contributor's personal experience. A story may make historical claims about another person or event. Memories do not need approval. A story that names people or makes claims about family events the contributor did not experience needs approval under D-024 (for example, a story about a deceased grandfather is verified by 2 registered core relatives). A story about a family event must tag at least one subject (D-028), and one approver counts toward only one subject's rule (D-029). Multiple versions may coexist during dispute resolution. If a story dispute remains unresolved for 60 days, the contested story becomes the contributor's private draft unless a documented exception applies.
+A memory is a contributor's personal experience. A story may make historical claims about another person or event. Memories do not need approval. A story that names people or makes claims about family events the contributor did not experience needs approval under D-024 (for example, a story about a deceased grandfather is verified by 2 registered core relatives). A story about a family event must tag at least one subject (D-028), and one approver counts toward only one subject's rule (D-029). Multiple versions may coexist during dispute resolution. If a story dispute remains unresolved for 60 days, the contested story becomes the contributor's private draft unless a documented exception applies. Timer rules: D-026 (the story is hidden from the wider family during the dispute).
 
 ### FR-08: Media
 Members can attach photos and audio recordings to people, memories, stories, or events. Media must use private storage and authorization-controlled access. Revoked access must invalidate future access, including signed-link expiry behavior.
@@ -107,7 +107,7 @@ Track family activation, invitation acceptance, relationship verification rate, 
 
 ## 10. Open decisions
 
-1. Resolved: close-relative eligibility and approval thresholds (D-023), story approval (D-024), first-launch languages and regional terminology (D-025), and story dispute timer and exceptions (D-026). Testable criteria are in `docs/acceptance-criteria.md`.
+1. Resolved: close-relative eligibility and approval thresholds (D-023; exception policy beyond D-016 and D-026 is still open), story approval (D-024), first-launch languages and regional terminology (D-025), and story dispute timer and exceptions (D-026). Testable criteria are in `docs/acceptance-criteria.md`.
 2. Resolved: see item 1 (new-relationship review in D-023).
 3. Resolved: see item 1 (D-025).
 4. Exact evidence-handling and retention periods.

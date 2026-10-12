@@ -28,9 +28,9 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequence: Evidence is attached to individual claims and restricted to authorized reviewers.
 
 ## D-006: Story dispute deadline
-- Status: Accepted; timer details need implementation decision
+- Status: Accepted; timer details decided in D-026
 - Decision: A story dispute has a 60-day resolution window. If unresolved, move the story to the contributor's private drafts.
-- Open: Define timer start, notifications, extension authority, and exceptions.
+- Open: resolved by D-026.
 
 ## D-007: Privacy defaults
 - Status: Accepted
@@ -209,3 +209,9 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Context: Review of PR #4 found that D-024's "one person counts once per subject" could be read as letting one approver satisfy several subjects' rules, which changes the threshold for a story tagging a living subject and a deceased subject.
 - Decision: No double counting across subjects. One person's approval counts toward only one subject's rule. For a story tagging a living subject and a deceased subject, the deceased subject's 2 core-relative approvals come from people other than the approver who approves as the living subject. A story tagging Venkata and Sarada needs 3 approvals in total: Sarada as subject plus 2 other core relatives of Venkata (for example Anil and Padma).
 - Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7, "Story approval", AC-7.18, AC-7.25, AC-7.26).
+
+## D-030: Laya live check and budget cap (2026-10-12)
+- Status: Observation recorded; budget-cap decision open
+- Context: The `tools/route-task` router (PR #5) was only covered by automated tests. On 2026-10-12 the owner ran the live check from `tools/route-task/README.md` for the task 'Classify a docs update'.
+- Observation: `routingPath` was `laya` and the tier was T1. The static table in `docs/model-routing.md` gives D for the same task. The owner reported this; it was not re-run when this was recorded. It is an observation only: no routing rule, table, or catalog row was changed, and one sample does not show which answer is better.
+- Open: Before 2026-10-31 the owner sets an AI Gateway budget cap and decides whether to keep paid Laya or self-host. After that date the router defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.

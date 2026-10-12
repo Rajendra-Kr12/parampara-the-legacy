@@ -24,11 +24,13 @@ During implementation, maintain a short checklist below the feature. After imple
 - Repository: public GitHub `Rajendra-Kr12/parampara-the-legacy`, `main` protected, PR-only (D-018).
 - Original idea notes: `docs/original-brief.md` (historical; this scope and the PRD supersede it where they differ).
 
-## Current status (2026-10-10)
+## Current status (2026-10-12)
 
 - Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021); approval, story, language, and dispute-timer rules decided (D-023 to D-029) with testable criteria in `docs/acceptance-criteria.md`.
+- Feature 0 tooling merged: harness verification and Firstmate tier-dispatch map (PR #3) and the `tools/route-task` Laya router with static fallback (PR #5). Remaining Feature 0 items are owner actions, a Greptile check, a re-probe of Antigravity, free-model trials, and CI once code exists.
 - No application code yet. Next approved step candidates: Feature 0 (agent tooling) and Feature 1 (monorepo scaffold).
-- Time-sensitive: Laya is free on Vercel AI Gateway only through 2026-10-31.
+- Time-sensitive: Laya is free on Vercel AI Gateway only through 2026-10-31. The owner's budget-cap decision for paid Laya (keep paid or self-host) is still open and due before that date.
+- Owner live check of the Laya router (2026-10-12), reported by the owner and not re-run for this update: for the task 'Classify a docs update' it returned `routingPath: laya` with tier T1, while the static table gives D. This is an observation only; no routing rule or table was changed.
 
 ## At a glance
 
@@ -69,14 +71,15 @@ Make multi-harness development safe and cheap before application code: routing, 
 
 ### Checklist
 - [x] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback (2026-10-11). Automated tests only; the live Laya call is unverified. After 2026-10-31 it defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
-- [ ] Owner: run the live Laya check from `tools/route-task/README.md`, set an AI Gateway budget cap, and decide before 2026-10-31 whether to keep paid Laya or self-host.
+- [x] Owner: run the live Laya check from `tools/route-task/README.md` (2026-10-12: `routingPath: laya`, tier T1 for 'Classify a docs update'; the static table says D, so the two paths differ on this task; observation only, as reported by the owner).
+- [ ] Owner: set an AI Gateway budget cap and decide before 2026-10-31 whether to keep paid Laya or self-host. Still open.
 - [x] Map routing tiers to Firstmate dispatch profiles and document the herdr setup in `docs/harness-setup.md` (2026-10-11). The map is a proposal; no Firstmate config file was changed, and herdr lifecycle commands were not run.
 - [x] Read official docs for OpenCode, Pi, and Hermes on instruction and skill loading (2026-10-11).
 - [x] Run Claude Code, Codex, OpenCode, Pi, and Hermes once in this repo; `AGENTS.md` loading observed for the first four, skill names visible via `AGENTS.md` but skill file discovery unconfirmed, Hermes only partly confirmed. Results in `docs/model-routing.md` (2026-10-11).
 - [ ] Re-run the Antigravity (agy) probe after its quota resets (429 on 2026-10-11, about 44 hours); optionally repeat Hermes with a second model.
 - [x] Firstmate cannot dispatch Hermes; manual herdr-pane workflow documented in `docs/harness-setup.md` (2026-10-11).
 - [x] Pi and Hermes access to free models recorded in `docs/model-catalog.md` and `docs/harness-setup.md` (2026-10-11). Still not tried: Zen as a Pi custom provider, Pi on OpenRouter free models.
-- [ ] Run one small trial task per free model class B model and record whether it is usable; re-verify `docs/model-catalog.md` (dated 2026-10-11).
+- [ ] Run one small trial task per free model class B model and record whether it is usable; re-verify `docs/model-catalog.md` (dated 2026-10-11). Partly observed only: `opencode/space-bunny-free` ran the harness probe in OpenCode, and Pi reached NVIDIA-hosted Nemotron 3 Super and GLM 5.3 Flash (one model returned HTTP 410). No per-model trial of every class B model has been run, so this stays open.
 - [x] Teach `tools/route-task` the data-class rules in `docs/model-routing.md` (2026-10-11).
 - [x] Install Greptile (free Starter plan) on the repository (2026-10-10, done by owner).
 - [x] Add `.greptile/` review rules and doc context (2026-10-10).
