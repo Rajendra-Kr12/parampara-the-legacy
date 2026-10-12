@@ -107,10 +107,18 @@ test("ci: the workflow policy rejects unpinned actions and write permissions", (
 });
 
 test("workspace: tools/route-task stays outside the pnpm workspace", () => {
-  const workspace = readFileSync(`${repoRoot}pnpm-workspace.yaml`, "utf8");
-  assert.match(workspace, /^ {2}- "!tools\/\*\*"$/m);
-  const workflow = readFileSync(`${repoRoot}.github/workflows/ci.yml`, "utf8");
-  assert.match(workflow, /tools\/route-task/);
+  const listed = JSON.parse(
+    execFileSync("pnpm", ["ls", "-r", "--depth", "-1", "--json"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+    }),
+  );
+  const paths = listed.map((project) => project.path);
+  assert.ok(paths.some((path) => path.endsWith("/packages/config")));
+  assert.equal(
+    paths.some((path) => path.includes("/tools/")),
+    false,
+  );
 });
 
 test("secrets: env files are gitignored and .env.example is not", () => {
