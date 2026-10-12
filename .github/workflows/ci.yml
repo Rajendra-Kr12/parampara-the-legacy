@@ -45,7 +45,8 @@ jobs:
   # analysis step, and it is not a required status check. Results render as the
   # job summary. It inherits the workflow-level contents: read permissions,
   # which are least privilege; the workflow probe does not allow job-level
-  # permissions yet.
+  # permissions yet. .fallowrc.json keeps **/convex/_generated/** out of every
+  # report as a guard against strict-mode false positives on Convex builder exports.
   fallow:
     runs-on: ubuntu-latest
     timeout-minutes: 20
