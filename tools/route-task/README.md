@@ -19,11 +19,11 @@ From the repository root:
 npm --prefix tools/route-task run route -- --task "Classify a public documentation update."
 ```
 
-At runtime, the tool reads `AI_GATEWAY_API_KEY` from the process environment or the repository `.env.local`. It never prints the key or the task text. The live Laya call uses `experimental_decide` from `ai` (7.0.128 or later; `experimental_evaluate` is its deprecated alias) with model ID `convaiinnovations/laya`. Boundless is the only provider listed for that model, so no provider restriction is passed. The default timeout is 30 seconds.
+At runtime, the tool reads `AI_GATEWAY_API_KEY` from the process environment or the repository `.env.local`. It never prints the key or the task text. The live Laya call uses `experimental_decide` from `ai` (7.0.128 or later; `experimental_evaluate` is its deprecated alias) with model ID `convaiinnovations/laya`. The request follows the documented examples: `state` is a plain string (the task text) and `providerOptions.gateway.only` is `["boundless"]`. Both `convaiinnovations/laya` and `convaiinnovations/laya-free` are free through 2026-10-31 on Boundless; the standard ID is the one that keeps working after. The default timeout is 30 seconds.
 
 Output includes `routingPath`. `laya` means the live classifier was used. `static` means the static table was used, includes a `fallbackReason`, and sets `requiresHumanOrLeadDecision`.
 
-When Laya fails, `fallbackReason` is one of `laya-timeout`, `laya-auth`, `laya-rate-limited`, `laya-model-unavailable`, `laya-provider-restricted`, `laya-bad-response`, or `laya-unknown`. It is derived from the error class and HTTP status only. Add `--diagnose` to also print a `diagnostic` object with the category, error class name, and HTTP status code. No message body, key, task text, or path is ever included.
+When Laya fails, `fallbackReason` is one of `laya-timeout`, `laya-auth`, `laya-rate-limited`, `laya-model-unavailable`, `laya-provider-restricted`, `laya-bad-request` (HTTP 400 or 422), `laya-bad-response`, or `laya-unknown`. It is derived from the error class and HTTP status only. Add `--diagnose` to also print a `diagnostic` object with the category, error class name, HTTP status code, and, when the provider error carries one as a short token, a provider error code and failing field name. No message body, key, task text, or path is ever included.
 
 After 2026-10-31, static routing is the default. Set `ROUTE_TASK_ENABLE_PAID_LAYA=true` only after the owner has enabled a paid Laya budget in Vercel AI Gateway.
 
@@ -40,3 +40,5 @@ npm --prefix tools/route-task run route -- --task "Classify a public documentati
 ```
 
 `routingPath: "laya"` means the live call worked. If it shows `static`, report the `fallbackReason` and `diagnostic` values.
+
+If the call still fails, run `npm --prefix tools/route-task run route -- --diagnose-request` to print the request shape (task replaced by a placeholder, no network call) and paste it back together with the `--diagnose` output.

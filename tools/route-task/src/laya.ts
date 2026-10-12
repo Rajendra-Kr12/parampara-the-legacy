@@ -98,20 +98,31 @@ export function parseResult(result: LayaEvaluationResult): Classification {
   };
 }
 
+export const LAYA_MODEL_ID = "convaiinnovations/laya";
+const PROVIDER_OPTIONS = { gateway: { only: ["boundless"] } } as const;
+
+/**
+ * The documented Laya examples send `state` as a plain string and pin routing to Boundless.
+ * The catalog is not part of the request: the questions need only the task text.
+ */
+export function buildLayaRequest(state: string) {
+  return { model: LAYA_MODEL_ID, state, questions: QUESTIONS, providerOptions: PROVIDER_OPTIONS };
+}
+
+export const TASK_PLACEHOLDER = "<TASK_TEXT_REDACTED>";
+
+/** The request shape with the task replaced by a placeholder; safe to paste into a bug report. */
+export function describeLayaRequest(): unknown {
+  const request = buildLayaRequest(TASK_PLACEHOLDER);
+  return { ...request, stateType: typeof request.state, questionTypes: Object.fromEntries(Object.entries(QUESTIONS).map(([name, question]) => [name, question.type])) };
+}
+
 export function createAiSdkLayaClient(): LayaClient {
   return {
-    async evaluate({ task, catalog, timeoutMs }): Promise<Classification> {
+    async evaluate({ task, timeoutMs }): Promise<Classification> {
       const { experimental_decide } = await import("ai");
       const result = await experimental_decide({
-        model: "convaiinnovations/laya",
-        state: {
-          task,
-          availableModels: catalog.models.map((model) => ({
-            tiers: model.tiers,
-            dataClass: model.dataClass,
-          })),
-        },
-        questions: QUESTIONS,
+        ...buildLayaRequest(task),
         abortSignal: AbortSignal.timeout(timeoutMs),
       });
       return parseResult(result);

@@ -1,3 +1,4 @@
+import { describeLayaRequest } from "./laya.js";
 import { routeTask } from "./router.js";
 import type { RoutingDecision } from "./types.js";
 
@@ -15,9 +16,13 @@ function taskFromArguments(argumentsList: readonly string[]): string | undefined
 
 /** Returns the process exit code. Setup failures never expose raw errors or paths. */
 export async function runCli(argumentsList: readonly string[], io: CliIo): Promise<number> {
+  if (argumentsList.includes("--diagnose-request")) {
+    io.stdout(`${JSON.stringify(describeLayaRequest(), null, 2)}\n`);
+    return 0;
+  }
   const task = taskFromArguments(argumentsList);
   if (task === undefined) {
-    io.stderr("Usage: route-task --task <task-description> [--diagnose]\n");
+    io.stderr("Usage: route-task --task <task-description> [--diagnose] | --diagnose-request\n");
     return 2;
   }
   try {

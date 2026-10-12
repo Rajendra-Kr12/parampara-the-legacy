@@ -4,6 +4,7 @@ export const FAILURE_CATEGORIES = [
   "laya-rate-limited",
   "laya-model-unavailable",
   "laya-provider-restricted",
+  "laya-bad-request",
   "laya-bad-response",
   "laya-unknown",
 ] as const;
@@ -15,6 +16,9 @@ export interface FailureDiagnostic {
   readonly category: FailureCategory;
   readonly errorClass: string;
   readonly statusCode?: number;
+  /** Short provider error code or failing field name, only when it matches a strict token pattern. */
+  readonly providerCode?: string;
+  readonly field?: string;
 }
 
 export class LayaTimeoutError extends Error {
@@ -74,8 +78,37 @@ function categorize(rawName: string, status: number | undefined): FailureCategor
   if (status === 429 || name === "GatewayRateLimitError") return "laya-rate-limited";
   if (status === 401 || AUTH_CLASSES.has(name)) return "laya-auth";
   if (status === 402 || status === 403 || name === "GatewayForbiddenError") return "laya-provider-restricted";
+  if (status === 400 || status === 422) return "laya-bad-request";
   if (status === 404 || MODEL_CLASSES.has(name)) return "laya-model-unavailable";
   return undefined;
+}
+
+const TOKEN = /^[A-Za-z][A-Za-z0-9_.-]{0,47}$/;
+
+function token(value: unknown): string | undefined {
+  return typeof value === "string" && TOKEN.test(value) ? value : undefined;
+}
+
+function recordOf(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : undefined;
+}
+
+/** Looks for a short error code and a failing field name; message text and bodies are never copied. */
+function providerDetails(chain: readonly unknown[]): { providerCode?: string; field?: string } {
+  let providerCode: string | undefined;
+  let field: string | undefined;
+  for (const candidate of chain) {
+    const record = recordOf(candidate);
+    if (record === undefined) continue;
+    let body: unknown = record["data"];
+    if (body === undefined && typeof record["responseBody"] === "string") {
+      try { body = JSON.parse(record["responseBody"]); } catch { body = undefined; }
+    }
+    const nested = recordOf(recordOf(body)?.["error"]) ?? recordOf(body);
+    providerCode ??= token(nested?.["code"]) ?? token(nested?.["type"]) ?? token(record["type"]);
+    field ??= token(nested?.["param"]) ?? token(nested?.["field"]);
+  }
+  return { ...(providerCode === undefined ? {} : { providerCode }), ...(field === undefined ? {} : { field }) };
 }
 
 /** Derives a safe category from the error class and HTTP status only. */
@@ -86,9 +119,9 @@ export function classifyFailure(error: unknown): FailureDiagnostic {
     const status = statusOf(candidate);
     const category = categorize(name, status);
     if (category !== undefined) {
-      return { category, errorClass: name, ...(status === undefined ? {} : { statusCode: status }) };
+      return { category, errorClass: name, ...(status === undefined ? {} : { statusCode: status }), ...providerDetails(chain) };
     }
   }
   const status = chain.map(statusOf).find((value) => value !== undefined);
-  return { category: "laya-unknown", errorClass: errorName(error), ...(status === undefined ? {} : { statusCode: status }) };
+  return { category: "laya-unknown", errorClass: errorName(error), ...(status === undefined ? {} : { statusCode: status }), ...providerDetails(chain) };
 }

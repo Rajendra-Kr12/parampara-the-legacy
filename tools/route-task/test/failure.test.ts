@@ -4,6 +4,7 @@ import test from "node:test";
 import { APICallError, LoadAPIKeyError, NoSuchModelError } from "ai";
 import { classifyFailure, LayaResponseError, LayaTimeoutError, type FailureDiagnostic } from "../src/failure.js";
 import { routeTask } from "../src/router.js";
+import { buildLayaRequest, describeLayaRequest, TASK_PLACEHOLDER } from "../src/laya.js";
 import { runCli } from "../src/run.js";
 
 const catalogText = await readFile(new URL("../../test/catalog.fixture.md", import.meta.url), "utf8");
@@ -35,6 +36,9 @@ const cases: readonly [string, unknown, FailureDiagnostic["category"], number | 
   ["HTTP 402", apiError(402), "laya-provider-restricted", 402],
   ["unparseable answer", new LayaResponseError("bad"), "laya-bad-response", undefined],
   ["gateway response class", named("GatewayResponseError", 502), "laya-bad-response", 502],
+  ["HTTP 422", apiError(422), "laya-bad-request", 422],
+  ["HTTP 400", apiError(400), "laya-bad-request", 400],
+  ["gateway internal error class with 422", named("GatewayInternalServerError", 422), "laya-bad-request", 422],
   ["HTTP 500", apiError(500), "laya-unknown", 500],
   ["plain error", new Error("boom"), "laya-unknown", undefined],
   ["non-error throw", "SECRET string", "laya-unknown", undefined],
@@ -77,4 +81,53 @@ test("--diagnose reaches the router and is opt-in", async () => {
   await runCli(["--task", "x"], io);
   await runCli(["--task", "x", "--diagnose"], io);
   assert.deepEqual(seen, [false, true]);
+});
+
+test("422 diagnostics expose only a short provider code and field name, never the body", () => {
+  const error = new APICallError({
+    message: "SECRET-PROVIDER-TEXT for task SECRET-TASK",
+    url: "https://example.invalid/?key=SECRET",
+    requestBodyValues: { task: "SECRET-TASK" },
+    statusCode: 422,
+    responseBody: JSON.stringify({ error: { code: "invalid_question", param: "questions.tier.criteria", message: "SECRET-TASK is not valid at /Users/x/y" } }),
+  });
+  const result = classifyFailure(error);
+  assert.deepEqual(result, { category: "laya-bad-request", errorClass: "AI_APICallError", statusCode: 422, providerCode: "invalid_question", field: "questions.tier.criteria" });
+  assert.ok(!/SECRET|\/Users/.test(JSON.stringify(result)));
+});
+
+test("provider codes that are not short tokens are dropped", () => {
+  const error = new APICallError({
+    message: "m",
+    url: "https://example.invalid",
+    requestBodyValues: {},
+    statusCode: 422,
+    responseBody: JSON.stringify({ error: { code: "SECRET task text with spaces /Users/x", param: "a b" } }),
+  });
+  const result = classifyFailure(error);
+  assert.equal(result.providerCode, undefined);
+  assert.equal(result.field, undefined);
+});
+
+test("the Laya request sends a string state, pins Boundless, and omits the catalog", () => {
+  const request = buildLayaRequest("Classify a docs update.");
+  assert.equal(request.model, "convaiinnovations/laya");
+  assert.equal(typeof request.state, "string");
+  assert.deepEqual(request.providerOptions, { gateway: { only: ["boundless"] } });
+});
+
+test("--diagnose-request prints the request shape with the task replaced and does not route", async () => {
+  const out: string[] = [];
+  let routed = false;
+  const code = await runCli(["--diagnose-request", "--task", "SECRET-TASK"], {
+    stdout: (t) => void out.push(t),
+    stderr: () => undefined,
+    route: async () => { routed = true; return { status: "routed", routingPath: "static" } as const; },
+  });
+  assert.equal(code, 0);
+  assert.equal(routed, false);
+  const text = out.join("");
+  assert.ok(text.includes(TASK_PLACEHOLDER));
+  assert.ok(!text.includes("SECRET-TASK"));
+  assert.deepEqual(JSON.parse(text), JSON.parse(JSON.stringify(describeLayaRequest())));
 });
