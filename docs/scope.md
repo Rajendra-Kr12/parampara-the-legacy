@@ -76,10 +76,10 @@ Make multi-harness development safe and cheap before application code: routing, 
 - [x] Map routing tiers to Firstmate dispatch profiles and document the herdr setup in `docs/harness-setup.md` (2026-10-11). The map is a proposal; no Firstmate config file was changed, and herdr lifecycle commands were not run.
 - [x] Read official docs for OpenCode, Pi, and Hermes on instruction and skill loading (2026-10-11).
 - [x] Run Claude Code, Codex, OpenCode, Pi, and Hermes once in this repo; `AGENTS.md` loading observed for the first four, skill names visible via `AGENTS.md` but skill file discovery unconfirmed, Hermes only partly confirmed. Results in `docs/model-routing.md` (2026-10-11).
-- [ ] Re-run the Antigravity (agy) probe after its quota resets (429 on 2026-10-11, about 44 hours); optionally repeat Hermes with a second model.
+- [ ] Re-run the Antigravity (agy) probe after the Gemini quota resets (429 on 2026-10-11, about 44 hours); partial findings from the Claude and GPT pool are in `docs/harness-setup.md`; optionally repeat Hermes with a second model.
 - [x] Firstmate cannot dispatch Hermes; manual herdr-pane workflow documented in `docs/harness-setup.md` (2026-10-11).
 - [x] Pi and Hermes access to free models recorded in `docs/model-catalog.md` and `docs/harness-setup.md` (2026-10-11). Still not tried: Zen as a Pi custom provider, Pi on OpenRouter free models.
-- [ ] Run one small trial task per free model class B model and record whether it is usable; re-verify `docs/model-catalog.md` (dated 2026-10-11). Partly observed only: `opencode/space-bunny-free` ran the harness probe in OpenCode, and Pi reached NVIDIA-hosted Nemotron 3 Super and GLM 5.3 Flash (one model returned HTTP 410). No per-model trial of every class B model has been run, so this stays open.
+- [ ] Free model class B trial and reviewer calibration done 2026-10-11 (results in `docs/model-catalog.md`; none fits as a sole reviewer); re-verify `docs/model-catalog.md` (dated 2026-10-11).
 - [x] Teach `tools/route-task` the data-class rules in `docs/model-routing.md` (2026-10-11).
 - [x] Install Greptile (free Starter plan) on the repository (2026-10-10, done by owner).
 - [x] Add `.greptile/` review rules and doc context (2026-10-10).

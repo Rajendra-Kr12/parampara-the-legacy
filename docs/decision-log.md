@@ -114,7 +114,7 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Context: The owner also uses OpenCode (with an OpenCode Zen key), Pi, and Hermes Agent, and wants free models used where safe. Official docs show OpenCode, Pi, and Hermes all read `AGENTS.md` and `.agents/skills`; Hermes needs `hermes skills trust` first. Kimi K2.6 and MiniMax are paid on OpenCode Zen (older articles listing them as free are out of date). Several free Zen models collect prompts for training or are trial-only.
 - Decision: Add `docs/model-catalog.md` with model IDs, prices, and four data-handling classes (A paid, B free zero-retention, C free with possible training, D trial-only). Free models may see public repository content only, never secrets or family data, and never do T2, T3, review, or security work. Laya also classifies task sensitivity and volume, and routes bulk low-risk work to class B or cheap paid models first.
 - Consequence: Free lineups rotate, so the catalog carries a verification date and must be re-checked monthly. Hermes is not in Firstmate's documented harness list; use it through a herdr pane until verified. Do not add `AGENTS.override.md` or `.hermes.md`, which would shadow `AGENTS.md`.
-- Follow-up: Run each harness once in this repo and record results (Feature 0). Done 2026-10-11 except agy (quota); results in `docs/model-routing.md`, open items in `docs/harness-setup.md`.
+- Follow-up: Run each harness once in this repo and record results (Feature 0). Done 2026-10-11; agy partly (Gemini pool quota-limited, Claude and GPT pool answered); results in `docs/model-routing.md`, open items in `docs/harness-setup.md`.
 
 ## D-023: Close-relative eligibility per claim type (2026-10-11)
 - Status: Accepted
