@@ -17,6 +17,7 @@
   "prettier": "@parampara/config/prettier",
   "devDependencies": {
     "@parampara/config": "workspace:*",
+    "fallow": "3.33.1",
     "prettier": "3.9.10",
     "turbo": "2.11.7"
   }
