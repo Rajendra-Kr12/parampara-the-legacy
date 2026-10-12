@@ -45,7 +45,7 @@ export interface RoutingDecision {
     | "laya-disabled-after-promotion"
     | FailureCategory;
   readonly diagnostic?: FailureDiagnostic;
-  readonly refusalReason?: "possible-secret-or-personal-data";
+  readonly refusalReason?: "possible-secret-or-personal-data" | "invalid-task-length";
   readonly tier?: Tier;
   readonly sensitiveContext?: boolean;
   readonly touchesHighRiskArea?: boolean;

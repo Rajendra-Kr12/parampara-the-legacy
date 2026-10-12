@@ -7,6 +7,7 @@ import type { Classification } from "../src/types.js";
 const catalogText = await readFile(new URL("../../test/catalog.fixture.md", import.meta.url), "utf8");
 const promotionDate = Date.parse("2026-10-11T00:00:00.000Z");
 const afterPromotion = Date.parse("2026-11-01T00:00:00.000Z");
+const offline = { now: promotionDate, environment: {} as NodeJS.ProcessEnv, loadApiKey: async () => undefined };
 
 function classification(overrides: Partial<Classification> = {}): Classification {
   return {
@@ -121,18 +122,18 @@ test("static fallback is explicit for absent key, Laya failure, and paid Laya di
 
 test("does not refuse ordinary words that contain a key prefix", async () => {
   for (const task of ["Update route-task-description-handling", "Review risk_management_policy_review"]) {
-    const result = await routeTask({ task, catalogText });
+    const result = await routeTask({ task, catalogText, ...offline });
     assert.notEqual(result.status, "refused");
   }
-  const key = await routeTask({ task: "Here is sk-abcdef0123456789abcd", catalogText });
+  const key = await routeTask({ task: "Here is sk-abcdef0123456789abcd", catalogText, ...offline });
   assert.equal(key.status, "refused");
 });
 
 test("refuses a task that looks like a secret or personal data", async () => {
-  const secret = await routeTask({ task: "Use AI_GATEWAY_API_KEY=abcdef0123456789 in the task.", catalogText });
+  const secret = await routeTask({ task: "Use AI_GATEWAY_API_KEY=abcdef0123456789 in the task.", catalogText, ...offline });
   assert.deepEqual(secret, { status: "refused", routingPath: "refused", refusalReason: "possible-secret-or-personal-data" });
 
-  const personalData = await routeTask({ task: "Route this phone number: +91 98765 43210.", catalogText });
+  const personalData = await routeTask({ task: "Route this phone number: +91 98765 43210.", catalogText, ...offline });
   assert.equal(personalData.status, "refused");
 });
 
@@ -144,10 +145,10 @@ test("refuses explicit credential assignments of any length", async () => {
     "set token=xyz",
     "api_key = short",
   ]) {
-    const result = await routeTask({ task, catalogText });
+    const result = await routeTask({ task, catalogText, ...offline });
     assert.equal(result.status, "refused", task);
   }
-  const prose = await routeTask({ task: "Document the password reset flow copy.", catalogText });
+  const prose = await routeTask({ task: "Document the password reset flow copy.", catalogText, ...offline });
   assert.notEqual(prose.status, "refused");
 });
 
@@ -185,4 +186,39 @@ test("a blank AI_GATEWAY_API_KEY falls through to the loaded key", async () => {
   const kept: NodeJS.ProcessEnv = { AI_GATEWAY_API_KEY: "real" };
   await routeTask({ task: "Fix a typo.", catalogText, now: promotionDate, environment: kept, loadApiKey: async () => "other", layaClient: { evaluate: async () => classification() } });
   assert.equal(kept.AI_GATEWAY_API_KEY, "real");
+});
+
+test("a blank or over-long task is refused for its length, not as sensitive data", async () => {
+  for (const task of ["   ", "a".repeat(6_001)]) {
+    const result = await routeTask({ task, catalogText, ...offline });
+    assert.deepEqual(result, { status: "refused", routingPath: "refused", refusalReason: "invalid-task-length" });
+  }
+});
+
+test("a local routing error is not reported as a Laya failure", async () => {
+  const withoutDefault = catalogText.replace(/^.*claude-sonnet-5-5.*\n/m, "");
+  await assert.rejects(
+    routeTask({ task: "Implement a public settings screen.", catalogText: withoutDefault, now: promotionDate, loadApiKey: async () => "k", environment: {}, layaClient: { evaluate: async () => classification() } }),
+    /missing from the model catalog/,
+  );
+});
+
+test("a low-confidence tie between a review and an implementation tier routes to review", async () => {
+  for (const reviewProbability of [0.5, 0.45]) {
+    const result = await routeWithLaya(classification({
+      tier: "T3",
+      tierProbabilities: { T0: 0, T1: 0, T2: 0, T3: 0.5, R: reviewProbability, D: 0 },
+    }));
+    assert.equal(result.tier, "R", String(reviewProbability));
+  }
+});
+
+test("a low-confidence tie between D and T1 takes the higher-risk tier", async () => {
+  for (const [d, t1] of [[0.5, 0.45], [0.45, 0.5]] as const) {
+    const result = await routeWithLaya(classification({
+      tier: "D",
+      tierProbabilities: { T0: 0, T1: t1, T2: 0, T3: 0, R: 0, D: d },
+    }));
+    assert.equal(result.tier, "T1", `${d}/${t1}`);
+  }
 });

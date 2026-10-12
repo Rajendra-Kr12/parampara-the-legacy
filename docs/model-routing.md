@@ -73,7 +73,7 @@ Questions asked of Laya:
 Decision rule:
 1. If `touches_high_risk_area` is true, minimum tier is T2 and free models are excluded. Tiers T2, T3 and R never use free models, whatever the other answers are; check this before any volume-based preference.
 2. If `involves_sensitive_context` is true, only class A models are allowed. If the task contains real secrets or family data, stop: the task must be rewritten, not routed.
-3. If the top choice probability is below 0.7, take the higher of the two most likely tiers.
+3. If the top choice probability is below 0.7, take the higher of the two most likely tiers; when R is one of the two, choose R, and otherwise break ties toward the higher-risk tier (T1 over D, T2 over T1, T3 over T2).
 4. Only for tiers T0, T1 and D (never R, T2 or T3), with `volume = bulk` and no sensitive context, prefer a class B free model, then a cheap paid model, then the default. A task that is itself a review is tier `R`, so this rule does not apply to it. (`needs_independent_review` only says the output must later be reviewed; it does not change the model for the task itself.)
 5. Map the result to a model in the catalog, then to a harness (OpenCode, Pi, Hermes, Claude Code, Codex, Antigravity) or a Firstmate dispatch profile.
 6. If Laya is unavailable, errors, or the budget cap is hit, fall back to the static table with a human or lead-agent decision. Core work must never depend on Laya being up.

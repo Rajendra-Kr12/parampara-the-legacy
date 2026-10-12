@@ -9,6 +9,7 @@ import type { Catalog, CatalogModel, Classification, RoutingDecision, SelectedMo
 const DEFAULT_TIMEOUT_MS = 30_000;
 const PROMOTION_END = Date.parse("2026-11-01T00:00:00.000Z");
 const MINIMUM_TIER_RANK: Readonly<Record<Tier, number>> = { T0: 0, D: 1, T1: 1, T2: 2, R: 3, T3: 3 };
+const TIE_BREAK_ORDER: readonly Tier[] = ["T0", "D", "T1", "T2", "T3", "R"];
 const STATIC_DEFAULTS: Readonly<Record<Exclude<Tier, "R">, string>> = {
   T0: "claude-haiku-5-5",
   T1: "claude-sonnet-5-5",
@@ -106,7 +107,7 @@ function adjustedTier(classification: Classification): Tier {
   const total = ranked.reduce((sum, [, probability]) => sum + probability, 0);
   let tier = classification.tier;
   if (total > 0 && first !== undefined && second !== undefined && first[1] < 0.7) {
-    tier = MINIMUM_TIER_RANK[first[0]] >= MINIMUM_TIER_RANK[second[0]] ? first[0] : second[0];
+    tier = TIE_BREAK_ORDER.indexOf(first[0]) >= TIE_BREAK_ORDER.indexOf(second[0]) ? first[0] : second[0];
   }
   if (classification.touchesHighRiskArea && MINIMUM_TIER_RANK[tier] < MINIMUM_TIER_RANK.T2) return "T2";
   return tier;
@@ -207,7 +208,10 @@ export async function loadDefaultCatalog(): Promise<Catalog> {
 
 export async function routeTask(options: RouteTaskOptions): Promise<RoutingDecision> {
   const task = options.task.trim();
-  if (task.length === 0 || task.length > 6_000 || containsProhibitedData(task)) {
+  if (task.length === 0 || task.length > 6_000) {
+    return { status: "refused", routingPath: "refused", refusalReason: "invalid-task-length" };
+  }
+  if (containsProhibitedData(task)) {
     return { status: "refused", routingPath: "refused", refusalReason: "possible-secret-or-personal-data" };
   }
 
@@ -222,16 +226,17 @@ export async function routeTask(options: RouteTaskOptions): Promise<RoutingDecis
   const key = await (options.loadApiKey ?? (() => loadGatewayApiKey(environment)))();
   if (key === undefined) return decision(catalog, staticClassification(task), "static", "no-api-key");
 
+  let classification: Classification;
   try {
     if (!environment.AI_GATEWAY_API_KEY?.trim()) environment.AI_GATEWAY_API_KEY = key;
     const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-    const classification = enforceTaskSignals(
+    classification = enforceTaskSignals(
       task,
       await evaluateWithTimeout(options.layaClient ?? createAiSdkLayaClient(), task, catalog, timeoutMs),
     );
-    return decision(catalog, classification, "laya");
   } catch (error: unknown) {
     const failure = classifyFailure(error);
     return decision(catalog, staticClassification(task), "static", failure.category, options.diagnose === true ? failure : undefined);
   }
+  return decision(catalog, classification, "laya");
 }
