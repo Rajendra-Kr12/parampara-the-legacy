@@ -96,13 +96,14 @@ Scaffold the Turborepo with web, mobile, Convex, and shared packages, proving on
 - [x] Record stack decisions in `docs/architecture.md` and `docs/decision-log.md`.
 - [x] Identify security, privacy, data integrity, and cost risks (architecture open items).
 - [ ] Present scaffold plan and wait for approval before application-code changes.
-- [ ] Scaffold `apps/web`, `apps/mobile`, `packages/backend`, `packages/domain`, `packages/kinship-engine`, `packages/validation`, `packages/config`.
+- [x] Step 1 `chore/monorepo-tooling`: root workspace tooling, `packages/config`, and empty `packages/domain`, `packages/kinship-engine`, `packages/validation`.
+- [ ] Scaffold `apps/web`, `apps/mobile`, `packages/backend`.
 - [ ] Wire Clerk to Convex on both clients; verify sign-in on web, iOS simulator, Android emulator.
-- [ ] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger.
+- [x] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger (`docs/coding-standards.md`).
 - [ ] Resolve data-residency open item before any real data.
 
 ### Verification
-Documentation inspection only. No code, build, or tests exist yet.
+Step 1 tooling is covered by the enforcement probes in `packages/config/probes/` (see the ledger in `docs/coding-standards.md`). No product code exists yet.
 
 ## Feature 2: identity, family groups, invitations
 
