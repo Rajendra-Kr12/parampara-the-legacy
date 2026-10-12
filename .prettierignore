@@ -15,4 +15,5 @@ AGENTS.md
 CLAUDE.md
 .env.example
 packages/config/probes/fixtures
+packages/backend/convex/_generated
 .github/pull_request_template.md

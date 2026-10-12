@@ -1,0 +1,23 @@
+{
+  "name": "@parampara/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc --noEmit -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "convex": "1.46.0"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "5.0.0",
+    "@parampara/config": "workspace:*",
+    "convex-test": "0.0.61",
+    "eslint": "9.39.5",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}

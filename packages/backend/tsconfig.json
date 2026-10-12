@@ -1,0 +1,4 @@
+{
+  "extends": "@parampara/config/tsconfig.base.json",
+  "include": ["convex", "vitest.config.ts"]
+}

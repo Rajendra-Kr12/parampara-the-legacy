@@ -16,4 +16,8 @@ minimumReleaseAge: 1440
 # Dependency lifecycle scripts do not run unless listed here, and an unlisted
 # build fails the install. Reviewed entry by entry.
 strictDepBuilds: true
-allowBuilds: {}
+allowBuilds:
+  # Pulled in by convex for bundling. Its postinstall only checks or relinks the
+  # platform binary, which pnpm already installs as an @esbuild/* optional
+  # dependency, so the script stays disabled.
+  esbuild: false
