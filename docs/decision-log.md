@@ -97,7 +97,7 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Rationale: GitHub Free enforces rulesets only on public repositories. No real family data or secrets are ever committed. No open-source license is added: the code is visible but not licensed for reuse.
 
 ## D-019: Model and task routing (2026-10-10)
-- Status: Accepted; classifier not yet implemented
+- Status: Accepted; classifier implemented in `tools/route-task` (live call unverified, see `docs/scope.md`)
 - Decision: A static routing table (`docs/model-routing.md`) maps task tiers to models and harnesses. Laya, a decision model on Vercel AI Gateway, classifies task descriptions into tiers, with fallback to the static table.
 - Constraints: Laya sees task descriptions only, never family data or secrets. Free on AI Gateway only through 2026-10-31; billed afterwards.
 
