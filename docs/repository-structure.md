@@ -30,7 +30,8 @@ parampara-the-legacy/
 ├── turbo.json                # lint, typecheck, test, build; root format check
 ├── .nvmrc
 ├── .prettierignore
-├── .github/workflows/ci.yml  # format, lint, typecheck, test, build
+├── .fallowrc.json            # Fallow code-health report config (non-blocking CI job)
+├── .github/workflows/ci.yml  # format, lint, typecheck, test, build; non-blocking fallow report
 ├── packages/
 │   ├── backend/              # Convex schema and functions (auth and users.me so far)
 │   ├── config/               # shared tsconfig, ESLint, Prettier, enforcement probes

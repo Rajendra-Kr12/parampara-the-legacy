@@ -227,3 +227,10 @@ Record durable product and architecture decisions here. Add date, status, contex
   - esbuild, a convex dependency, is listed as `allowBuilds: { esbuild: false }` in `pnpm-workspace.yaml`. Its postinstall only checks the platform binary, which pnpm already installs as an `@esbuild/*` optional dependency.
   - convex-test receives its modules from `import.meta.glob(["./**/*.*s", "!./**/*.*.*"])`. The extglob in the convex-test docs matches nothing under Vite 8.
 - Consequences: Steps 3 and 4 import `api` from `@parampara/backend/api`. Every new public Convex function needs its own signed-out and wrong-user tests; a test fails if `convex/users.ts` gains another export.
+
+## D-032: Fallow as a non-blocking code-health report (2026-10-12)
+- Status: Accepted (Feature 1 step 6, branch `chore/para-fallow`)
+- Context: Step 6 of the approved Feature 1 scaffold plan adds dead-code and duplication analysis. The plan's Fallow evaluation (section 11) sets the terms.
+- Decision: Fallow 3.33.1 is a pinned exact devDependency of the root package, never `latest`. CI runs the installed binary with `pnpm exec`. The `fallow` job in `ci.yml` writes `dead-code` and `dupes` reports to the job summary and can never fail a PR: `continue-on-error` on the job, `|| true` on each analysis step, not a required status check, and no write permissions. Telemetry and the update check are off in that job. `fallow fix` never runs in CI. `.fallowrc.json` ignores `**/convex/_generated/**`; the default analysis is used, and `--include-entry-exports` stays off because it flags Convex generated files and framework config default exports.
+- Rationale: Fallow results degrade without `node_modules`, so the job runs after install. The fallow-rs GitHub Action was not used because it selects the latest CLI unless a version is set, and its comments need `id-token: write` plus the Fallow Cloud bot.
+- Consequences: Keep the job out of the `protect-main` required checks. Upgrading Fallow is a dependency PR that reviews the pin and the `pnpm minimumReleaseAge` rule. Whether the report should ever gate merges is a separate owner decision.
