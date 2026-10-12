@@ -2,7 +2,7 @@
 
 ## Status
 
-Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling and `packages/backend` exist; no web or mobile app yet. Exact versions, configuration, and the open items at the end are confirmed when the monorepo is scaffolded (Feature 1) and recorded in `docs/decision-log.md`.
+Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `packages/backend` exist; no web or mobile app yet. The toolchain versions are pinned and confirmed in `docs/decision-log.md` (D-032 to D-039); the web and mobile versions arrive with steps 3 and 4. The open items at the end are confirmed as those steps ship.
 
 ## Architecture principles
 
@@ -29,6 +29,10 @@ Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling and `packa
 | CI | GitHub Actions | Format, lint, typecheck, test, build on every PR |
 
 Clerk and Greptile also appear in `adrianhajdin/llm-arena`; they were chosen here on their own merits (D-021). llm-arena's Prisma, PostHog, and Arcjet choices were not adopted.
+
+### Versions confirmed so far
+
+Node 24, pnpm 12.11.2, Turborepo 2.11.7, TypeScript 6.0.3, ESLint 9.39.5, Prettier 3.9.10, Vitest 5.0.3, Convex 1.46.0, `convex-test` 0.0.61. Every version is exact, with its reason in `docs/decision-log.md` (D-032 to D-036). Clerk is wired on the server only. Next.js, Expo SDK, React, `@clerk/nextjs`, and `@clerk/expo` are not chosen yet (D-038).
 
 ### What the shared packages are
 
@@ -92,9 +96,15 @@ Family metadata (people, edges, claims, stories) is small: a few MB per family, 
 
 ## Open items
 
+- Client apps: `apps/web` and `apps/mobile` do not exist (Feature 1 steps 3 and 4). Next.js, Expo SDK, and React are not pinned, and the Expo SDK choice, the mobile sign-in flow, and where the simulator and emulator proof runs are still undecided (D-038).
+- Sign-in is in progress. Nothing has been signed in against a real Clerk instance or Convex deployment, so no end-to-end proof path exists yet. A Clerk development instance and a Convex development project are owner actions.
+- Test stack beyond the shared packages and Convex: Playwright with `@clerk/testing` for web, `jest-expo` for mobile components, Maestro for mobile end to end (D-036). No coverage threshold.
+- CI hardening: `protect-main` has no required status checks, repository-wide action SHA pinning is off, and there is no mobile E2E workflow or Turbo remote cache (D-037). These change shared settings and need owner approval.
+- Convex codegen drift check: `convex codegen` needs `CONVEX_DEPLOYMENT`, so a drift job is still to be designed.
+- Fallow report job (D-039): accepted, not built.
+- i18n approach shared by Next.js and Expo, which D-025 requires Feature 1 to pick; CI should fail on a missing translation key.
+- Styling approach shared across web and mobile (for example NativeWind or Tamagui).
 - Data residency: confirm Convex and R2 regions and obligations under India's DPDP Act before storing real data.
 - Clerk SMS OTP cost and availability for Indian numbers; email-link limits on Expo native.
-- Styling approach shared across web and mobile (for example NativeWind or Tamagui).
-- Test stack: Vitest for packages, `convex-test` for functions, Playwright for web, Maestro (candidate) for mobile.
 - Notification provider (email/SMS/push).
 - Analytics: deferred; must avoid personal data.

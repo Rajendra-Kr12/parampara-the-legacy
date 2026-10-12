@@ -227,3 +227,60 @@ Record durable product and architecture decisions here. Add date, status, contex
   - esbuild, a convex dependency, is listed as `allowBuilds: { esbuild: false }` in `pnpm-workspace.yaml`. Its postinstall only checks the platform binary, which pnpm already installs as an `@esbuild/*` optional dependency.
   - convex-test receives its modules from `import.meta.glob(["./**/*.*s", "!./**/*.*.*"])`. The extglob in the convex-test docs matches nothing under Vite 8.
 - Consequences: Steps 3 and 4 import `api` from `@parampara/backend/api`. Every new public Convex function needs its own signed-out and wrong-user tests; a test fails if `convex/users.ts` gains another export.
+
+## D-032: Pinned toolchain versions (2026-10-12)
+- Status: Accepted (Feature 1 step 1)
+- Context: D-014 left exact versions to be confirmed at scaffold time.
+- Decision: Exact versions with no `^` or `~` in every workspace package. pnpm 12.11.2 through `packageManager`; Node 24 (`.nvmrc`, `engines >=24.3.0 <25`); Turborepo 2.11.7; Prettier 3.9.10; `typescript-eslint` 8.71.1; `globals` 17.13.0; Vitest 5.0.3; Convex 1.46.0; `convex-test` 0.0.61; `@edge-runtime/vm` 5.0.0; `yaml` 2.9.1. TypeScript and ESLint are D-033 and D-034.
+- Supply-chain controls: `minimumReleaseAge: 1440` (pnpm's own default, set explicitly) and `strictDepBuilds: true` with an `allowBuilds` list reviewed entry by entry. The plan suggested 4320 minutes; 1440 is in place because the plan's own Prettier pin was two days old at the time.
+- Consequences: A version is chosen deliberately or not at all. CI installs with `--frozen-lockfile`, so the lockfile and the pins move together in one dependency PR. Review `pnpm-workspace.yaml` in every dependency change: pnpm may append `minimumReleaseAgeExclude` entries on its own. Raise `minimumReleaseAge` to 4320 in a later dependency PR. `tools/route-task` is outside the workspace and still uses npm with caret ranges.
+
+## D-033: TypeScript 6.0.3, not 7 (2026-10-12)
+- Status: Accepted; settles an open choice in the approved scaffold plan
+- Context: TypeScript 7 is the Go-native compiler.
+- Decision: Pin TypeScript 6.0.3 across the workspace.
+- Rationale: `typescript-eslint` 8.71.1 declares `typescript >=4.8.4 <6.1.0`. Lint and typecheck must share one compiler, and `eslint-config-expo`, added with step 4, depends on `typescript-eslint` too.
+- Consequences: Revisit when typescript-eslint supports 7. Do not bump to 7 in a dependency PR before that check.
+
+## D-034: ESLint 9.39.5 with flat config, not 10 and not Biome (2026-10-12)
+- Status: Accepted; settles an open choice in the approved scaffold plan
+- Decision: ESLint 9.39.5 for linting, Prettier for formatting, `tsc` for typecheck: one tool per concern.
+- Rationale: `eslint-config-next`, added with step 3, pulls `eslint-plugin-react`, `eslint-plugin-import`, and `jsx-a11y`, which cap at ESLint 9, and only ESLint has the Next.js and Expo framework rules. Biome was rejected because it would take over both linting and formatting without those rules.
+- Consequences: The type-aware `strictTypeChecked` rules run with `projectService`, warnings are errors (`--max-warnings 0`), and `packages/domain` and `packages/kinship-engine` add a `no-restricted-imports` block for UI, Convex, and Clerk imports. `packages/validation` does not yet.
+
+## D-035: pnpm isolated node_modules (2026-10-12)
+- Status: Accepted; reversible
+- Decision: Keep pnpm's default `isolated` linker. No `nodeLinker` setting and no `.npmrc`.
+- Rationale: Isolated installs are stricter and catch phantom dependencies, and Expo SDK 54 and later support them. The official Convex starter template uses `nodeLinker: hoisted`; that was not copied.
+- Consequences: If a Metro or native build fails on a missing peer, fix it by installing through `npx expo install`, not by switching to `hoisted` first. Isolated mode already caused one real failure: `convex-test` must be inlined in the Vitest config (D-036).
+
+## D-036: Test stack (2026-10-12)
+- Status: Accepted for the shared packages, the enforcement probes, and Convex; the client runners are still open
+- Decisions:
+  - Shared and pure packages use Vitest 5, one trivial test each today.
+  - Convex functions use `convex-test` 0.0.61 under Vitest's `edge-runtime` environment. Two settings are required under isolated installs: `server.deps.inline: ["convex-test"]`, and modules passed to `convexTest` through `import.meta.glob(["./**/*.*s", "!./**/*.*.*"])`. Without them the errors look unrelated (`import.meta.glob is not a function`, `Could not find the "_generated" directory`).
+  - The enforcement probes in `packages/config/probes/enforcement.test.mjs` run under `node --test` and feed deliberately broken fixtures to the real TypeScript, ESLint, and Prettier configuration.
+  - `tools/route-task` keeps npm and `node --test` and stays outside the workspace and outside CI.
+- Consequences: No coverage threshold. `convex-test` does not enforce usage limits or run crons, so the Convex local backend is a later option. Still undecided: Playwright with `@clerk/testing` for web, `jest-expo` for mobile components, and Maestro for mobile end to end, all added with steps 3 and 4.
+
+## D-037: CI shape (2026-10-12)
+- Status: Accepted (Feature 1 step 1)
+- Decision: One workflow, `.github/workflows/ci.yml`, with a matrix over `format`, `lint`, `typecheck`, `test`, and `build`. Actions are pinned by commit SHA, workflow permissions are `contents: read`, concurrency cancels superseded runs, and Node comes from `.nvmrc` with the pnpm cache on. `tools/route-task` is outside this workflow's scope, stated in the file header.
+- Rationale: The matrix job names are the status-check contexts to require on `protect-main` later, so adding a check must not rename them.
+- Not done: `protect-main` still has no required status checks, repository-wide action SHA pinning is off, and there is no mobile E2E workflow and no Turbo remote cache. Those are plan step 5 and need owner approval because they change shared settings.
+- Consequences: The workflow cannot verify a real Clerk sign-in, because GitHub withholds secrets from fork PRs, and it cannot check Convex codegen drift, because `convex codegen` needs `CONVEX_DEPLOYMENT`. A drift job stays an open design item.
+
+## D-038: Clerk to Convex wiring, server side done and clients not built (2026-10-12)
+- Status: Accepted; the client half is not built
+- Decisions:
+  - Server side is what D-031 records: `auth.config.ts` with `applicationID: "convex"`, `CLERK_JWT_ISSUER_DOMAIN` read through `requireHttpsUrl`, identity only from `ctx.auth`, and the committed `convex/_generated/` exported as `@parampara/backend/api`.
+  - Clients, when they exist, follow the official Convex Clerk guide: `ClerkProvider` outside `ConvexProviderWithClerk`, and `<Authenticated>` or `useConvexAuth()` rather than Clerk's `useAuth()`, so the UI shows only what the backend verified.
+  - `CLERK_SECRET_KEY` and the Convex deploy key never go into `NEXT_PUBLIC_*` or `EXPO_PUBLIC_*`. `npx clerk init` is not used, because it is unpinned and writes keys.
+- State of the proof: neither `apps/web` nor `apps/mobile` exists (steps 3 and 4). Sign-in is in progress: nothing has been signed in against a real Clerk instance or Convex deployment. A Clerk development instance and a Convex development project are owner actions.
+- Open: the Expo SDK choice, the mobile sign-in flow, where the iOS and Android proof runs, and the shared i18n approach D-025 requires Feature 1 to pick.
+
+## D-039: Fallow as a non-blocking CI report (2026-10-12)
+- Status: Accepted; not yet built (plan step 6)
+- Context: Fallow is a Rust analyzer for unused code, duplication, complexity, and architecture boundaries. The plan audited 3.33.1 and ran it against a synthetic monorepo.
+- Decision: Add Fallow as a pinned devDependency run from CI only. Do not adopt the Fallow GitHub Action, which posts as a bot and needs write permissions. Keep the job out of the required checks, run it with `continue-on-error` and `contents: read`, and set `DO_NOT_TRACK=1` and `FALLOW_UPDATE_CHECK=off`. Use the default mode only: `--include-entry-exports` produced false positives on `convex/_generated` and on framework config defaults. Commit a minimal `.fallowrc.json` ignoring `**/convex/_generated/**`. Never run `fallow fix` in CI.
+- Consequences: Version bumps are deliberate, in a PR, after reading the CHANGELOG. Fallow has a single maintainer and a fast release cadence; nothing depends on it, so it can be removed without touching application code.
