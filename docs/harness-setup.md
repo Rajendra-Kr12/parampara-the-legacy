@@ -44,6 +44,7 @@ Lifecycle commands (`workspace`, `pane`, `tab`, `worktree` create or delete, `se
 
 ## Open items
 
+- Skill file discovery for Claude Code, Codex, OpenCode and Pi: unconfirmed. The first probe only asked for skill names, which `AGENTS.md` also lists. Stronger probe still open: ask for information found only inside a `SKILL.md` body (or the harness's own discovered-skill list), run with the skill files as the only source.
 - Hermes: model self-report was inconsistent (one probe said no instruction files, one quoted the `AGENTS.md` heading); repeat with a second model if exact loading matters.
 - agy: not verified, quota error (429, reset about 44 hours). Re-run the probe in `docs/model-routing.md` after the reset.
 - Pi + Zen custom provider, and Pi on OpenRouter free models: not tried.

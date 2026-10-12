@@ -71,7 +71,7 @@ Make multi-harness development safe and cheap before application code: routing, 
 - [ ] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback and budget cap. Decide before 2026-10-31 whether to keep it on paid Laya or self-host.
 - [x] Map routing tiers to Firstmate dispatch profiles and document the herdr setup in `docs/harness-setup.md` (2026-10-11). The map is a proposal; no Firstmate config file was changed, and herdr lifecycle commands were not run.
 - [x] Read official docs for OpenCode, Pi, and Hermes on instruction and skill loading (2026-10-11).
-- [x] Run Claude Code, Codex, OpenCode, Pi, and Hermes once in this repo; `AGENTS.md` and skills load for the first four, Hermes only partly confirmed. Results in `docs/model-routing.md` (2026-10-11).
+- [x] Run Claude Code, Codex, OpenCode, Pi, and Hermes once in this repo; `AGENTS.md` loading observed for the first four, skill names visible via `AGENTS.md` but skill file discovery unconfirmed, Hermes only partly confirmed. Results in `docs/model-routing.md` (2026-10-11).
 - [ ] Re-run the Antigravity (agy) probe after its quota resets (429 on 2026-10-11, about 44 hours); optionally repeat Hermes with a second model.
 - [x] Firstmate cannot dispatch Hermes; manual herdr-pane workflow documented in `docs/harness-setup.md` (2026-10-11).
 - [x] Pi and Hermes access to free models recorded in `docs/model-catalog.md` and `docs/harness-setup.md` (2026-10-11). Still not tried: Zen as a Pi custom provider, Pi on OpenRouter free models.
