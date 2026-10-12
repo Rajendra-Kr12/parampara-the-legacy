@@ -70,7 +70,7 @@ P0/P1 express sequencing priority, not exclusion from the agreed MVP.
 Make multi-harness development safe and cheap before application code: routing, automated review, and CI.
 
 ### Checklist
-- [x] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback (2026-10-11). Automated tests only; the live Laya call is unverified. After 2026-10-31 it defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
+- [x] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback (2026-10-11). Covered by automated tests; see the live-check item below. After 2026-10-31 it defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
 - [x] Owner: run the live Laya check from `tools/route-task/README.md` (2026-10-12: `routingPath: laya`, tier T1 for 'Classify a docs update'; the static table says D, so the two paths differ on this task; observation only, as reported by the owner).
 - [ ] Owner: set an AI Gateway budget cap and decide before 2026-10-31 whether to keep paid Laya or self-host. Still open.
 - [x] Map routing tiers to Firstmate dispatch profiles and document the herdr setup in `docs/harness-setup.md` (2026-10-11). The map is a proposal; no Firstmate config file was changed, and herdr lifecycle commands were not run.

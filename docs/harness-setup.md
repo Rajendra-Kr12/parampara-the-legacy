@@ -48,4 +48,4 @@ Lifecycle commands (`workspace`, `pane`, `tab`, `worktree` create or delete, `se
 - Hermes: model self-report was inconsistent (one probe said no instruction files, one quoted the `AGENTS.md` heading); repeat with a second model if exact loading matters.
 - agy: not verified, quota error (429, reset about 44 hours). Re-run the probe in `docs/model-routing.md` after the reset.
 - Pi + Zen custom provider, and Pi on OpenRouter free models: not tried.
-- Laya classifier remains unimplemented (Feature 0 continues).
+- Laya classifier: implemented in `tools/route-task`; open owner items are tracked in `docs/scope.md` (Feature 0).
