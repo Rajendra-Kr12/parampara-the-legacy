@@ -19,7 +19,7 @@ Accepted effort values per harness (docs, from Firstmate adapter notes): Claude 
 
 Rules to carry over: route up on doubt; high-risk areas (graph, kinship, approvals, auth, privacy, migrations) match a T2 rule before any bulk or free-model rule; never a free model for T2, T3, R. Rules are read in natural language by Firstmate, so write the `when` text from `docs/model-routing.md` task classes, and put the high-risk rule first. A schema-valid file does not prove the harness/model pair works: Firstmate refuses a model a harness listing omits, and effort is only recorded when unsupported.
 
-Dispatchable harnesses (docs, Firstmate `AGENTS.md` section 4): `claude`, `codex`, `opencode`, `pi`, `pi-signed`, `grok`, `kimi`, `cursor`, `omp`, plus `muse`, `gemini`, `rovo`, `agy`, `devin` for crewmates and scouts only. **Hermes is not in the list, so Firstmate cannot dispatch it** (docs); use the manual herdr workflow below. Antigravity is dispatchable in principle, but the owner's account was quota-limited when probed (observed), so keep agy out of profiles until it passes the probe.
+Dispatchable harnesses (docs, Firstmate `AGENTS.md` section 4): `claude`, `codex`, `opencode`, `pi`, `pi-signed`, `grok`, `kimi`, `cursor`, `omp`, plus `muse`, `gemini`, `rovo`, `agy`, `devin` for crewmates and scouts only. **Hermes is not in the list, so Firstmate cannot dispatch it** (docs); use the manual herdr workflow below. Antigravity is dispatchable in principle. Its Gemini pool was quota-limited when first probed, but its separate Claude and GPT pool answered (see the agy section below), so an agy profile can name a model from that pool; keep agy out of profiles until a pane launch is shown to honor the chosen model.
 
 ## Reaching free models from Pi and Hermes
 
@@ -42,10 +42,35 @@ Manual Hermes workflow (docs-derived, not run): open a herdr pane in a git workt
 
 Lifecycle commands (`workspace`, `pane`, `tab`, `worktree` create or delete, `server stop`) were not run in this verification, on purpose; tasks that drive them must use a named non-default isolated lab (Firstmate `AGENTS.md`).
 
+## Antigravity (agy) findings
+
+Observed 2026-10-11 with agy 1.3.3 from a worktree of this repository. agy's answers about itself are self-report, not an inspection of its injected context.
+
+- **Two model pools with separate quotas.** Gemini pool: Gemini 3.8, 3.7 and 3.6 Flash (high, medium, low) and Gemini 3.1 Pro (high, low). Claude and GPT pool: `claude-sonnet-4-6`, `claude-opus-4-6-thinking` and `gpt-oss-120b-medium`. The Gemini pool hit the 429 quota error; the Claude and GPT pool answered, so use that pool while the Gemini quota is exhausted. Model ids are in `docs/model-catalog.md`.
+- **`AGENTS.md` is loaded.** agy reported it as an injected workspace rule and quoted line 1 correctly. It also loads a global `~/GEMINI.md` outside the repository, so `AGENTS.md` must carry every rule agy needs.
+- **Skills are listed, not loaded.** agy sees the skill names but only reads a `SKILL.md` when a task triggers it. Its file tools could not list the skills directory, so its skill names came from `AGENTS.md` and its skill registry. Whether a triggered skill loads was not tested; do not describe skills as loaded in agy.
+- **`CLAUDE.md` `@AGENTS.md` import is not processed.** agy can read `CLAUDE.md` as a file but treats `@AGENTS.md` as Claude Code syntax.
+- **`--model` is honored in print mode, but a pane launch fell back to Gemini.** `agy --model claude-sonnet-4-6 --print-timeout 120s --print "<prompt>"` ran on the requested Claude model. A launch inside a Herdr pane was reported to fall back to a Gemini model instead; that pane launch was not reproduced for this note, and the interactive `-i` path was not tested. Verify the model a pane actually runs on before trusting a profile that names a non-Gemini agy model.
+- **Headless permission gap.** In print mode agy's shell-style tool is auto-denied, so directory listing fails unless a `permissions.allow` rule covers it; avoid `--dangerously-skip-permissions`.
+- **Version claim to check.** `docs/model-routing.md` cites `AGENTS.md` support from "v1.20.3+" while the installed agy is 1.3.3; verify the cited version before relying on it.
+
+## Laya router (`tools/route-task`)
+
+The Laya router is merged. It classifies a task description into a tier and data class and selects an allowed catalog model, falling back to the static routing table when Laya cannot run (`routingPath: "static"` with a `fallbackReason`). Setup and options are in `tools/route-task/README.md`.
+
+Run the live check (not part of automated tests), from the repository root, with `AI_GATEWAY_API_KEY` in the gitignored `.env.local` (never print or commit it):
+
+```sh
+npm --prefix tools/route-task install
+npm --prefix tools/route-task run route -- --task "Classify a public documentation update." --diagnose
+```
+
+`routingPath: "laya"` means the live call worked. If it shows `static`, record the `fallbackReason` and `diagnostic` values. `--diagnose-request` prints the request shape without a network call. Laya is free through 2026-10-31; after that static routing is the default unless `ROUTE_TASK_ENABLE_PAID_LAYA=true` is set by the owner. Live check result on this machine: not run for this note.
+
 ## Open items
 
 - Skill file discovery for Claude Code, Codex, OpenCode and Pi: unconfirmed. The first probe only asked for skill names, which `AGENTS.md` also lists. Stronger probe still open: ask for information found only inside a `SKILL.md` body (or the harness's own discovered-skill list), run with the skill files as the only source.
 - Hermes: model self-report was inconsistent (one probe said no instruction files, one quoted the `AGENTS.md` heading); repeat with a second model if exact loading matters.
-- agy: not verified, quota error (429, reset about 44 hours). Re-run the probe in `docs/model-routing.md` after the reset.
+- agy: re-run the probe in `docs/model-routing.md` after the Gemini quota resets; still open are a controlled marker test that `AGENTS.md` is loaded, whether a triggered skill loads, and a reproducible pane launch showing which model runs.
 - Pi + Zen custom provider, and Pi on OpenRouter free models: not tried.
 - Laya classifier: implemented in `tools/route-task`; open owner items are tracked in `docs/scope.md` (Feature 0).

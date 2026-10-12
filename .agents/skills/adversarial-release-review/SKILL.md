@@ -1,6 +1,6 @@
 ---
 name: adversarial-release-review
-description: Independently challenge a Parampara feature before shipment or before merging a feature PR, focusing on security, privacy, relationship integrity, migrations, and web/iOS/Android regressions. Use when a feature is believed done.
+description: Use when a Parampara feature is believed done and needs an independent challenge before shipment or before merging a feature PR, covering security, privacy, relationship integrity, migrations, and web/iOS/Android regressions. Do NOT use for planning, for reviewing a work-in-progress draft, or as a substitute for the targeted domain and privacy reviews.
 ---
 
 # Adversarial release review
@@ -16,3 +16,17 @@ description: Independently challenge a Parampara feature before shipment or befo
 9. Classify findings as critical, high, medium, or low with reproduction evidence.
 10. Block release for unresolved critical security, privacy, or data-integrity findings.
 11. Record remediation and retest results in the PR description and `docs/scope.md`.
+
+## Gotchas
+
+- The reviewer must be a different model family from the implementer; the same family sharing blind spots is not independence.
+- Claude cannot invoke `/codex:adversarial-review`; the user runs it, and its output is recorded.
+- Never claim a test or review ran if it did not; write "not run".
+- A UI that renders is not a feature that is done.
+
+## Before you finish
+
+- [ ] Reviewer family differs from the implementer.
+- [ ] Greptile conversations are resolved or answered.
+- [ ] Findings are classified by severity, and unresolved critical ones block release.
+- [ ] Remediation and retest results are recorded in the PR description and `docs/scope.md`.

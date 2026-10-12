@@ -1,6 +1,6 @@
 ---
 name: relationship-domain-review
-description: Review Parampara changes involving family identities, relationship edges, kinship terminology (Atta, Menatta, Nanamma, Tatayya and others), relationship verification, deceased profiles, stories about other people, or historical claims. Use before merging any change to packages/domain, packages/kinship-engine, or Convex functions that write people, edges, claims, or approvals.
+description: Use when a change touches family identities, relationship edges, kinship terms (Atta, Menatta, Nanamma, Tatayya and others), relationship or claim verification, deceased profiles, stories about other people, or approvals, and before merging any change to packages/domain, packages/kinship-engine, or Convex functions that write people, edges, claims, or approvals. Do NOT use for UI-only styling, copy edits, or changes that touch no family data model or approval logic.
 ---
 
 # Relationship-domain review
@@ -16,3 +16,16 @@ description: Review Parampara changes involving family identities, relationship 
 9. Integrity: approval + status change + audit event happen in one Convex mutation; concurrent conflicting proposals are handled; audit history is preserved.
 10. Tests: positive and negative cases, including cousin-marriage overlap, self-approval attempt, insufficient approvers, and missing kinship term. Use synthetic families only.
 11. Report findings by severity (critical, high, medium, low) with reproduction and suggested correction. Do not silently change product policy; raise it with the user.
+
+## Gotchas
+
+- Overlapping maternal and paternal paths from marriages between relatives are valid data, not duplicates or errors.
+- A kinship label change must never edit an edge; check the code path, not only the UI.
+- A single `verified` boolean is a defect even when it looks convenient.
+- Use synthetic families in tests; never real family data.
+
+## Before you finish
+
+- [ ] Findings listed by severity with reproduction.
+- [ ] Negative tests exist: self-approval, insufficient approvers, cousin-marriage overlap, missing kinship term.
+- [ ] Product-policy questions raised with the user, not changed silently.

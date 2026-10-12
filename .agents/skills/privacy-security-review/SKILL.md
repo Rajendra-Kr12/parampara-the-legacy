@@ -1,6 +1,6 @@
 ---
 name: privacy-security-review
-description: Review Parampara changes involving personal information, phone or email, addresses, city discovery, children, evidence, photos or audio, retention, deletion, authentication (Clerk), authorization (Convex functions), media access (R2 signed URLs), secrets, or external AI services. Use before merging any such change.
+description: Use when a change touches personal information, phone or email, addresses, city discovery, children, evidence, photos or audio, retention, deletion, authentication (Clerk), authorization (Convex functions), media access (R2 signed URLs), secrets, or external AI services, and before merging any such change. Do NOT use for changes that touch no personal data, access control, media, or secrets, such as pure layout or copy edits.
 ---
 
 # Privacy and security review
@@ -19,3 +19,16 @@ description: Review Parampara changes involving personal information, phone or e
 9. Review retention, archival copies, deletion requests, and backups.
 10. Confirm AI output (including the Laya router) cannot bypass approval or authorization and never receives family data.
 11. Report findings with severity, impact, reproduction, and required retest. Critical privacy or security findings block release.
+
+## Gotchas
+
+- Hiding data in the client is not authorization; test by calling Convex functions directly.
+- `NEXT_PUBLIC_*` and `EXPO_PUBLIC_*` variables ship to clients, so no secret belongs in them.
+- Revoking consent or access must stop future queries and URL issuance, but a URL already issued stays valid until it expires.
+- Logs, error messages, analytics and prompts leak personal data as easily as the database does.
+
+## Before you finish
+
+- [ ] Every sensitive field has a stated purpose and an authorization check.
+- [ ] Attack tests run: direct function calls, role escalation, cross-family access, replayed invitations, expired media URLs.
+- [ ] Critical findings recorded as release blockers, with a required retest.

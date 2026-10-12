@@ -14,6 +14,8 @@ Parampara: The Legacy is a private family legacy network for web, iOS, and Andro
 |---|---|
 | Starting any session | `docs/scope.md` (status and next work) |
 | Planning a feature | `docs/product-requirements.md`, skill `plan-feature` |
+| Writing or checking behavior (done criteria, tests) | `docs/acceptance-criteria.md` |
+| Choosing, running, or debugging a harness | `docs/harness-setup.md` |
 | Touching people, relationships, kinship, approvals | `docs/domain-model.md`, skill `relationship-domain-review` |
 | Touching personal data, media, auth, consent | `docs/privacy-and-governance.md`, skill `privacy-security-review` |
 | Choosing a model or harness for a task | `docs/model-routing.md`, skill `route-task` |
@@ -22,6 +24,8 @@ Parampara: The Legacy is a private family legacy network for web, iOS, and Andro
 | Shipping a feature | skill `adversarial-release-review`, then skill `update-scope` |
 
 Skills live in `.agents/skills/<name>/SKILL.md`. If your harness does not load skills automatically, open the file and follow it.
+
+This file stays short on purpose (owner choice): add a rule only after an observed agent mistake, and put detail in `docs/` or skills.
 
 ## Workflow
 

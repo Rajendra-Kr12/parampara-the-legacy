@@ -69,3 +69,15 @@ An uploaded document is evidence to assess, not automatic proof of authenticity.
 - Archived/restricted: retained under documented policy with limited access.
 
 A story dispute follows a 60-day resolution policy. Timer start, visibility, resolution, extension, notifications, and exceptions are defined in D-026.
+
+## Why these rules exist
+
+One-line reasons for the critical invariants in `AGENTS.md`, so a change that seems to simplify them is weighed against the harm they prevent.
+
+- **One canonical identity per person:** duplicates split a person's memories, relationships and approvals across records, so no one sees the whole family picture.
+- **Maternal and paternal paths both preserved:** marriages between relatives are real, and dropping either path erases a true relationship and changes derived labels.
+- **Labels are display only:** a term varies by household, region and viewer, so if a label could edit the graph, a preference would silently rewrite family facts.
+- **Separate verification states:** control of an account, an accepted relationship, evidence for a claim and an approved story are different facts, and one `verified` flag would let one stand in for another.
+- **A proposer never approves their own change:** approval is only meaningful as an independent check by someone else.
+- **Uncertainty never becomes certainty:** family history is often disputed or undocumented, and recording a guess as fact makes it look settled and hard to correct.
+- **Server-side authorization:** a client can be bypassed by calling the backend directly, so contact details, evidence and media are protected only if Convex functions check access themselves.
