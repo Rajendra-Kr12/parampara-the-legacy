@@ -25,8 +25,19 @@ parampara-the-legacy/
 │       └── adversarial-release-review/
 ├── .claude/
 │   └── skills -> ../.agents/skills   # symlink so Claude Code sees the same skills
+├── package.json              # pnpm workspace root (pnpm 12.11.2, Node 24)
+├── pnpm-workspace.yaml       # packages/* only; tools/route-task is excluded (npm)
+├── turbo.json                # lint, typecheck, test, build; root format check
+├── .nvmrc
+├── .prettierignore
+├── .github/workflows/ci.yml  # format, lint, typecheck, test, build
+├── packages/
+│   ├── config/               # shared tsconfig, ESLint, Prettier, enforcement probes
+│   ├── domain/               # pure TS (empty so far)
+│   ├── kinship-engine/       # pure TS (empty so far)
+│   └── validation/           # shared input schemas (empty so far)
 ├── tools/
-│   └── route-task/           # Laya task router (Feature 0); see its README
+│   └── route-task/           # Laya task router (Feature 0); npm, not in the pnpm workspace
 └── docs/
     ├── scope.md              # living plan and status
     ├── original-brief.md     # the owner's original idea notes (historical)

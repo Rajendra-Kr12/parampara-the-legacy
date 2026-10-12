@@ -1,0 +1,19 @@
+# Workspace members. Add apps/* and further packages/* entries as they are created.
+packages:
+  - packages/*
+  # tools/route-task is deliberately NOT a workspace member. It uses npm with its
+  # own package-lock.json and `node --test`, and pnpm, Turborepo and the CI
+  # workflow do not run it. Keep it out of the globs above.
+  - "!tools/**"
+
+# Supply-chain controls (pnpm 12). A version must be at least 1 day (1440 minutes,
+# the pnpm default, set explicitly) old before it can be installed. The plan suggested
+# 4320 (3 days), but its own prettier 3.9.10 pin was published 2026-10-10, so raise
+# this to 4320 in a later dependency PR. pnpm may append minimumReleaseAgeExclude
+# entries on its own; review this file in every dependency change and remove them.
+minimumReleaseAge: 1440
+
+# Dependency lifecycle scripts do not run unless listed here, and an unlisted
+# build fails the install. Reviewed entry by entry.
+strictDepBuilds: true
+allowBuilds: {}

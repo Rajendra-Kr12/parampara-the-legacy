@@ -1,0 +1,18 @@
+# Prettier covers the pnpm workspace tooling only (packages/, root config, CI).
+# Existing docs and agent files predate it, and tools/route-task has its own
+# npm toolchain, so they are out of scope until someone formats them on purpose.
+pnpm-lock.yaml
+package-lock.json
+node_modules
+.turbo
+docs
+tools
+.agents
+.claude
+.greptile
+README.md
+AGENTS.md
+CLAUDE.md
+.env.example
+packages/config/probes/fixtures
+.github/pull_request_template.md

@@ -1,0 +1,30 @@
+{
+  "name": "@parampara/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared TypeScript, ESLint and Prettier configuration for the Parampara workspace.",
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint": "./eslint.mjs",
+    "./prettier": "./prettier.mjs"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "test": "node --test probes/enforcement.test.mjs"
+  },
+  "dependencies": {
+    "@eslint/js": "9.39.5",
+    "globals": "17.13.0",
+    "typescript-eslint": "8.71.1"
+  },
+  "devDependencies": {
+    "eslint": "9.39.5",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3"
+  },
+  "peerDependencies": {
+    "eslint": "9.39.5",
+    "typescript": "6.0.3"
+  }
+}

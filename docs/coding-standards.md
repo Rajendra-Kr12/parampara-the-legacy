@@ -2,7 +2,7 @@
 
 ## Status
 
-These are proposed standards. A rule must not be described as machine-enforced until a corresponding tool/configuration exists and a probe or test demonstrates that it works. First inspect the actual repository and adapt these rules to its framework.
+These are proposed standards. A rule must not be described as machine-enforced until a corresponding tool/configuration exists and a probe or test demonstrates that it works. First inspect the actual repository and adapt these rules to its framework. The workspace tooling (pnpm, Turborepo, TypeScript 6.0.3, ESLint 9.39, Prettier 3.9, Vitest, CI) exists as of the `chore/monorepo-tooling` change; the ledger at the end says which rules it enforces.
 
 ## Principles
 
@@ -32,7 +32,7 @@ Adapt the exact directory names to the actual repository after inspection.
 
 ## Naming and formatting
 
-Choose and enforce one formatter, linter, strict typecheck, and naming convention after inspecting the current toolchain. Do not introduce conflicting tools that check the same concern. Use consistent kebab-case filenames where supported; use framework-required naming where the framework demands it.
+One formatter (Prettier), one linter (ESLint flat config), and one strict typecheck (`tsc`) are enforced; the shared configuration lives in `packages/config`. Do not introduce conflicting tools that check the same concern. Use consistent kebab-case filenames where supported; use framework-required naming where the framework demands it.
 
 ## Security and privacy review rules
 
@@ -49,10 +49,22 @@ After a completed change, run the repository-supported checks: lint, typecheck, 
 
 ## Enforcement ledger
 
-Maintain a table in the actual repository documenting:
-- rule
-- enforcing tool/configuration
-- probe or test proving it fires
-- status: enforced, review-only, or not yet implemented
+Status is `enforced`, `review-only`, or `not yet implemented`. A probe is a test that feeds a deliberately broken fixture to the real configuration and fails if the tool stops rejecting it. Probes live in `packages/config/probes/` and run as part of `pnpm test` (the `@parampara/config` package). Review-only and not-yet-implemented rows have no probe by definition, and must not be presented as automated guarantees.
 
-Review-only rules must not be presented as automated guarantees.
+| Rule | Enforcing tool / configuration | Probe | Status |
+|---|---|---|---|
+| Strict TypeScript, including implicit `any`, unchecked index access, and exact optional properties | `packages/config/tsconfig.base.json`, run by each package's `typecheck` and `build` scripts | `strict-implicit-any.ts` (TS7006), `strict-unchecked-index.ts` (TS2532/TS18048), `strict-exact-optional.ts` (TS2375) in `enforcement.test.mjs` | enforced |
+| No `any`, non-null assertions, or `@ts-ignore` | `strictTypeChecked` typescript-eslint plus explicit rules in `packages/config/eslint.mjs`, `eslint --max-warnings 0` | `lint-escape-hatches.ts` must raise `no-explicit-any`, `no-non-null-assertion`, `ban-ts-comment` | enforced |
+| Domain packages stay pure TypeScript (no `react`, `react-native`, `next`, `expo*`, `convex*`, `@clerk/*`, `@parampara/backend`) | `domainPurity` `no-restricted-imports` block in `packages/domain` and `packages/kinship-engine` ESLint configs | `domain-impure-imports.ts` must raise three `no-restricted-imports` errors | enforced (`packages/validation` is not covered) |
+| One formatter | Prettier 3.9 via `pnpm format`, scope set by `.prettierignore` | `unformatted.ts` must fail the check, and the root `package.json` must point at the shared config | enforced for workspace tooling and packages only; `docs/`, `tools/`, `.agents/`, and root markdown are excluded |
+| Tests run for every package | Vitest through `pnpm test` (Turborepo) | each package's own trivial test | enforced (no coverage threshold) |
+| Production sources compile | `tsc -p tsconfig.build.json` in each package's `build` script (no emit; internal packages ship TypeScript source) | covered by the strict typecheck probes above | enforced (compile check only, not a bundle) |
+| CI actions pinned by commit SHA, read-only permissions | `.github/workflows/ci.yml`, checked by `probes/workflow-policy.mjs` | the real workflow must pass, and a bad sample (unpinned action, `contents: write`) must fail | enforced for files in `.github/workflows/` that the test reads (`ci.yml` only) |
+| `tools/route-task` stays outside the pnpm workspace | `!tools/**` in `pnpm-workspace.yaml`, noted in the `ci.yml` header | workspace and CI-scope assertions in `enforcement.test.mjs` | enforced (route-task has no CI of its own yet) |
+| Secrets and `.env*` files are not committed | `.gitignore` | `git check-ignore` assertions for `.env` and `apps/web/.env.local`, and none for `.env.example` | enforced (ignore rules only; no secret scanning) |
+| CI checks are required to merge | GitHub `protect-main` ruleset | none | not yet implemented (ruleset has no required status checks; plan step 5, owner approval needed) |
+| Actions must be pinned repository-wide (`sha_pinning_required`) | GitHub Actions settings | none | not yet implemented (settings change, owner approval needed) |
+| Layering: UI depends on services, services on domain | code review, Greptile | none | review-only (only the domain-purity subset above is automated) |
+| Kebab-case filenames | none | none | not yet implemented |
+| Authorization, privacy, and relationship-integrity rules | Greptile rules, skills `privacy-security-review` and `relationship-domain-review`, Codex adversarial review | none | review-only |
+| No em dashes in written output | none | none | review-only |
