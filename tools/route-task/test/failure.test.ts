@@ -5,6 +5,7 @@ import { APICallError, LoadAPIKeyError, NoSuchModelError } from "ai";
 import { classifyFailure, LayaResponseError, LayaTimeoutError, type FailureDiagnostic } from "../src/failure.js";
 import { routeTask } from "../src/router.js";
 import { buildLayaRequest, describeLayaRequest, TASK_PLACEHOLDER } from "../src/laya.js";
+import { parseModelCatalog } from "../src/catalog.js";
 import { runCli } from "../src/run.js";
 
 const catalogText = await readFile(new URL("../../test/catalog.fixture.md", import.meta.url), "utf8");
@@ -109,11 +110,20 @@ test("provider codes that are not short tokens are dropped", () => {
   assert.equal(result.field, undefined);
 });
 
-test("the Laya request sends a string state, pins Boundless, and omits the catalog", () => {
-  const request = buildLayaRequest("Classify a docs update.");
+test("the Laya request sends a string state, pins Boundless, and lists allowed models without prices", () => {
+  const catalog = parseModelCatalog(catalogText);
+  const request = buildLayaRequest("Classify a docs update.", catalog);
   assert.equal(request.model, "convaiinnovations/laya");
   assert.equal(typeof request.state, "string");
   assert.deepEqual(request.providerOptions, { gateway: { only: ["boundless"] } });
+  assert.ok(request.state.includes("Classify a docs update."));
+  for (const model of catalog.models) {
+    assert.ok(request.state.includes(`${model.id} | ${model.tiers.join(",")} | ${model.dataClass}`), model.id);
+  }
+  const allLines = request.state.split("\n");
+  const lines = allLines.slice(allLines.findIndex((line) => line.startsWith("Allowed models")) + 1);
+  assert.equal(lines.length, catalog.models.length);
+  assert.ok(!/\$|\d+\.\d+|price|Zero retention/i.test(lines.join("\n")), lines.join("\n"));
 });
 
 test("--diagnose-request prints the request shape with the task replaced and does not route", async () => {
@@ -122,6 +132,7 @@ test("--diagnose-request prints the request shape with the task replaced and doe
   const code = await runCli(["--diagnose-request", "--task", "SECRET-TASK"], {
     stdout: (t) => void out.push(t),
     stderr: () => undefined,
+    loadCatalog: async () => parseModelCatalog(catalogText),
     route: async () => { routed = true; return { status: "routed", routingPath: "static" } as const; },
   });
   assert.equal(code, 0);
@@ -129,5 +140,5 @@ test("--diagnose-request prints the request shape with the task replaced and doe
   const text = out.join("");
   assert.ok(text.includes(TASK_PLACEHOLDER));
   assert.ok(!text.includes("SECRET-TASK"));
-  assert.deepEqual(JSON.parse(text), JSON.parse(JSON.stringify(describeLayaRequest())));
+  assert.deepEqual(JSON.parse(text), JSON.parse(JSON.stringify(describeLayaRequest(parseModelCatalog(catalogText)))));
 });

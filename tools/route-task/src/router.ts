@@ -201,6 +201,10 @@ export async function loadGatewayApiKey(
   }
 }
 
+export async function loadDefaultCatalog(): Promise<Catalog> {
+  return parseModelCatalog(await readFile(DEFAULT_CATALOG_PATH, "utf8"));
+}
+
 export async function routeTask(options: RouteTaskOptions): Promise<RoutingDecision> {
   const task = options.task.trim();
   if (task.length === 0 || task.length > 6_000 || containsProhibitedData(task)) {

@@ -101,28 +101,37 @@ export function parseResult(result: LayaEvaluationResult): Classification {
 export const LAYA_MODEL_ID = "convaiinnovations/laya";
 const PROVIDER_OPTIONS = { gateway: { only: ["boundless"] } } as const;
 
+/** One compact line per allowed model: id, tier suggestion and data class only (no prices or notes). */
+export function formatAllowedModels(catalog: Catalog): string {
+  return catalog.models.map((model) => `${model.id} | ${model.tiers.join(",")} | ${model.dataClass}`).join("\n");
+}
+
+export function buildLayaState(task: string, catalog: Catalog): string {
+  return `Task:\n${task}\n\nAllowed models (id | tier suggestion | data class):\n${formatAllowedModels(catalog)}`;
+}
+
 /**
  * The documented Laya examples send `state` as a plain string and pin routing to Boundless.
- * The catalog is not part of the request: the questions need only the task text.
+ * The string carries the task and the compact allowed-model list required by the classifier contract.
  */
-export function buildLayaRequest(state: string) {
-  return { model: LAYA_MODEL_ID, state, questions: QUESTIONS, providerOptions: PROVIDER_OPTIONS };
+export function buildLayaRequest(task: string, catalog: Catalog) {
+  return { model: LAYA_MODEL_ID, state: buildLayaState(task, catalog), questions: QUESTIONS, providerOptions: PROVIDER_OPTIONS };
 }
 
 export const TASK_PLACEHOLDER = "<TASK_TEXT_REDACTED>";
 
 /** The request shape with the task replaced by a placeholder; safe to paste into a bug report. */
-export function describeLayaRequest(): unknown {
-  const request = buildLayaRequest(TASK_PLACEHOLDER);
+export function describeLayaRequest(catalog: Catalog): unknown {
+  const request = buildLayaRequest(TASK_PLACEHOLDER, catalog);
   return { ...request, stateType: typeof request.state, questionTypes: Object.fromEntries(Object.entries(QUESTIONS).map(([name, question]) => [name, question.type])) };
 }
 
 export function createAiSdkLayaClient(): LayaClient {
   return {
-    async evaluate({ task, timeoutMs }): Promise<Classification> {
+    async evaluate({ task, catalog, timeoutMs }): Promise<Classification> {
       const { experimental_decide } = await import("ai");
       const result = await experimental_decide({
-        ...buildLayaRequest(task),
+        ...buildLayaRequest(task, catalog),
         abortSignal: AbortSignal.timeout(timeoutMs),
       });
       return parseResult(result);

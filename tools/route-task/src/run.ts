@@ -1,8 +1,9 @@
 import { describeLayaRequest } from "./laya.js";
-import { routeTask } from "./router.js";
-import type { RoutingDecision } from "./types.js";
+import { loadDefaultCatalog, routeTask } from "./router.js";
+import type { Catalog, RoutingDecision } from "./types.js";
 
 export interface CliIo {
+  readonly loadCatalog?: () => Promise<Catalog>;
   readonly route?: (options: { readonly task: string; readonly diagnose?: boolean }) => Promise<RoutingDecision>;
   readonly stdout: (text: string) => void;
   readonly stderr: (text: string) => void;
@@ -17,8 +18,13 @@ function taskFromArguments(argumentsList: readonly string[]): string | undefined
 /** Returns the process exit code. Setup failures never expose raw errors or paths. */
 export async function runCli(argumentsList: readonly string[], io: CliIo): Promise<number> {
   if (argumentsList.includes("--diagnose-request")) {
-    io.stdout(`${JSON.stringify(describeLayaRequest(), null, 2)}\n`);
-    return 0;
+    try {
+      io.stdout(`${JSON.stringify(describeLayaRequest(await (io.loadCatalog ?? loadDefaultCatalog)()), null, 2)}\n`);
+      return 0;
+    } catch {
+      io.stderr("Unable to route task. Check the model catalog and gateway configuration.\n");
+      return 1;
+    }
   }
   const task = taskFromArguments(argumentsList);
   if (task === undefined) {
