@@ -11,7 +11,7 @@ description: Review Parampara changes involving family identities, relationship 
 4. Kinship labels: derived by `packages/kinship-engine` from graph paths plus locale and custom settings; paternal-side default; viewer preference stored separately; changing a label never mutates edges. Missing terms fall back gracefully. New terms are marked unvalidated until checked by native speakers.
 5. Purity: `packages/domain` and `packages/kinship-engine` import no UI, Convex, or provider code.
 6. States: account, relationship, historical-claim, content, and profile states stay distinct. No single `verified` boolean.
-7. Approvals: proposer never approves their own change; reviewer eligibility is computed server-side. Deceased profiles need three eligible approvals, or two plus reviewed documentary evidence when fewer than three are eligible (D-016). Stories about a person need that person's living close relatives.
+7. Approvals: proposer never approves their own change; reviewer eligibility is computed server-side. Deceased profiles need three eligible approvals, or two plus reviewed documentary evidence when fewer than three are eligible (D-016). Eligibility circles and thresholds are owned by D-023 and story approval by D-024 (see `docs/acceptance-criteria.md`).
 8. Evidence: provenance recorded; uncertain and disputed states preserved; a document is evidence to assess, not automatic proof.
 9. Integrity: approval + status change + audit event happen in one Convex mutation; concurrent conflicting proposals are handled; audit history is preserved.
 10. Tests: positive and negative cases, including cousin-marriage overlap, self-approval attempt, insufficient approvers, and missing kinship term. Use synthetic families only.

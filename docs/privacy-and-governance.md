@@ -30,7 +30,7 @@ Evidence records should capture type, source, submitter, associated claim, revie
 - Conflicting dates remain uncertain or disputed until credible evidence supports resolution.
 - Administrators can resolve escalated disputes but must record the basis of the decision.
 - Multiple story versions may coexist during review.
-- A story unresolved after 60 days moves to the contributor's private draft, subject to a documented exception.
+- A story unresolved after 60 days moves to the contributor's private draft, subject to a documented exception. Timer, visibility, extension, and exceptions are owned by D-026.
 - Disagreement on one field does not automatically invalidate an entire person's profile.
 
 ## Archival preservation and deletion
