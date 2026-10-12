@@ -276,7 +276,7 @@ Record durable product and architecture decisions here. Add date, status, contex
   - Server side is what D-031 records: `auth.config.ts` with `applicationID: "convex"`, `CLERK_JWT_ISSUER_DOMAIN` read through `requireHttpsUrl`, identity only from `ctx.auth`, and the committed `convex/_generated/` exported as `@parampara/backend/api`.
   - Clients, when they exist, follow the official Convex Clerk guide: `ClerkProvider` outside `ConvexProviderWithClerk`, and `<Authenticated>` or `useConvexAuth()` rather than Clerk's `useAuth()`, so the UI shows only what the backend verified.
   - `CLERK_SECRET_KEY` and the Convex deploy key never go into `NEXT_PUBLIC_*` or `EXPO_PUBLIC_*`. `npx clerk init` is not used, because it is unpinned and writes keys.
-- State of the proof: neither `apps/web` nor `apps/mobile` exists (steps 3 and 4). Sign-in is in progress: nothing has been signed in against a real Clerk instance or Convex deployment. A Clerk development instance and a Convex development project are owner actions.
+- State of the proof: neither `apps/web` nor `apps/mobile` exists (steps 3 and 4). Sign-in is in progress: nothing has been signed in against a real Clerk instance or Convex deployment. The Convex development deployment exists, because the owner generated `convex/_generated/` against it (D-031). Setting `CLERK_JWT_ISSUER_DOMAIN` in that deployment for a Clerk development instance, and the sign-in proof itself, are owner actions.
 - Open: the Expo SDK choice, the mobile sign-in flow, where the iOS and Android proof runs, and the shared i18n approach D-025 requires Feature 1 to pick.
 
 ## D-039: Fallow as a non-blocking CI report (2026-10-12)

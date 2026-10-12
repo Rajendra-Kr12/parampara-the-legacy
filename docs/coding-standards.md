@@ -2,7 +2,7 @@
 
 ## Status
 
-These are proposed standards. A rule must not be described as machine-enforced until a corresponding tool/configuration exists and a probe or test demonstrates that it works. First inspect the actual repository and adapt these rules to its framework. The workspace tooling (pnpm, Turborepo, TypeScript 6.0.3, ESLint 9.39, Prettier 3.9, Vitest, CI) exists as of the `chore/monorepo-tooling` change; the ledger at the end says which rules it enforces.
+These are proposed standards. A rule must not be described as machine-enforced until a corresponding tool/configuration exists and a probe or test demonstrates that it works. First inspect the actual repository and adapt these rules to its framework. The workspace tooling (pnpm, Turborepo, TypeScript 6.0.3, ESLint 9.39, Prettier 3.9, Vitest, CI) exists as of Feature 1 step 1 (`docs/scope.md`, D-032 to D-037); the ledger at the end says which rules it enforces.
 
 ## Principles
 

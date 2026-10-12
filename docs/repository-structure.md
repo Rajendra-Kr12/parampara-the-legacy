@@ -27,7 +27,8 @@ parampara-the-legacy/
 │       └── adversarial-release-review/
 ├── .claude/
 │   └── skills -> ../.agents/skills   # symlink so Claude Code sees the same skills
-├── package.json              # pnpm workspace root (pnpm 12.11.2, Node 24)
+├── package.json              # pnpm workspace root (pinned versions: D-032)
+├── pnpm-lock.yaml            # CI installs with --frozen-lockfile
 ├── pnpm-workspace.yaml       # packages/* only; tools/route-task is excluded (npm)
 ├── turbo.json                # lint, typecheck, test, build; root format check
 ├── .nvmrc
@@ -67,11 +68,6 @@ There is no `apps/` directory yet. pnpm installs with its default isolated `node
 apps/                         # does not exist yet
 ├── web/                      # Next.js
 └── mobile/                   # Expo (iOS + Android)
-packages/
-├── domain/                   # pure TS rules: claims, thresholds, eligibility
-├── kinship-engine/           # pure TS kinship path -> term calculation
-├── validation/               # shared input schemas
-└── config/                   # shared tsconfig, lint, format settings
 ```
 
 Tests sit next to the code they cover, grouped as unit, integration (Convex), end-to-end (web, mobile), and security/authorization tests. Adjust names if the scaffolding tools establish a better convention, and record the change.
