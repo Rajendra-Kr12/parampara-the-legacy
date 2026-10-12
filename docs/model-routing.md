@@ -61,7 +61,7 @@ The same instruction filenames can shadow `AGENTS.md`: never add `AGENTS.overrid
 
 ### Classifier contract
 
-Input: the task description only (no code, no family data), plus the available-model list derived from `docs/model-catalog.md` (tier and class columns only).
+Input to Laya: the task description only (no code, no family data). The router applies the tier and class columns of `docs/model-catalog.md` locally after Laya answers, so no catalog content is sent to Laya.
 
 Questions asked of Laya:
 - `tier`: choice of `T0 | T1 | T2 | T3 | R | D` (`R` = review of any kind: PR review, adversarial review, security or domain review, regardless of how small or public the content is).

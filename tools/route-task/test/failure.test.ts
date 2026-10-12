@@ -110,20 +110,15 @@ test("provider codes that are not short tokens are dropped", () => {
   assert.equal(result.field, undefined);
 });
 
-test("the Laya request sends a string state, pins Boundless, and lists allowed models without prices", () => {
+test("the Laya request sends the task as a string state, pins Boundless, and carries no catalog content", () => {
   const catalog = parseModelCatalog(catalogText);
-  const request = buildLayaRequest("Classify a docs update.", catalog);
+  const request = buildLayaRequest("Classify a docs update.");
   assert.equal(request.model, "convaiinnovations/laya");
-  assert.equal(typeof request.state, "string");
+  assert.equal(request.state, "Classify a docs update.");
   assert.deepEqual(request.providerOptions, { gateway: { only: ["boundless"] } });
-  assert.ok(request.state.includes("Classify a docs update."));
-  for (const model of catalog.models) {
-    assert.ok(request.state.includes(`${model.id} | ${model.tiers.join(",")} | ${model.dataClass}`), model.id);
-  }
-  const allLines = request.state.split("\n");
-  const lines = allLines.slice(allLines.findIndex((line) => line.startsWith("Allowed models")) + 1);
-  assert.equal(lines.length, catalog.models.length);
-  assert.ok(!/\$|\d+\.\d+|price|Zero retention/i.test(lines.join("\n")), lines.join("\n"));
+  const serialized = JSON.stringify(request);
+  for (const model of catalog.models) assert.ok(!serialized.includes(model.id), model.id);
+  assert.ok(!/\d+\.\d+ \/ \d+\.\d+|price/i.test(request.state));
 });
 
 test("--diagnose-request prints the request shape with the task replaced and does not route", async () => {
@@ -132,7 +127,6 @@ test("--diagnose-request prints the request shape with the task replaced and doe
   const code = await runCli(["--diagnose-request", "--task", "SECRET-TASK"], {
     stdout: (t) => void out.push(t),
     stderr: () => undefined,
-    loadCatalog: async () => parseModelCatalog(catalogText),
     route: async () => { routed = true; return { status: "routed", routingPath: "static" } as const; },
   });
   assert.equal(code, 0);
@@ -140,5 +134,5 @@ test("--diagnose-request prints the request shape with the task replaced and doe
   const text = out.join("");
   assert.ok(text.includes(TASK_PLACEHOLDER));
   assert.ok(!text.includes("SECRET-TASK"));
-  assert.deepEqual(JSON.parse(text), JSON.parse(JSON.stringify(describeLayaRequest(parseModelCatalog(catalogText)))));
+  assert.deepEqual(JSON.parse(text), JSON.parse(JSON.stringify(describeLayaRequest())));
 });
