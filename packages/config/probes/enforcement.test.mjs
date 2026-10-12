@@ -126,3 +126,11 @@ test("secrets: env files are gitignored and .env.example is not", () => {
   assert.equal(ignored("apps/web/.env.local"), true);
   assert.equal(ignored(".env.example"), false);
 });
+
+test("ci: the workflow policy rejects quoted, inline, and docker forms", () => {
+  const wrap = (body) => `permissions:\n  contents: read\njobs:\n  one:\n    steps:\n${body}\n`;
+  assert.ok(checkWorkflow(wrap('      - uses: "actions/checkout@v4"')).length > 0);
+  assert.ok(checkWorkflow(wrap("      - uses: docker://alpine:3")).length > 0);
+  assert.ok(checkWorkflow("permissions: write-all\njobs: {}\n").length > 0);
+  assert.ok(checkWorkflow("permissions: { contents: write }\njobs: {}\n").length > 0);
+});

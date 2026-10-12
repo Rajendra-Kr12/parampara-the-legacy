@@ -7,7 +7,7 @@ const PINNED = /@[0-9a-f]{40}(\s|$)/;
 export function checkWorkflow(text) {
   const problems = [];
   for (const line of text.split("\n")) {
-    const match = /^\s*-?\s*uses:\s*(\S+)(.*)$/.exec(line);
+    const match = /^\s*-?\s*["']?uses["']?:\s*["']?([^\s"']+)["']?(.*)$/.exec(line);
     if (!match) continue;
     const ref = match[1] + match[2];
     if (match[1].startsWith("./")) continue;
@@ -22,6 +22,10 @@ export function checkWorkflow(text) {
     );
   }
   if (/^[ \t]+permissions:/m.test(text)) problems.push("job-level permissions are not allowed yet");
+  if (/^[ \t]*["']?permissions["']?:[ \t]*[^\s#]/m.test(text)) {
+    problems.push("permissions must be a block mapping, not an inline value");
+  }
+  if (/\buses:\s*["']?docker:\/\//.test(text)) problems.push("docker:// actions are not allowed");
   if (/pull_request_target/.test(text)) problems.push("pull_request_target is not allowed");
   return problems;
 }
