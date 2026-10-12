@@ -27,7 +27,7 @@ When Laya fails, `fallbackReason` is one of `laya-timeout`, `laya-auth`, `laya-r
 
 After 2026-10-31, static routing is the default. Set `ROUTE_TASK_ENABLE_PAID_LAYA=true` only after the owner has enabled a paid Laya budget in Vercel AI Gateway.
 
-The tool refuses task input that appears to include secrets or personal data. Rewrite such a task before routing it.
+The tool refuses task input that appears to include secrets or personal data. Rewrite such a task before routing it. Task descriptions must never contain real family data or secrets, and the router does not detect all of them.
 
 ## Live check
 
