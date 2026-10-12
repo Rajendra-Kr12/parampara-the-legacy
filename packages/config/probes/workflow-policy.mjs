@@ -12,6 +12,15 @@ function triggers(workflow) {
   return [];
 }
 
+function checkUses(uses, problems) {
+  if (uses.startsWith("./")) return;
+  if (uses.startsWith("docker://")) {
+    problems.push("docker:// actions are not allowed");
+  } else if (!PINNED.test(uses)) {
+    problems.push(`action not pinned by commit SHA: ${uses}`);
+  }
+}
+
 /**
  * Policy checks for a GitHub Actions workflow, parsed from YAML.
  * Returns a list of problems; an empty list means the workflow passes.
@@ -40,15 +49,11 @@ export function checkWorkflow(text) {
   for (const job of jobs) {
     if (!isMapping(job)) continue;
     if ("permissions" in job) problems.push("job-level permissions are not allowed yet");
+    if (typeof job.uses === "string") checkUses(job.uses, problems);
     const steps = Array.isArray(job.steps) ? job.steps : [];
     for (const step of steps) {
       if (!isMapping(step) || typeof step.uses !== "string") continue;
-      if (step.uses.startsWith("./")) continue;
-      if (step.uses.startsWith("docker://")) {
-        problems.push("docker:// actions are not allowed");
-      } else if (!PINNED.test(step.uses)) {
-        problems.push(`action not pinned by commit SHA: ${step.uses}`);
-      }
+      checkUses(step.uses, problems);
     }
   }
   return problems;

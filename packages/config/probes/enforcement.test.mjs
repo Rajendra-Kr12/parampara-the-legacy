@@ -178,3 +178,25 @@ test("ci: the workflow policy reads parsed structure, not source text", () => {
     );
   }
 });
+
+test("ci: the workflow policy pins job-level reusable workflow calls", () => {
+  const wrap = (uses) => `permissions:\n  contents: read\njobs:\n  one:\n    uses: ${uses}\n`;
+  assert.ok(checkWorkflow(wrap("owner/repo/.github/workflows/x.yml@main")).length > 0);
+  assert.deepEqual(checkWorkflow(wrap("./.github/workflows/x.yml")), []);
+  const sha = "0123456789abcdef0123456789abcdef01234567";
+  assert.deepEqual(checkWorkflow(wrap(`owner/repo/.github/workflows/x.yml@${sha}`)), []);
+});
+
+test("lint: the real domain packages' ESLint configs include the domain-purity rule", async () => {
+  for (const name of ["domain", "kinship-engine"]) {
+    const eslint = new ESLint({ cwd: `${repoRoot}packages/${name}` });
+    const config = await eslint.calculateConfigForFile(`${repoRoot}packages/${name}/src/index.ts`);
+    const [severity, options] = config.rules["no-restricted-imports"];
+    assert.equal(severity, 2, `${name}: no-restricted-imports is not an error`);
+    const names = options.paths.map((entry) => entry.name);
+    for (const forbidden of ["react", "react-native", "next", "expo", "convex"]) {
+      assert.ok(names.includes(forbidden), `${name}: ${forbidden} is not restricted`);
+    }
+    assert.ok(options.patterns.some((entry) => entry.group.includes("@clerk/*")));
+  }
+});
