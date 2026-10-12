@@ -135,10 +135,46 @@ test("secrets: env files are gitignored and .env.example is not", () => {
   assert.equal(ignored(".env.example"), false);
 });
 
-test("ci: the workflow policy rejects quoted, inline, and docker forms", () => {
-  const wrap = (body) => `permissions:\n  contents: read\njobs:\n  one:\n    steps:\n${body}\n`;
+test("ci: the workflow policy reads parsed structure, not source text", () => {
+  const wrap = (steps, extra = "") =>
+    `permissions:\n  contents: read\n${extra}jobs:\n  one:\n    steps:\n${steps}\n`;
+  const sha = "3d3c42e5aac5ba805825da76410c181273ba90b1";
   assert.ok(checkWorkflow(wrap('      - uses: "actions/checkout@v4"')).length > 0);
   assert.ok(checkWorkflow(wrap("      - uses: docker://alpine:3")).length > 0);
   assert.ok(checkWorkflow("permissions: write-all\njobs: {}\n").length > 0);
   assert.ok(checkWorkflow("permissions: { contents: write }\njobs: {}\n").length > 0);
+  assert.deepEqual(checkWorkflow(wrap(`      - uses: "actions/checkout@${sha}"`)), []);
+
+  const flow = `permissions: { contents: read }\njobs:\n  one:\n    steps: [{uses: actions/checkout@v4}]\n`;
+  assert.ok(checkWorkflow(flow).some((p) => p.includes("not pinned")));
+
+  const commented = [
+    "permissions: # keep read-only",
+    "  # comment between key and children",
+    "  contents: write",
+    "jobs: {}",
+    "",
+  ].join("\n");
+  assert.ok(checkWorkflow(commented).some((p) => p.includes("contents: read")));
+
+  const blockScalar = wrap(
+    `      - run: |\n          uses: actions/checkout@v4\n      - uses: actions/checkout@${sha}`,
+  );
+  assert.deepEqual(checkWorkflow(blockScalar), []);
+
+  const jobPermissions =
+    "permissions:\n  contents: read\njobs:\n  one:\n    permissions: { contents: write }\n    steps: []\n";
+  assert.ok(checkWorkflow(jobPermissions).some((p) => p.includes("job-level")));
+
+  for (const on of [
+    "on: pull_request_target",
+    "on: [push, pull_request_target]",
+    "on:\n  pull_request_target:",
+  ]) {
+    assert.ok(
+      checkWorkflow(wrap("      - run: x", `${on}\n`)).some((p) =>
+        p.includes("pull_request_target"),
+      ),
+    );
+  }
 });
