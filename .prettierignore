@@ -16,4 +16,5 @@ CLAUDE.md
 .env.example
 packages/config/probes/fixtures
 packages/backend/convex/_generated
+packages/backend/.convex
 .github/pull_request_template.md

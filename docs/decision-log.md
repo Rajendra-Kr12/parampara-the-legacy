@@ -215,3 +215,15 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Context: The `tools/route-task` router (PR #5) was only covered by automated tests. On 2026-10-12 the owner ran the live check from `tools/route-task/README.md` for the task 'Classify a docs update'.
 - Observation: `routingPath` was `laya` and the tier was T1. The static table in `docs/model-routing.md` gives D for the same task. The owner reported this; it was not re-run when this was recorded. It is an observation only: no routing rule, table, or catalog row was changed, and one sample does not show which answer is better.
 - Open: Before 2026-10-31 the owner sets an AI Gateway budget cap and decides whether to keep paid Laya or self-host. After that date the router defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
+
+## D-031: Convex auth backend choices (2026-10-12)
+- Status: Accepted (Feature 1 step 2, branch `feat/para-auth-backend`)
+- Context: Step 2 of the approved Feature 1 scaffold plan adds `packages/backend`. Some details were not settled by the plan.
+- Decisions:
+  - `users.me` takes no arguments and returns `null` when signed out, otherwise `{ name }` from the verified identity. `name` is `null` when the Clerk token carries no name (email and password sign-up may not collect one), so a missing name is never filled in and never confused with signed out.
+  - `convex/_generated/` is committed as produced by the Convex CLI against the owner's dev deployment. `convex codegen` needs a deployment and the owner's login, so agents cannot regenerate it; whoever changes a Convex function or the schema regenerates it with `npx convex dev` and commits the result. It is excluded from ESLint and Prettier.
+  - `auth.config.ts` reads `CLERK_JWT_ISSUER_DOMAIN` through `requireHttpsUrl`, which throws an error naming the variable, never its value, when it is unset or not an https URL. The deployment therefore refuses to load its auth config until the variable is set in the Convex dashboard.
+  - `process.env` is typed by a small ambient declaration instead of `@types/node`, because the default Convex runtime is not Node.js.
+  - esbuild, a convex dependency, is listed as `allowBuilds: { esbuild: false }` in `pnpm-workspace.yaml`. Its postinstall only checks the platform binary, which pnpm already installs as an `@esbuild/*` optional dependency.
+  - convex-test receives its modules from `import.meta.glob(["./**/*.*s", "!./**/*.*.*"])`. The extglob in the convex-test docs matches nothing under Vite 8.
+- Consequences: Steps 3 and 4 import `api` from `@parampara/backend/api`. Every new public Convex function needs its own signed-out and wrong-user tests; a test fails if `convex/users.ts` gains another export.
