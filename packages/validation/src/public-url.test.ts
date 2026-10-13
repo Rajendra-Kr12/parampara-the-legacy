@@ -20,6 +20,16 @@ describe("requirePublicUrl", () => {
     expect(requirePublicUrl("X", "http://localhost:3210")).toBe("http://localhost:3210");
   });
 
+  it("accepts ports up to 65535 and rejects anything above", () => {
+    expect(requirePublicUrl("X", "https://example.com:1")).toBe("https://example.com:1");
+    expect(requirePublicUrl("X", "https://example.com:65535")).toBe("https://example.com:65535");
+    for (const port of ["0", "65536", "99999", "00080"]) {
+      expect(() => requirePublicUrl("X", `https://example.com:${port}`)).toThrow(
+        "X is not a valid URL.",
+      );
+    }
+  });
+
   it("rejects anything that is not a plain origin", () => {
     for (const value of [
       "https://example.com/path",
