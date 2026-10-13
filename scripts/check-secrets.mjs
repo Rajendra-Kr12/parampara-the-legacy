@@ -44,10 +44,14 @@ export const CONTENT_RULES = [
   },
   { name: "Slack token", test: (line) => /\bxox[abprs]-[A-Za-z0-9-]{10,}/.test(line) },
   {
-    // A quoted literal, or an unquoted value at the start of a line (`.env` and YAML style).
+    // A quoted literal (single, double or backtick), or an unquoted value at the start of a line (`.env` and YAML style).
     name: "secret-looking assignment with a literal value",
     test: (line) => {
-      const quoted = new RegExp(`${SECRET_WORD}["']?\\s*[:=]\\s*["']([^"'\\s]{12,})["']`, "gi");
+      // Single, double or backtick quotes; the value may contain spaces (a passphrase) but no quote.
+      const quoted = new RegExp(
+        `${SECRET_WORD}["']?\\s*[:=]\\s*["'\`]([^"'\`]{12,200})["'\`]`,
+        "gi",
+      );
       const bare = new RegExp(
         `^\\s*(?:export\\s+)?${ASSIGNED_NAME}\\s*[:=]\\s*([A-Za-z0-9/+_=~-]{12,})\\s*(?:#.*)?$`,
         "i",
@@ -61,6 +65,8 @@ export const CONTENT_RULES = [
 
 function isLiteralSecretValue(value) {
   if (PLACEHOLDER.test(value)) return false;
+  // A value with spaces is a passphrase only if it is plain words; commands and paths are not.
+  if (/\s/.test(value) && !/^[A-Za-z0-9 ,;:!?-]+$/.test(value)) return false;
   return !/[({]/.test(value) && new Set(value).size > 3;
 }
 

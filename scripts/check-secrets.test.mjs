@@ -59,6 +59,17 @@ test("every secret-looking assignment on a line is checked, not only the first",
   assert.deepEqual(scanText(bothPlaceholders), []);
 });
 
+test("quoted values containing spaces are flagged, prose-like placeholders are not", () => {
+  assert.equal(scanText(`${"pass"}${"word"} = "correct horse battery staple"`).length, 1);
+  assert.deepEqual(scanText(`${"pass"}${"word"} = "your password goes here"`), []);
+  assert.deepEqual(scanText('"check:secrets": "node scripts/check-secrets.mjs"'), []);
+});
+
+test("backtick strings are flagged unless they interpolate", () => {
+  assert.equal(scanText(`const api_${"key"} = \`${filler(24)}\`;`).length, 1);
+  assert.deepEqual(scanText(`const api_${"key"} = \`\${prefix}-\${suffix}-value\`;`), []);
+});
+
 test("the allow marker suppresses a reviewed line", () => {
   assert.deepEqual(scanText(`${fakes["AWS access key id"]} // secrets-gate:allow`), []);
 });
