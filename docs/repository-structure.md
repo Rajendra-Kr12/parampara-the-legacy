@@ -61,14 +61,14 @@ parampara-the-legacy/
     └── repository-structure.md
 ```
 
-There is no `apps/` directory yet. pnpm installs with its default isolated `node_modules`, so each package links only its declared dependencies (D-035).
+`apps/web` exists (Feature 1 step 3); `apps/mobile` does not yet. pnpm installs with its default isolated `node_modules`, so each package links only its declared dependencies (D-035).
 
 ## Planned application layout (Feature 1 steps 3 and 4)
 
 ```text
-apps/                         # does not exist yet
-├── web/                      # Next.js
-└── mobile/                   # Expo (iOS + Android)
+apps/
+├── web/                      # Next.js (exists)
+└── mobile/                   # Expo (iOS + Android), does not exist yet
 ```
 
 Tests sit next to the code they cover, grouped as unit, integration (Convex), end-to-end (web, mobile), and security/authorization tests. Adjust names if the scaffolding tools establish a better convention, and record the change.

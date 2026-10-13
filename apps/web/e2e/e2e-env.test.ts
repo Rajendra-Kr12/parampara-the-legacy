@@ -27,7 +27,9 @@ describe("readE2eEnv", () => {
     if (!result.ok) {
       const message = skipMessage(result.missing);
       expect(
-        message.startsWith("NOT RUN: web sign-in proof skipped, this is not a pass: missing CLERK_SECRET_KEY."),
+        message.startsWith(
+          "NOT RUN: web sign-in proof skipped, this is not a pass: missing CLERK_SECRET_KEY.",
+        ),
       ).toBe(true);
       expect(message).toContain("missing CLERK_SECRET_KEY.");
       expect(message).toContain("pnpm --filter @parampara/web test:e2e");
