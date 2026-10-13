@@ -22,6 +22,7 @@ test("a signed-in test user sees their name from the Convex users.me query", asy
   if (!env.ok) {
     throw new Error(skipMessage(env.missing));
   }
+  await setupClerkTestingToken({ page });
   await page.goto("/");
   await clerk.signIn({
     page,

@@ -32,7 +32,7 @@ export function readE2eEnv(env: Readonly<Record<string, string | undefined>>): E
 
 export function skipMessage(missing: readonly E2eEnvName[]): string {
   return [
-    `Web sign-in proof not run: missing ${missing.join(", ")}.`,
+    `NOT RUN: web sign-in proof skipped, this is not a pass: missing ${missing.join(", ")}.`,
     "Put the Clerk development keys, the Convex dev URL and the Clerk test user in",
     "apps/web/.env.local (see apps/web/.env.example), then run",
     "`pnpm --filter @parampara/web exec playwright install chromium` once and",
