@@ -143,18 +143,28 @@ jobs:
           echo "$RUNNER_TEMP/maestro/bin" >> "$GITHUB_PATH"
       - name: Boot an iPhone simulator
         run: |
-          udid=$(xcrun simctl list devices available -j | python3 -c '
+          # Pick an iPhone on the newest available iOS runtime and keep that runtime's
+          # iOS version, so the device record names the OS that was actually tested.
+          read -r udid ios_version < <(python3 -c '
           import json, sys
-          devices = json.load(sys.stdin)["devices"]
-          for runtime in sorted(devices, reverse=True):
-              if "iOS" in runtime:
-                  for device in devices[runtime]:
-                      if device["name"].startswith("iPhone"):
-                          print(device["udid"]); sys.exit(0)
-          sys.exit("no available iPhone simulator")')
+          runtimes = json.loads(sys.argv[1])["runtimes"]
+          devices = json.loads(sys.argv[2])["devices"]
+          versions = {r["identifier"]: r["version"] for r in runtimes if r.get("platform") == "iOS"}
+          key = lambda runtime: tuple(int(part) for part in versions[runtime].split("."))
+          for runtime in sorted((r for r in devices if r in versions), key=key, reverse=True):
+              for device in devices[runtime]:
+                  if device["name"].startswith("iPhone"):
+                      print(device["udid"], versions[runtime]); sys.exit(0)
+          sys.exit("no available iPhone simulator")' \
+            "$(xcrun simctl list -j runtimes)" "$(xcrun simctl list -j devices available)")
+          if [ -z "$udid" ] || [ -z "$ios_version" ]; then
+            echo "::error::No available iPhone simulator on an iOS runtime."
+            exit 1
+          fi
           xcrun simctl boot "$udid"
           xcrun simctl bootstatus "$udid" -b
           echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
+          echo "SIM_IOS_VERSION=$ios_version" >> "$GITHUB_ENV"
       - name: Run the signed-out smoke
         run: |
           xcrun simctl install "$SIM_UDID" apps/mobile/ios/build/Build/Products/Release-iphonesimulator/Parampara.app
@@ -169,6 +179,7 @@ jobs:
           {
             echo "### iOS"
             echo "- simulator: $(xcrun simctl list devices | grep "${SIM_UDID:-none}" | sed 's/^ *//')"
+            echo "- iOS: ${SIM_IOS_VERSION:-unknown}"
             echo "- Xcode: $(xcodebuild -version | head -1)"
             echo "- expo: $(node -p "require('./apps/mobile/node_modules/expo/package.json').version")"
           } | tee e2e-artifacts/device-ios.md >> "$GITHUB_STEP_SUMMARY"
