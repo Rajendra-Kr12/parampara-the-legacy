@@ -15,6 +15,14 @@
 
 Enforce access in the backend/data layer, not just in client rendering. Test both allowed and denied access. Every API and media-access path must apply the same policy.
 
+### Users table (`packages/backend/convex/schema.ts`)
+
+Any Convex function that reads or writes the `users` table must:
+
+- derive `tokenIdentifier` from `ctx.auth.getUserIdentity()`, never from client arguments;
+- filter only by the caller's own `tokenIdentifier`, so it can never return or change another account's row;
+- handle the signed-out case, where the identity is `null`, explicitly.
+
 Roles may include member, reviewer, family administrator, contributor, and guardian. Roles are scoped; an administrator of one family group does not automatically administer another family group.
 
 ## Consent

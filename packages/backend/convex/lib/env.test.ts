@@ -10,6 +10,25 @@ describe("requireHttpsUrl", () => {
   });
 
   it.each([
+    ["with a trailing slash", "https://synthetic-test.clerk.accounts.dev/"],
+    ["with a port", "https://synthetic-test.clerk.accounts.dev:8443"],
+  ])("accepts an origin %s", (_label, value) => {
+    expect(requireHttpsUrl(name, value)).toBe(value);
+  });
+
+  it.each([
+    ["a path", "https://synthetic-test.clerk.accounts.dev/some/path"],
+    ["a repeated trailing slash", "https://synthetic-test.clerk.accounts.dev//"],
+    ["a query", "https://synthetic-test.clerk.accounts.dev?a=1"],
+    ["a query after a slash", "https://synthetic-test.clerk.accounts.dev/?a=1"],
+    ["a fragment", "https://synthetic-test.clerk.accounts.dev#frag"],
+    ["a fragment after a slash", "https://synthetic-test.clerk.accounts.dev/#frag"],
+    ["a port and a path", "https://synthetic-test.clerk.accounts.dev:8443/some/path"],
+  ])("rejects an origin with %s", (_label, value) => {
+    expect(() => requireHttpsUrl(name, value)).toThrow(/is not a valid https URL/);
+  });
+
+  it.each([
     ["unset", undefined, /is not set/],
     ["empty", "", /is not set/],
     ["blank", "   ", /is not set/],

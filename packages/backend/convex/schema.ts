@@ -6,7 +6,7 @@ import { v } from "convex/values";
 export default defineSchema({
   users: defineTable({
     // Clerk-issued identity from ctx.auth (issuer plus subject). Never taken from
-    // client arguments.
+    // client arguments. Access rules for this table: docs/privacy-and-governance.md.
     tokenIdentifier: v.string(),
     // Display name from the verified identity; null when the token has no name.
     name: v.union(v.string(), v.null()),
