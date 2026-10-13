@@ -63,7 +63,7 @@ Status is `enforced`, `review-only`, or `not yet implemented`. A probe is a test
 | `tools/route-task` stays outside the pnpm workspace | `!tools/**` in `pnpm-workspace.yaml`, noted in the `ci.yml` header | workspace membership assertion (`pnpm ls`) in `enforcement.test.mjs` | enforced (route-task has no CI of its own yet) |
 | Secrets and `.env*` files are not committed | `.gitignore` | `git check-ignore` assertions for `.env` and `apps/web/.env.local`, and none for `.env.example` | enforced (ignore rules only; no secret scanning) |
 | CI checks are required to merge | GitHub `protect-main` ruleset | none | not yet implemented (ruleset has no required status checks; plan step 5, owner approval needed) |
-| Fallow code-health report never blocks a PR | `fallow` job in `.github/workflows/ci.yml` (`continue-on-error`, `|| true` on each analysis step, not a required check, no write permissions); D-032 | none | review-only (no probe checks the job's settings) |
+| Fallow code-health report never blocks a PR | `fallow` job in `.github/workflows/ci.yml` (`continue-on-error`, `|| true` on each analysis step, not a required check, no write permissions); D-039, D-040 | none | review-only (no probe checks the job's settings) |
 | Actions must be pinned repository-wide (`sha_pinning_required`) | GitHub Actions settings | none | not yet implemented (settings change, owner approval needed) |
 | Layering: UI depends on services, services on domain | code review, Greptile | none | review-only (only the domain-purity subset above is automated) |
 | Kebab-case filenames | none | none | not yet implemented |
