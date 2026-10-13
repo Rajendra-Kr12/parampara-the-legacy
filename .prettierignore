@@ -9,6 +9,7 @@ docs
 tools
 .agents
 .claude
+.opencode
 .greptile
 README.md
 AGENTS.md
