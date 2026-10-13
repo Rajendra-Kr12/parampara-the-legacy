@@ -20,7 +20,7 @@ During implementation, maintain a short checklist below the feature. After imple
 - Clients: web, Android, and iOS in the initial release.
 - MVP feature groups: family tree; invitations and relationship verification; deceased profiles and evidence; memories, stories, and photos; privacy and administration; opt-in city discovery; audio memories; spreadsheet import.
 - The product must remain useful without AI services.
-- Stack (D-014, D-015): Turborepo + pnpm; Next.js web; Expo for iOS and Android; Convex backend and database; Clerk auth; Cloudflare R2 media. Versions for the workspace tooling and `packages/backend` are pinned and recorded in `docs/decision-log.md` (D-032 to D-039). The web and mobile versions arrive with steps 3 and 4.
+- Stack (D-014, D-015): Turborepo + pnpm; Next.js web; Expo for iOS and Android; Convex backend and database; Clerk auth; Cloudflare R2 media. Versions for the workspace tooling and `packages/backend` are pinned and recorded in `docs/decision-log.md` (D-032 to D-040). The web and mobile versions arrive with steps 3 and 4.
 - Repository: public GitHub `Rajendra-Kr12/parampara-the-legacy`, `main` protected, PR-only (D-018).
 - Original idea notes: `docs/original-brief.md` (historical; this scope and the PRD supersede it where they differ).
 
