@@ -73,12 +73,16 @@ test(".env files are forbidden except the committed templates", () => {
     ".env_secret",
     "apps/web/.envrc",
     ".env.example.bak",
+    ".ENV",
+    ".Env.local",
+    "Prod.ENV",
   ]) {
     assert.equal(isForbiddenEnvFile(path), true, path);
   }
   for (const path of [
     ".env.example",
     "apps/web/.env.example",
+    ".ENV.EXAMPLE",
     "docs/env.md",
     "packages/backend/convex/lib/env.ts",
   ]) {
@@ -170,4 +174,18 @@ test("very long lines are scanned in linear time and still flag a secret at the 
   }
   const line = `${"x".repeat(2_000_000)} ${fakes["AWS access key id"]}`;
   assert.equal(scanText(line).length, 1);
+});
+
+test("NUL bytes do not hide a secret in a text file, but binary extensions are skipped", () => {
+  withRepo(({ stage, gate }) => {
+    stage("src/config.ts", `\0${fakes["AWS access key id"]}\n`);
+    const result = gate();
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /src\/config\.ts:1: AWS access key id/);
+  });
+
+  withRepo(({ stage, gate }) => {
+    stage("assets/logo.png", `\0${fakes["AWS access key id"]}\n`);
+    assert.equal(gate().status, 0);
+  });
 });

@@ -9,6 +9,16 @@ const UNREADABLE_RULE = "file could not be read, so it was not checked";
 const ALLOW_MARKER = "secrets-gate:allow";
 // Committed templates the repo already uses. Everything else named .env* is rejected.
 const ENV_TEMPLATES = new Set([".env.example"]);
+// Content scanning is skipped only for these extensions; every other file is scanned as text.
+const BINARY_EXTENSIONS = new Set(
+  (
+    "png jpg jpeg gif webp avif bmp ico icns tif tiff heic heif psd " +
+    "woff woff2 ttf otf eot " +
+    "zip gz tgz bz2 xz zst 7z rar tar jar " +
+    "mp3 wav ogg flac aac m4a mp4 mov webm avi mkv " +
+    "pdf wasm so dylib dll exe bin class"
+  ).split(" "),
+);
 
 // Affixes are length-bounded, and the unanchored quoted rule has no leading affix at all, so
 // a huge single-line file cannot trigger quadratic backtracking.
@@ -54,8 +64,14 @@ function isLiteralSecretValue(value) {
   return !/[({]/.test(value) && new Set(value).size > 3;
 }
 
-export function isForbiddenEnvFile(path) {
+function isBinaryPath(path) {
   const name = path.split("/").pop() ?? "";
+  const dot = name.lastIndexOf(".");
+  return dot > 0 && BINARY_EXTENSIONS.has(name.slice(dot + 1).toLowerCase());
+}
+
+export function isForbiddenEnvFile(path) {
+  const name = (path.split("/").pop() ?? "").toLowerCase();
   if (ENV_TEMPLATES.has(name)) return false;
   return name.startsWith(".env") || name.endsWith(".env");
 }
@@ -96,8 +112,9 @@ export function checkPaths(paths) {
       findings.push({ path, rule: UNREADABLE_RULE });
       continue;
     }
-    if (blob.includes(0)) continue;
-    for (const finding of scanText(blob.toString("utf8"))) findings.push({ path, ...finding });
+    if (isBinaryPath(path)) continue;
+    const text = blob.toString("utf8").replaceAll("\0", "");
+    for (const finding of scanText(text)) findings.push({ path, ...finding });
   }
   return findings;
 }
