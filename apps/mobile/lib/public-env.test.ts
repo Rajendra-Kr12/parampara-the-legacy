@@ -52,13 +52,13 @@ describe("parsePublicEnv", () => {
   });
 
   it("never echoes a rejected value", () => {
-    const secretLookingUrl = "ftp://user:hunter2@example.com";
-    const secretKey = "sk_live_secret-value-123";
-    const problems = problemsOf({ convexUrl: secretLookingUrl, clerkPublishableKey: secretKey });
+    const rejectedUrl = "ftp://user:hunter2@example.com";
+    const rejectedKey = "sk_live_secret-value-123";
+    const problems = problemsOf({ convexUrl: rejectedUrl, clerkPublishableKey: rejectedKey });
     expect(problems).toHaveLength(2);
     for (const problem of problems) {
       expect(problem).not.toContain("hunter2");
-      expect(problem).not.toContain(secretKey);
+      expect(problem).not.toContain(rejectedKey);
     }
   });
 });
