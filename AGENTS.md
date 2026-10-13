@@ -43,7 +43,7 @@ This file stays short on purpose (owner choice): add a rule only after an observ
 - PR description: what changed, why, risks, checks actually run, manual checks, docs updated (template in `.github/pull_request_template.md`).
 - Resolve every review conversation (Greptile, Codex, human) before merging.
 - Do not add AI agents as commit co-authors; the human owner stays accountable.
-- Never commit secrets, `.env` files, or real family data. Use synthetic fixtures.
+- Never commit real family data; use synthetic fixtures. Secrets and `.env` files are blocked by `pnpm run check:secrets` (CI `secrets` job; opt-in local hook in `docs/coding-standards.md`).
 
 ## Product and domain invariants
 
@@ -77,6 +77,6 @@ This file stays short on purpose (owner choice): add a rule only after an observ
 
 ## Model and task routing
 
-Route each task by complexity and risk using the table in `docs/model-routing.md`; model IDs, prices, and data classes are in `docs/model-catalog.md`. High-risk areas (relationship graph, approvals, auth, privacy, migrations) always get a strong reasoning model plus an independent reviewer from a different model family, and never a free model. Free models may only see public repository content, and only in the data classes the catalog allows. Never send real family data or secrets to any external model, including the Laya router.
+Route each task by complexity and risk using the table in `docs/model-routing.md`; model IDs, prices, and data classes are in `docs/model-catalog.md`. High-risk areas (relationship graph, approvals, auth, privacy, migrations) always get a strong reasoning model plus an independent reviewer from a different model family, and never a free model. Free models may only see public repository content, and only in the data classes the catalog allows. Never send real family data or secrets to any external model, including the Laya router. The router refuses secret-looking text, emails, and phone numbers before any Laya call (tested in CI); it cannot detect other family data, so that stays your responsibility.
 
 Do not create `AGENTS.override.md`, `.hermes.md`, or other files that shadow this one in some harnesses.

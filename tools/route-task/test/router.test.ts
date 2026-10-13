@@ -222,3 +222,31 @@ test("a low-confidence tie between D and T1 takes the higher-risk tier", async (
     assert.equal(result.tier, "T1", `${d}/${t1}`);
   }
 });
+
+test("a refused task never reaches the key loader or the Laya client", async () => {
+  const fakeKey = ["sk", "abcdef0123456789abcd"].join("-");
+  const refusedTasks = [
+    `Use ${["AI_GATEWAY_API", "KEY"].join("_")}=abcdef0123456789 in the task.`,
+    `Debug with ${["pass", "word"].join("")}=hunter2secret`,
+    `Here is ${fakeKey}`,
+    ["-----BEGIN RSA ", "PRIVATE KEY-----"].join(""),
+    `Authorization: Bearer ${"abcdef0123456789".repeat(2)}`,
+    `Email ${["someone", "example.test"].join("@")} about the release.`,
+    "Route this phone number: +91 98765 43210.",
+  ];
+  for (const task of refusedTasks) {
+    let layaCalls = 0;
+    let keyLoads = 0;
+    const result = await routeTask({
+      task,
+      catalogText,
+      now: promotionDate,
+      environment: {},
+      loadApiKey: async () => { keyLoads += 1; return "test-key-not-used-by-mock"; },
+      layaClient: { evaluate: async () => { layaCalls += 1; return classification(); } },
+    });
+    assert.deepEqual(result, { status: "refused", routingPath: "refused", refusalReason: "possible-secret-or-personal-data" });
+    assert.equal(layaCalls, 0, "Laya client was called for a refused task");
+    assert.equal(keyLoads, 0, "API key was loaded for a refused task");
+  }
+});

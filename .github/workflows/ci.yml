@@ -1,6 +1,6 @@
-# CI scope: the pnpm workspace only (root tooling and packages/*). tools/route-task
-# is NOT covered here. It uses npm with its own package-lock.json and `node --test`
-# and is excluded from pnpm-workspace.yaml; give it its own job if it needs CI.
+# CI scope: the pnpm workspace (root tooling and packages/*), the secrets gate, and
+# tools/route-task. route-task uses npm with its own package-lock.json and `node --test`
+# and is excluded from pnpm-workspace.yaml, so it has its own job below.
 name: ci
 
 on:
@@ -41,6 +41,34 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run ${{ matrix.task }}
+
+  # Secrets gate: fails when a tracked file is a .env* file (other than .env.example)
+  # or contains an obvious secret. Same script as the opt-in local pre-commit hook.
+  # Needs no install: scripts/check-secrets.mjs uses only Node built-ins.
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: node scripts/check-secrets.mjs
+
+  # Laya data-flow check: the route-task tests prove a task that looks like a secret,
+  # .env content, or personal data is refused before the key is loaded or Laya is called.
+  route-task:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: tools/route-task/package-lock.json
+      - run: npm --prefix tools/route-task ci
+      - run: npm --prefix tools/route-task test
 
   # Non-blocking code-health report (Fallow, pinned devDependency). This job can
   # never fail a pull request: continue-on-error on the job, `|| true` on every

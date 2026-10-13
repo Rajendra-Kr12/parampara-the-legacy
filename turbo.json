@@ -6,6 +6,9 @@
     "//#format:check": {
       "inputs": ["$TURBO_DEFAULT$", "!.turbo/**", "!**/node_modules/**"]
     },
+    "//#test:scripts": {
+      "inputs": ["scripts/**", ".githooks/**"]
+    },
     "lint": {
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/config/**"]
     },

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Opt-in pre-commit hook: runs the same secrets gate CI runs, on staged files only.
+# Enable once per clone with: pnpm run hooks:install
+exec node "$(git rev-parse --show-toplevel)/scripts/check-secrets.mjs" --staged
