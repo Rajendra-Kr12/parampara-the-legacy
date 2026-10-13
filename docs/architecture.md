@@ -2,7 +2,7 @@
 
 ## Status
 
-Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `packages/backend` exist; no web or mobile app yet. The toolchain versions are pinned and confirmed in `docs/decision-log.md` (D-032 to D-040); the web and mobile versions arrive with steps 3 and 4. The open items at the end are confirmed as those steps ship.
+Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `packages/backend`, `apps/web` and the signed-out `apps/mobile` shell exist. The toolchain versions are pinned and confirmed in `docs/decision-log.md` (D-032 to D-040); the web versions are in `apps/web/package.json` and the mobile versions in D-042. The open items at the end are confirmed as those steps ship.
 
 ## Architecture principles
 
