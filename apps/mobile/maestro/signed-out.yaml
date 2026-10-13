@@ -1,0 +1,14 @@
+# Step 4a device smoke: a fresh install launches and shows the signed-out state.
+# Run by .github/workflows/mobile-e2e.yml with `-e PLATFORM=ios|android`.
+appId: dev.parampara.provisional
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "You are signed out."
+    timeout: 90000
+- assertNotVisible:
+    id: "my-name"
+- assertNotVisible:
+    id: "config-error"
+- takeScreenshot: signed-out-${PLATFORM}

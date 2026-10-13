@@ -310,3 +310,68 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Context: `AGENTS.md` carried "never commit secrets or `.env`" and "never send real family data to an external model" as prose. Both can be tested by tooling.
 - Decision: `scripts/check-secrets.mjs` (`pnpm run check:secrets`) fails on tracked `.env*` files other than `.env.example` and on obvious secret patterns. It runs in a new `secrets` CI job and in an opt-in `.githooks/pre-commit` installed with `pnpm run hooks:install`. A new `route-task` CI job runs the router tests, including one proving a refused task never reaches the key loader or the Laya client. The enforcement ledger in `docs/coding-standards.md` is the owner of what each check covers and its limits; `AGENTS.md` keeps prose only for rules a hook cannot test.
 - Consequences: The checks are pattern-based and cannot detect other real family data. The local hook is opt-in, so CI is the gate. Making `secrets` and `route-task` required checks on `protect-main` is an open owner decision, alongside D-037; no repository setting was changed.
+
+## D-043: Mobile stack: Expo SDK 57 with @clerk/expo 4.10.1 (2026-10-13)
+- Status: Accepted (Feature 1 Step 4 plan, decided by the owner; built in Step 4a, branch `fm/para-mobile-shell`)
+- Context: D-038 left the Expo SDK open. The Step 4 plan compared SDK 55, 56, 57 and the SDK 58 beta, and the owner also weighed native Kotlin and Swift apps.
+- Decision: Keep Expo (React Native) rather than separate native Kotlin and Swift apps. Pin Expo SDK 57 (`expo` 57.0.27, re-resolved at build time as the newest 57.0.x at least 3 days old; 57.0.28 was one day old) with `@clerk/expo` 4.10.1. Exact pins for `apps/mobile`: `react` 19.2.3 and `react-native` 0.86.3 (one React copy with web), `expo-router` 57.0.25, `expo-linking` 57.0.12, `expo-constants` 57.0.21, `react-native-screens` 4.26.2, `react-native-safe-area-context` 5.7.0, `@expo/metro-runtime` 57.0.16, `expo-status-bar` 57.0.1, `expo-secure-store` 57.0.4, `convex` 1.46.0; dev: `typescript` 6.0.3, `@types/react` 19.2.18, `eslint` 9.39.5, `eslint-config-expo` 57.0.2, `jest-expo` 57.0.5, `jest` and `@jest/globals` 29.7.0. Left out: `expo-dev-client`, `expo-web-browser`, `expo-auth-session`, `expo-crypto`, `@testing-library/react-native`.
+- Rationale: SDK 57 is the current stable line, matches web's React 19.2.3 and TypeScript 6.0.3, and `@clerk/expo` 4.10.1 allows `expo >=54 <58`. One TypeScript codebase keeps web, iOS and Android on the same Convex `api` and shared packages.
+- Consequences: The dependency list and the three new `allowBuilds: false` reviews (`browser-tabs-lock`, `core-js`, `fsevents`; each script read, see `pnpm-workspace.yaml`) were approved with the plan. Upgrading to SDK 58 waits for `@clerk/expo` to allow it.
+
+## D-044: Mobile device proofs run on GitHub Actions as standalone Release builds (2026-10-13)
+- Status: Accepted (owner decision; workflow added in Step 4a)
+- Context: The owner's Mac cannot run an iOS simulator for SDK 57 (Xcode 26.4 needs macOS Tahoe, which this model cannot run) and has no Android SDK or free disk for one.
+- Decision: `.github/workflows/mobile-e2e.yml` runs the device proofs: an Ubuntu job for the Android emulator (API 34, x86_64, hardware acceleration) and a `macos-26` job for the iOS simulator. Each builds a standalone Release app with embedded JavaScript after `expo prebuild` (no Metro, no Expo Go, no dev client) and runs Maestro, installed from its pinned GitHub release with the checksum verified. The workflow is `workflow_dispatch` only, reads the public values from the repository variables `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` and `EXPO_PUBLIC_CONVEX_URL`, and needs no secrets. Native `ios/` and `android/` folders are generated in CI and never committed.
+- Consequences: Every device-level fix is a CI round trip. The owner sets the two repository variables before the first run. The workflow-policy probe now checks every file in `.github/workflows/`, not only `ci.yml`.
+
+## D-045: Live mobile sign-in in CI uses a protected Environment (2026-10-13)
+- Status: Accepted (owner decision; used in Step 4b, nothing created yet)
+- Decision: The live sign-in proof runs from a manual `workflow_dispatch` job with a protected GitHub Environment that holds the synthetic Clerk test user's credentials. A dispatch-only job does not run for fork pull requests, which refines D-037's note that CI cannot verify a real Clerk sign-in.
+- Consequences: Creating the Environment and its reviewers changes shared repository settings, so the owner does it. Never real family data.
+
+## D-046: iOS 17 is the minimum iOS version (2026-10-13)
+- Status: Accepted (owner decision; revisit before release)
+- Context: Expo SDK 57 supports iOS 16.4, but `@clerk/expo` 4.10.1 ships a native module whose pod requires iOS 17.0.
+- Decision: Accept iOS 17 or later. The `@clerk/expo` config plugin in `apps/mobile/app.json` raises the deployment target to 17.0 during `expo prebuild`. It is configured with `appleSignIn: false`, because the first sign-in slice is email and password only and the Sign in with Apple entitlement is not needed.
+- Consequences: iPhones that stop at iOS 16 (iPhone 8 and X) cannot install the app. Revisit if relatives use those phones.
+
+## D-047: Device-only token cache and no Android backup (2026-10-13)
+- Status: Accepted (owner decision; built in Step 4a)
+- Decision: Clerk's long-lived client token is stored by `apps/mobile/lib/device-token-cache.ts` in `expo-secure-store` with `AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY`, not Clerk's bundled `@clerk/expo/token-cache` (`AFTER_FIRST_UNLOCK`, which can move to a new phone in an encrypted backup). `android.allowBackup` is `false` in `app.json`. An unreadable item is deleted and treated as signed out. The short-lived Convex session token stays in memory in the Convex client. Nothing is stored in AsyncStorage or files, and no token is logged.
+- Consequences: Restoring a phone from backup signs the user out. Unit tests cover save, read, clear, the device-only option, and "read failure deletes the item and returns null". Open (privacy review of Step 4a, to settle in Step 4b and before real users): iOS keeps Keychain items after the app is deleted, so reinstalling on the same iPhone can restore a Clerk session; a shared family phone needs a first-launch clear or an explicit sign-out.
+
+## D-048: requirePublicUrl lives in packages/validation (2026-10-13)
+- Status: Accepted (owner decision; built in Step 4a)
+- Decision: The public URL check that web wrote in Step 3 (`https` only, `http` only on localhost, errors name the variable and never echo the value) moved to `packages/validation` (`src/public-url.ts`), and both `apps/web/lib/public-env.ts` and `apps/mobile/lib/public-env.ts` import it. Its tests moved with it. The "not set" message now points at "the app's `.env.local`" instead of `apps/web/.env.local`. It now checks by pattern, like `requireHttpsUrl` in `packages/backend`, instead of `new URL`, and accepts an origin only (an optional port and one trailing slash; no path, query, fragment or user info). React Native's built-in `URL` accepts malformed input, so `new URL` would have answered differently on mobile than on web, and the shared ES2023 tsconfig has no DOM `URL` type.
+- Consequences: The parity rule that validation is never duplicated in an app holds. The Clerk publishable-key check (`pk_test_` or `pk_live_`) is mobile-only for now, because web's `ClerkProvider` reads its key itself.
+
+## D-049: Mobile tests: pure-function Jest tests plus Maestro (2026-10-13)
+- Status: Accepted (owner decision; settles the mobile half of D-036)
+- Decision: `apps/mobile` runs unit tests for pure modules with `jest-expo` 57.0.5 (Jest 29, imports from `@jest/globals`, no global test types) and device flows with Maestro in `mobile-e2e.yml`. `@testing-library/react-native` is not added. Screen logic that needs testing is kept in pure functions.
+- Consequences: `pnpm test` runs Jest next to Vitest. `jest-expo` brings `@react-native/jest-preset` 0.86.3 as a required peer, which pnpm installs automatically.
+
+## D-050: Step 4b sign-in scope is email and password only (2026-10-13)
+- Status: Accepted (owner decision; applies to Step 4b)
+- Decision: Mobile sign-in in Step 4b supports email and password only. When Clerk asks for Device Trust (`needs_client_trust`) or a second factor (`needs_second_factor`), the app shows a fixed, safe "not supported yet" message. Clerk error text is never shown.
+- Must build before real users: Device Trust and MFA handling on mobile. Clerk turns Device Trust on by default for instances created after 2025-11-14, so real users would be blocked on a new phone without it.
+
+## D-051: Provisional development app ids (2026-10-13)
+- Status: Accepted (owner decision)
+- Decision: `ios.bundleIdentifier` and `android.package` are `dev.parampara.provisional`, and the URL scheme is `parampara`. These are development-only ids.
+- Consequences: The real ids are decided before any store build. Clerk's native sign-in providers will later be tied to the final ids.
+
+## D-052: Telugu-script name for the synthetic test user (2026-10-13)
+- Status: Accepted (owner decision; after Step 4b passes)
+- Decision: After the Step 4b proof passes, the owner sets the synthetic Clerk test user's display name to include Telugu script (for example the fixture family's Kiran, కిరణ్), updates `E2E_CLERK_USER_NAME`, and the web and both mobile proofs are re-run. This is the cheapest evidence for the parity skill's "Telugu renders correctly" item.
+
+## D-053: Step 4a build choices (2026-10-13)
+- Status: Accepted (Feature 1 Step 4a, branch `fm/para-mobile-shell`)
+- Context: Details the approved plan did not settle.
+- Decisions:
+  - One local command, `pnpm --filter @parampara/mobile run check`, runs the gates in order and prints PASS, FAIL, or "NOT RUN: <reason>, this is not a pass"; `--strict` fails on NOT RUN. The device smoke is always reported as NOT RUN there.
+  - Gate 1 runs Prettier with the repository's config and ignore files on the files git tracks or would track, so a harness file excluded only through `.git/info/exclude` cannot fail it locally. CI checks the same files.
+  - Gate 7 runs `expo install --check` against the installed SDK's own version map (`EXPO_OFFLINE=1`) plus `expo config`. Online, `expo install --check` asks for the newest patches, which can be younger than `minimumReleaseAge` allows. `expo-doctor` is not run: it is not a pinned dependency.
+  - The mobile `build` script runs `scripts/verify-export.mjs`: `expo export` for iOS and Android with synthetic values, then it checks that both bundles exist, that a `CLERK_SECRET_KEY` sentinel appears nowhere in the output, and that the public Convex URL sentinel was inlined. Real `.env*` files are not loaded (`EXPO_NO_DOTENV`), and the export runs with `--clear`, because Metro's transform cache kept an earlier run's inlined `EXPO_PUBLIC_*` value and failed the public-sentinel check once. CI's `build` job therefore enforces the no-secret check for mobile.
+  - A missing or malformed public value renders a fixed configuration-error screen that names the variables, never their values, instead of crashing.
+  - Expo CLI telemetry is off in CI (`EXPO_NO_TELEMETRY`, passed through by `turbo.json`); Clerk SDK telemetry is off in the app (`telemetry={false}`), as on web.
+- Risk recorded, not fixed: `expo-router` depends on `react-native-drawer-layout`, which declares `react-native-reanimated`, `react-native-gesture-handler` and `react-native-worklets` as required peers, so pnpm installs their newest versions (4.7.1, 3.3.0, 0.13.0) and Expo autolinking would compile them into the native apps. SDK 57's version map expects 4.5.1, about 2.32 and 0.10.1. The app does not use them. The first `mobile-e2e.yml` run shows whether the native builds accept them; if not, the fix (pinning them to the SDK versions, or excluding them from autolinking) is a dependency decision for the owner.

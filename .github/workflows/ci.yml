@@ -20,6 +20,8 @@ env:
   DO_NOT_TRACK: "1"
   # Next.js ignores DO_NOT_TRACK; turbo.json passes this through to tasks.
   NEXT_TELEMETRY_DISABLED: "1"
+  # Expo CLI telemetry (the mobile build runs `expo export`); turbo.json passes it through.
+  EXPO_NO_TELEMETRY: "1"
 
 jobs:
   # One job per check. The job names (format, lint, typecheck, test, build) are the

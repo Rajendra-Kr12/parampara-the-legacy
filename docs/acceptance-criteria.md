@@ -1,6 +1,6 @@
-# Acceptance Criteria: Features 2 to 8
+# Acceptance Criteria: Features 1 to 8
 
-Testable acceptance checklists for the P0 features in `docs/scope.md`, derived from `docs/product-requirements.md` (PRD), `docs/domain-model.md`, `docs/privacy-and-governance.md`, and `docs/decision-log.md`. A feature is not done until every criterion in its checklist has a passing automated test or a recorded manual check (see "Definition of done" in `docs/scope.md`).
+Testable acceptance checklists for the Feature 1 scaffold proofs and the P0 features in `docs/scope.md`, derived from `docs/product-requirements.md` (PRD), `docs/domain-model.md`, `docs/privacy-and-governance.md`, and `docs/decision-log.md`. A feature is not done until every criterion in its checklist has a passing automated test or a recorded manual check (see "Definition of done" in `docs/scope.md`).
 
 This file states **what must be true**, not how it is built. Where a value is not yet decided (for example a retention period or a traversal limit), the criterion names the configured value and the test asserts against that configuration; it never invents a number.
 
@@ -82,6 +82,31 @@ Rules for every claim type:
 Every sensitive action writes an audit event in the same Convex mutation as the state change, with actor, time, action, target, outcome, and provenance (evidence references, previous value). Audit events never contain secrets, story text, exact addresses, or evidence content.
 
 ---
+
+## Feature 1: monorepo scaffold and architecture validation
+
+Sources: scope Feature 1, D-031, D-038, D-041 to D-053. These are the proofs that the stack works end to end; they carry no family data. The executable definition of done for the mobile steps is `pnpm --filter @parampara/mobile run check` (one PASS, FAIL or NOT RUN line per gate, exit 0 only when every runnable gate passed) plus a green dispatched run of `.github/workflows/mobile-e2e.yml` with its artifacts. A device criterion is never ticked from a local run.
+
+### Web sign-in proof (Step 3)
+- [x] **AC-1.01** [P] A signed-out web visitor sees the sign-in link (`data-testid="sign-in-link"`) and no name. (Playwright, 2026-10-13)
+- [x] **AC-1.02** [P] The signed-in synthetic test user sees their display name from the Convex `users.me` query in `data-testid="my-name"`. (Playwright, 2026-10-13)
+- [x] **AC-1.03** [A] `users.me` returns `null` when signed out and never returns another user's record, including for a forged argument or the same subject from another issuer. (convex-test)
+
+### Mobile app shell (Step 4a)
+- [ ] **AC-1.10** [P] The app bundles for iOS and Android with no keys (`check` gate 5, also the mobile `build` in CI).
+- [ ] **AC-1.11** [F] A server-only `CLERK_SECRET_KEY` present at build time appears nowhere in either bundle, while the public Convex URL is inlined (`check` gate 6, also the mobile `build` in CI).
+- [ ] **AC-1.12** [F] A missing, malformed or non-localhost `http://` Convex URL, and a missing or non-`pk_` Clerk publishable key, are rejected with an error that names the variable and never echoes the value; the app shows a configuration-error screen instead of crashing.
+- [ ] **AC-1.13** [P] Clerk's client token is stored only in the device's secure storage with `AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY`; an unreadable item is deleted and read as signed out; Android backup is off (`allowBackup: false`).
+- [ ] **AC-1.14** [P] A fresh install on an iOS simulator and on an Android emulator launches and shows "You are signed out." with no `my-name` element (Maestro `signed-out.yaml`, screenshots and device and OS version in the run artifacts).
+- [ ] **AC-1.15** [P] Mobile wires `ClerkProvider` outside `ConvexProviderWithClerk`, takes signed-in state only from Convex (`Authenticated`, `useConvexAuth`), takes the name only from `users.me`, and shows a `null` name as `my-name-missing`, with the same test IDs as web. (Review now; proven live by AC-1.20.)
+- [ ] **AC-1.16** [F] Every workflow in `.github/workflows/` pins actions by commit SHA, has top-level `contents: read` only, no job-level permissions and no `pull_request_target` (workflow-policy probe).
+
+### Mobile sign-in (Step 4b)
+- [ ] **AC-1.20** [P] The synthetic test user signs in with email and password and sees their display name from `users.me` on iOS and Android.
+- [ ] **AC-1.21** [P] After the app is killed and relaunched without clearing data, the user is still signed in (secure storage and session restore).
+- [ ] **AC-1.22** [P] Sign-out returns to the signed-out state on both platforms.
+- [ ] **AC-1.23** [F] A wrong password shows one fixed generic message, never Clerk's error text, and no `my-name`.
+- [ ] **AC-1.24** [F] When Clerk asks for Device Trust or a second factor, the app shows a fixed "not supported yet" message (D-050).
 
 ## Feature 2: identity, family groups, invitations
 

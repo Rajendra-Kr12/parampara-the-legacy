@@ -2,7 +2,7 @@
 
 A private family legacy network for web, iOS, and Android. Parampara preserves family relationships across maternal and paternal branches, deceased profiles, memories, stories, photos, and audio, with Telugu and other Indian kinship terms, verified relationships, and privacy by default.
 
-**Status:** early scaffold: workspace tooling and the Convex auth backend (`packages/backend`) exist; no web or mobile app yet. See `docs/scope.md`.
+**Status:** early scaffold: workspace tooling, the Convex auth backend (`packages/backend`), the web sign-in proof (`apps/web`) and the Expo mobile app shell (`apps/mobile`, signed-out only; mobile sign-in is Step 4b) exist. See `docs/scope.md`.
 
 ## Index
 
@@ -12,7 +12,7 @@ A private family legacy network for web, iOS, and Android. Parampara preserves f
 | `CLAUDE.md` | Imports `AGENTS.md`, adds Claude Code notes |
 | `docs/scope.md` | Living plan: status, features, checklists, next work |
 | `docs/product-requirements.md` | Product requirements and high-level acceptance criteria |
-| `docs/acceptance-criteria.md` | Testable acceptance-criteria checklists per feature (Features 2 to 8) |
+| `docs/acceptance-criteria.md` | Testable acceptance-criteria checklists per feature (Features 1 to 8) |
 | `docs/architecture.md` | Stack, layers, media storage, security boundaries, open items |
 | `docs/domain-model.md` | People, relationship graph, kinship terms, verification |
 | `docs/privacy-and-governance.md` | Access control, consent, evidence, disputes, retention |

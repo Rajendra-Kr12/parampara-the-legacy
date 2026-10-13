@@ -1,0 +1,9 @@
+{
+  "extends": "@parampara/config/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "customConditions": ["react-native"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist", ".expo", "ios", "android"]
+}

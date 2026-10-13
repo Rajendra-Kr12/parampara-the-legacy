@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "agentGuidance": false,
-  "globalPassThroughEnv": ["NEXT_TELEMETRY_DISABLED"],
+  "globalPassThroughEnv": ["NEXT_TELEMETRY_DISABLED", "EXPO_NO_TELEMETRY"],
   "tasks": {
     "//#format:check": {
       "inputs": ["$TURBO_DEFAULT$", "!.turbo/**", "!**/node_modules/**"]

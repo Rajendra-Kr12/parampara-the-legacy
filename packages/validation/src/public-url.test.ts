@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { requirePublicUrl } from "./public-env";
+import { requirePublicUrl } from "./public-url";
 
 describe("requirePublicUrl", () => {
   it("accepts an https URL", () => {
@@ -13,11 +13,35 @@ describe("requirePublicUrl", () => {
     expect(() => requirePublicUrl("X", "http://example.com")).toThrow("X must be an https URL.");
   });
 
+  it("accepts an origin with a port or one trailing slash", () => {
+    expect(requirePublicUrl("X", "https://example-123.convex.cloud/")).toBe(
+      "https://example-123.convex.cloud/",
+    );
+    expect(requirePublicUrl("X", "http://localhost:3210")).toBe("http://localhost:3210");
+  });
+
+  it("rejects anything that is not a plain origin", () => {
+    for (const value of [
+      "https://example.com/path",
+      "https://example.com?query=1",
+      "https://example.com#fragment",
+      "https://user:password@example.com",
+      "https://exa mple.com",
+      "ftp://example.com",
+      "https://",
+    ]) {
+      expect(() => requirePublicUrl("X", value)).toThrow("X is not a valid URL.");
+    }
+  });
+
   it("rejects a missing or blank value, naming the variable", () => {
     expect(() => requirePublicUrl("NEXT_PUBLIC_CONVEX_URL", undefined)).toThrow(
       /^NEXT_PUBLIC_CONVEX_URL is not set/,
     );
     expect(() => requirePublicUrl("NEXT_PUBLIC_CONVEX_URL", "  ")).toThrow(/is not set/);
+    expect(() => requirePublicUrl("EXPO_PUBLIC_CONVEX_URL", undefined)).toThrow(
+      /^EXPO_PUBLIC_CONVEX_URL is not set/,
+    );
   });
 
   it("never echoes the value in the error", () => {

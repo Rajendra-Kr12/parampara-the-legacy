@@ -3,7 +3,7 @@
 // rejects it for the expected reason, so a rule that silently stops firing fails here.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { ESLint } from "eslint";
@@ -83,9 +83,14 @@ test("format: the root package points Prettier at the shared config", () => {
   assert.equal(rootPackage.prettier, "@parampara/config/prettier");
 });
 
-test("ci: the real workflow pins actions by SHA and has read-only permissions", () => {
-  const workflow = readFileSync(`${repoRoot}.github/workflows/ci.yml`, "utf8");
-  assert.deepEqual(checkWorkflow(workflow), []);
+test("ci: every real workflow pins actions by SHA and has read-only permissions", () => {
+  const dir = `${repoRoot}.github/workflows/`;
+  const files = readdirSync(dir).filter((name) => /\.ya?ml$/.test(name));
+  assert.ok(files.includes("ci.yml"), `ci.yml not found; got ${files.join(",")}`);
+  assert.ok(files.includes("mobile-e2e.yml"), `mobile-e2e.yml not found; got ${files.join(",")}`);
+  for (const name of files) {
+    assert.deepEqual(checkWorkflow(readFileSync(`${dir}${name}`, "utf8")), [], name);
+  }
 });
 
 test("ci: the workflow policy rejects unpinned actions and write permissions", () => {
@@ -132,6 +137,8 @@ test("secrets: env files are gitignored and .env.example is not", () => {
   };
   assert.equal(ignored(".env"), true);
   assert.equal(ignored("apps/web/.env.local"), true);
+  assert.equal(ignored("apps/mobile/.env.local"), true);
+  assert.equal(ignored("apps/mobile/.env.example"), false);
   assert.equal(ignored(".env.example"), false);
 });
 

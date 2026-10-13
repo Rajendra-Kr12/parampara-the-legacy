@@ -27,3 +27,13 @@ allowBuilds:
   # pnpm already installs as an @unrs/resolver-binding-* optional dependency, so the
   # script stays disabled.
   unrs-resolver: false
+  # The next three are reached through @clerk/expo (D-043 onward). Each script was
+  # read before listing it here. browser-tabs-lock (through @clerk/clerk-js) prints
+  # a thank-you banner from its postinstall and does nothing else. core-js (through
+  # @clerk/clerk-js) prints a funding banner from its postinstall and does nothing
+  # else. fsevents (macOS only, through Metro and Jest file watching) ships a
+  # prebuilt fsevents.node; its install script is npm's implicit `node-gyp rebuild`
+  # for packages with a binding.gyp, which would only recompile that binary.
+  browser-tabs-lock: false
+  core-js: false
+  fsevents: false
