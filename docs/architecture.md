@@ -101,7 +101,6 @@ Family metadata (people, edges, claims, stories) is small: a few MB per family, 
 - Test stack beyond the shared packages and Convex: Playwright with `@clerk/testing` for web, `jest-expo` for mobile components, Maestro for mobile end to end (D-036). No coverage threshold.
 - CI hardening: `protect-main` has no required status checks, repository-wide action SHA pinning is off, and there is no mobile E2E workflow or Turbo remote cache (D-037). These change shared settings and need owner approval.
 - Convex codegen drift check: `convex codegen` needs `CONVEX_DEPLOYMENT`, so a drift job is still to be designed.
-- Fallow report job (D-039): accepted, not built.
 - i18n approach shared by Next.js and Expo, which D-025 requires Feature 1 to pick; CI should fail on a missing translation key.
 - Styling approach shared across web and mobile (for example NativeWind or Tamagui).
 - Data residency: confirm Convex and R2 regions and obligations under India's DPDP Act before storing real data.

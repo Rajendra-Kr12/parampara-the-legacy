@@ -11,7 +11,7 @@ parampara-the-legacy/
 ├── .github/
 │   ├── pull_request_template.md
 │   └── workflows/
-│       └── ci.yml            # format, lint, typecheck, test, build matrix (D-037)
+│       └── ci.yml            # format, lint, typecheck, test, build matrix (D-037); non-blocking Fallow report (D-040)
 ├── .greptile/                # Greptile review settings, rules, and doc context
 │   ├── config.json
 │   ├── rules.md
@@ -34,7 +34,6 @@ parampara-the-legacy/
 ├── .nvmrc
 ├── .prettierignore
 ├── .fallowrc.json            # Fallow code-health report config (non-blocking CI job)
-├── .github/workflows/ci.yml  # format, lint, typecheck, test, build; non-blocking fallow report
 ├── packages/
 │   ├── backend/              # Convex project: schema.ts, auth.config.ts, users.me,
 │   │                         # committed convex/_generated/, convex-test tests (D-031)
