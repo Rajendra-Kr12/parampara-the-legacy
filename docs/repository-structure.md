@@ -1,6 +1,6 @@
 # Repository Structure
 
-## Current (documentation, agent tooling, workspace tooling, and the Convex backend)
+## Current (documentation, agent tooling, workspace tooling, CI, and the Convex backend)
 
 ```text
 parampara-the-legacy/
@@ -9,7 +9,9 @@ parampara-the-legacy/
 ├── README.md                 # project index
 ├── .env.example              # variable names only, never values
 ├── .github/
-│   └── pull_request_template.md
+│   ├── pull_request_template.md
+│   └── workflows/
+│       └── ci.yml            # format, lint, typecheck, test, build matrix (D-037)
 ├── .greptile/                # Greptile review settings, rules, and doc context
 │   ├── config.json
 │   ├── rules.md
@@ -25,7 +27,8 @@ parampara-the-legacy/
 │       └── adversarial-release-review/
 ├── .claude/
 │   └── skills -> ../.agents/skills   # symlink so Claude Code sees the same skills
-├── package.json              # pnpm workspace root (pnpm 12.11.2, Node 24)
+├── package.json              # pnpm workspace root (pinned versions: D-032)
+├── pnpm-lock.yaml            # CI installs with --frozen-lockfile
 ├── pnpm-workspace.yaml       # packages/* only; tools/route-task is excluded (npm)
 ├── turbo.json                # lint, typecheck, test, build; root format check
 ├── .nvmrc
@@ -33,17 +36,20 @@ parampara-the-legacy/
 ├── .fallowrc.json            # Fallow code-health report config (non-blocking CI job)
 ├── .github/workflows/ci.yml  # format, lint, typecheck, test, build; non-blocking fallow report
 ├── packages/
-│   ├── backend/              # Convex schema and functions (auth and users.me so far)
+│   ├── backend/              # Convex project: schema.ts, auth.config.ts, users.me,
+│   │                         # committed convex/_generated/, convex-test tests (D-031)
 │   ├── config/               # shared tsconfig, ESLint, Prettier, enforcement probes
-│   ├── domain/               # pure TS (empty so far)
-│   ├── kinship-engine/       # pure TS (empty so far)
-│   └── validation/           # shared input schemas (empty so far)
+│   │   └── probes/           # node --test probes for the enforcement ledger
+│   ├── domain/               # pure TS (trivial test so far)
+│   ├── kinship-engine/       # pure TS (trivial test so far)
+│   └── validation/           # shared input schemas (trivial test so far)
 ├── tools/
 │   └── route-task/           # Laya task router (Feature 0); npm, not in the pnpm workspace
 └── docs/
     ├── scope.md              # living plan and status
     ├── original-brief.md     # the owner's original idea notes (historical)
     ├── product-requirements.md
+    ├── acceptance-criteria.md
     ├── architecture.md
     ├── domain-model.md
     ├── privacy-and-governance.md
@@ -56,17 +62,14 @@ parampara-the-legacy/
     └── repository-structure.md
 ```
 
-## Planned application layout (Feature 1)
+There is no `apps/` directory yet. pnpm installs with its default isolated `node_modules`, so each package links only its declared dependencies (D-035).
+
+## Planned application layout (Feature 1 steps 3 and 4)
 
 ```text
-apps/
+apps/                         # does not exist yet
 ├── web/                      # Next.js
 └── mobile/                   # Expo (iOS + Android)
-packages/
-├── domain/                   # pure TS rules: claims, thresholds, eligibility
-├── kinship-engine/           # pure TS kinship path -> term calculation
-├── validation/               # shared input schemas
-└── config/                   # shared tsconfig, lint, format settings
 ```
 
 Tests sit next to the code they cover, grouped as unit, integration (Convex), end-to-end (web, mobile), and security/authorization tests. Adjust names if the scaffolding tools establish a better convention, and record the change.

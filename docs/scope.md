@@ -20,15 +20,15 @@ During implementation, maintain a short checklist below the feature. After imple
 - Clients: web, Android, and iOS in the initial release.
 - MVP feature groups: family tree; invitations and relationship verification; deceased profiles and evidence; memories, stories, and photos; privacy and administration; opt-in city discovery; audio memories; spreadsheet import.
 - The product must remain useful without AI services.
-- Stack (D-014, D-015): Turborepo + pnpm; Next.js web; Expo for iOS and Android; Convex backend and database; Clerk auth; Cloudflare R2 media. Versions are confirmed when the monorepo is scaffolded.
+- Stack (D-014, D-015): Turborepo + pnpm; Next.js web; Expo for iOS and Android; Convex backend and database; Clerk auth; Cloudflare R2 media. Versions for the workspace tooling and `packages/backend` are pinned and recorded in `docs/decision-log.md` (D-032 to D-039). The web and mobile versions arrive with steps 3 and 4.
 - Repository: public GitHub `Rajendra-Kr12/parampara-the-legacy`, `main` protected, PR-only (D-018).
 - Original idea notes: `docs/original-brief.md` (historical; this scope and the PRD supersede it where they differ).
 
 ## Current status (2026-10-12)
 
 - Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021); approval, story, language, and dispute-timer rules decided (D-023 to D-029) with testable criteria in `docs/acceptance-criteria.md`.
-- Feature 0 tooling merged: harness verification and Firstmate tier-dispatch map (PR #3) and the `tools/route-task` Laya router with static fallback (PR #5). Remaining Feature 0 items are owner actions, a Greptile check, a re-probe of Antigravity, free-model trials, and CI once code exists.
-- Feature 1 in progress: step 1 (workspace tooling) merged in PR #8; step 2 (`packages/backend`, the Convex auth backend) is on branch `feat/para-auth-backend`. No client app exists yet (steps 3 and 4).
+- Feature 0 tooling merged: harness verification and Firstmate tier-dispatch map (PR #3) and the `tools/route-task` Laya router with static fallback (PR #5). Remaining Feature 0 items are owner actions, a Greptile check, a re-probe of Antigravity, free-model trials, and making the new CI job names required on `protect-main`.
+- Feature 1 in progress: step 1 (workspace tooling and CI) merged in PR #8; step 2 (`packages/backend`, the Convex auth backend) merged in PR #9 (D-031). No client app exists yet (steps 3 and 4), so sign-in is in progress: nothing has been signed in against a real Clerk instance or Convex deployment. Steps 3, 4, 5, and 6 are the remaining work of the approved scaffold plan.
 - Time-sensitive: Laya is free on Vercel AI Gateway only through 2026-10-31. The owner's budget-cap decision for paid Laya (keep paid or self-host) is still open and due before that date.
 - Owner live check of the Laya router (2026-10-12), reported by the owner and not re-run for this update: for the task 'Classify a docs update' it returned `routingPath: laya` with tier T1, while the static table gives D. This is an observation only; no routing rule or table was changed.
 
@@ -37,7 +37,7 @@ During implementation, maintain a short checklist below the feature. After imple
 | # | Feature | Priority | Status |
 |---|---|---|---|
 | 0 | Agent tooling: Laya router, Greptile, CI | Foundation | In progress |
-| 1 | Monorepo scaffold and architecture validation | Foundation | Partly done (docs, decisions, workspace tooling, Convex auth backend) |
+| 1 | Monorepo scaffold and architecture validation | Foundation | Partly done (docs, decisions, workspace tooling, CI, Convex auth backend) |
 | 2 | Identity, family groups, invitations | P0 | Not started |
 | 3 | Canonical person records and relationship graph | P0 | Not started |
 | 4 | Kinship terminology and preferred labels | P0 | Not started |
@@ -84,7 +84,8 @@ Make multi-harness development safe and cheap before application code: routing, 
 - [x] Install Greptile (free Starter plan) on the repository (2026-10-10, done by owner).
 - [x] Add `.greptile/` review rules and doc context (2026-10-10).
 - [ ] Confirm Greptile detects the config and posts a review on PR #1.
-- [ ] Add GitHub Actions CI (lint, typecheck, test, build) once code exists; then require it in the `protect-main` ruleset.
+- [x] Add GitHub Actions CI (format, lint, typecheck, test, build) (2026-10-12, `.github/workflows/ci.yml`, D-037).
+- [ ] Require the CI job names in the `protect-main` ruleset and turn on repository-wide action SHA pinning (plan step 5; owner approval needed).
 
 ## Feature 1: monorepo scaffold and architecture validation
 
@@ -95,13 +96,14 @@ Scaffold the Turborepo with web, mobile, Convex, and shared packages, proving on
 - [x] Inventory repository and read all docs and skills (2026-10-10).
 - [x] Record stack decisions in `docs/architecture.md` and `docs/decision-log.md`.
 - [x] Identify security, privacy, data integrity, and cost risks (architecture open items).
-- [ ] Present scaffold plan and wait for approval before application-code changes.
-- [x] Step 1 `chore/monorepo-tooling`: root workspace tooling, `packages/config`, and empty `packages/domain`, `packages/kinship-engine`, `packages/validation`.
-- [x] Step 2 `feat/convex-auth-backend` (branch `feat/para-auth-backend`, 2026-10-12): `packages/backend` with the `users` schema (display name only, keyed by `tokenIdentifier`), Clerk `auth.config.ts`, the `users.me` query, committed `convex/_generated/` (generated by the owner against the Convex dev deployment), and convex-test tests (D-031).
-- [x] Step 6 `chore/para-fallow` (2026-10-12): Fallow 3.33.1 pinned devDependency and a non-blocking `fallow` CI job (D-032).
-- [ ] Scaffold `apps/web` and `apps/mobile`.
-- [ ] Wire Clerk to Convex on both clients; verify sign-in on web, iOS simulator, Android emulator.
+- [x] Present scaffold plan and wait for approval before application-code changes (2026-10-12: approved; steps 1 and 2 shipped as PR #8 and PR #9).
+- [x] Step 1 `chore/para-scaffold-impl` (merged as PR #8, 2026-10-12): root workspace tooling, `packages/config`, and the `domain`, `kinship-engine`, and `validation` packages with one trivial Vitest test each.
+- [x] Step 2 `feat/para-auth-backend` (merged as PR #9, 2026-10-12): `packages/backend` with the `users` schema (display name only, keyed by `tokenIdentifier`), Clerk `auth.config.ts`, the `users.me` query, committed `convex/_generated/` (generated by the owner against the Convex dev deployment), and convex-test tests (D-031, D-038).
+- [ ] Step 3 `feat/web-auth-proof` and step 4 `feat/mobile-auth-proof`: scaffold `apps/web` and `apps/mobile`, wire Clerk to Convex on both clients, and verify sign-in on web, iOS simulator, and Android emulator. Neither app exists.
 - [x] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger (`docs/coding-standards.md`).
+- [ ] Step 5 `chore/ci-required-checks`: make the CI job names required on `protect-main` and turn on repository-wide action SHA pinning (owner approval needed; D-037).
+- [x] Step 6 `chore/para-fallow` (PR #11): Fallow as a pinned devDependency with a non-blocking CI job (D-039, implemented as D-040).
+- [x] Step 7 `docs/scope-feature-1`: documentation updated to match what steps 1 and 2 shipped (2026-10-12).
 - [ ] Resolve data-residency open item before any real data.
 
 ### Verification
@@ -112,6 +114,10 @@ Step 2 (2026-10-12):
 - Manual: none. Not run: the CI workflow (runs on the PR), a real Clerk sign-in against the Convex dev deployment (needs a client app, steps 3 and 4).
 
 Step 6 (2026-10-12): Prettier check passed locally on `package.json`, `.fallowrc.json`, and `ci.yml`. No TypeScript changed, so ESLint did not apply. The `fallow` job has not run yet; its output is unverified until the PR's CI run.
+
+Step 7, documentation only (2026-10-12):
+- Automated, run locally in the worktree with the Turborepo cache bypassed, so nothing was replayed from a cached result: `lint`, `typecheck`, `test`, and `build` all passed. `@parampara/backend` 19 tests, `@parampara/config` 15 enforcement probes, and one test in each of `domain`, `kinship-engine`, and `validation`. `format` failed on one file, `.opencode/plugins/fm-busy-state.js`, which is untracked and is not part of this repository; every tracked source file passes `prettier --check`. That file is a local agent-harness artifact, so the failure is environmental. It was not added to `.prettierignore`, which would be a settings change outside this task.
+- Manual: none. Not run: the CI workflow (runs on the PR), any Clerk or Convex sign-in (no client app yet).
 
 ## Feature 2: identity, family groups, invitations
 
