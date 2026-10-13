@@ -20,7 +20,7 @@ test("a signed-in test user sees their name from the Convex users.me query", asy
   page,
 }, testInfo) => {
   if (!env.ok) {
-    return;
+    throw new Error(skipMessage(env.missing));
   }
   await page.goto("/");
   await clerk.signIn({

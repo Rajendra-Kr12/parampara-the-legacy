@@ -32,7 +32,7 @@ Clerk and Greptile also appear in `adrianhajdin/llm-arena`; they were chosen her
 
 ### Versions confirmed so far
 
-pnpm 12.11.2, Turborepo 2.11.7, TypeScript 6.0.3, ESLint 9.39.5, Prettier 3.9.10, Vitest 5.0.3, Convex 1.46.0, `convex-test` 0.0.61. These dependency versions are exact, with their reasons in `docs/decision-log.md` (D-032 to D-036). Node is a range, not an exact pin: `engines` allows `>=24.3.0 <25` and `.nvmrc` is 24. Clerk is wired on the server only. Next.js, Expo SDK, React, `@clerk/nextjs`, and `@clerk/expo` are not chosen yet (D-038).
+pnpm 12.11.2, Turborepo 2.11.7, TypeScript 6.0.3, ESLint 9.39.5, Prettier 3.9.10, Vitest 5.0.3, Convex 1.46.0, `convex-test` 0.0.61. These dependency versions are exact, with their reasons in `docs/decision-log.md` (D-032 to D-036). Node is a range, not an exact pin: `engines` allows `>=24.3.0 <25` and `.nvmrc` is 24. Clerk is wired on the server (`packages/backend` token validation) and in the browser (`apps/web`). Next.js, React, and `@clerk/nextjs` are chosen and used by `apps/web`. Expo SDK and `@clerk/expo` are not chosen yet (D-038).
 
 ### What the shared packages are
 
