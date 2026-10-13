@@ -102,7 +102,7 @@ Scaffold the Turborepo with web, mobile, Convex, and shared packages, proving on
 - [ ] Step 3 `feat/web-auth-proof` and step 4 `feat/mobile-auth-proof`: scaffold `apps/web` and `apps/mobile`, wire Clerk to Convex on both clients, and verify sign-in on web, iOS simulator, and Android emulator. Neither app exists.
 - [x] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger (`docs/coding-standards.md`).
 - [ ] Step 5 `chore/ci-required-checks`: make the CI job names required on `protect-main` and turn on repository-wide action SHA pinning (owner approval needed; D-037).
-- [x] Step 6 `chore/para-fallow` (PR #11): Fallow as a pinned devDependency with a non-blocking CI job (D-039, implemented as D-040).
+- [ ] Step 6 `chore/para-fallow` (PR #11): Fallow as a pinned devDependency with a non-blocking CI job (D-039, implemented as D-040).
 - [x] Step 7 `docs/scope-feature-1`: documentation updated to match what steps 1 and 2 shipped (2026-10-12).
 - [ ] Resolve data-residency open item before any real data.
 
