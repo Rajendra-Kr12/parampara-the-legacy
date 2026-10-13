@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { isForbiddenEnvFile, scanText } from "./check-secrets.mjs";
+import { checkPaths, isForbiddenEnvFile, scanText } from "./check-secrets.mjs";
 
 const script = fileURLToPath(new URL("./check-secrets.mjs", import.meta.url));
 const filler = (length) => "aB3dE5gH7kLm".repeat(length).slice(0, length);
@@ -52,12 +52,28 @@ test("ordinary code, placeholders and empty template values pass", () => {
   }
 });
 
+test("every secret-looking assignment on a line is checked, not only the first", () => {
+  const placeholderFirst = `{"${"token"}":"<your-api-key>","${"password"}":"${filler(16)}"}`;
+  assert.equal(scanText(placeholderFirst).length, 1);
+  const bothPlaceholders = `{"${"token"}":"<your-api-key>","${"password"}":"<redacted-value>"}`;
+  assert.deepEqual(scanText(bothPlaceholders), []);
+});
+
 test("the allow marker suppresses a reviewed line", () => {
   assert.deepEqual(scanText(`${fakes["AWS access key id"]} // secrets-gate:allow`), []);
 });
 
 test(".env files are forbidden except the committed templates", () => {
-  for (const path of [".env", ".env.local", "apps/web/.env.production", "deploy/prod.env"]) {
+  for (const path of [
+    ".env",
+    ".env.local",
+    "apps/web/.env.production",
+    "deploy/prod.env",
+    ".env-production",
+    ".env_secret",
+    "apps/web/.envrc",
+    ".env.example.bak",
+  ]) {
     assert.equal(isForbiddenEnvFile(path), true, path);
   }
   for (const path of [
@@ -126,4 +142,32 @@ test("--staged ignores committed files that are not part of the change", () => {
     assert.equal(gate().status, 1);
     assert.equal(gate("--staged").status, 0);
   });
+});
+
+test("a file over the old size cap is still scanned", () => {
+  withRepo(({ stage, gate }) => {
+    const padding = `${"// padding line of ordinary text\n".repeat(40_000)}`;
+    assert.ok(padding.length > 1_000_000);
+    stage("big.ts", `${padding}${fakes["AWS access key id"]}\n`);
+    const result = gate();
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /big\.ts:40001: AWS access key id/);
+  });
+});
+
+test("a file that cannot be read fails the gate instead of being skipped", () => {
+  const findings = checkPaths(["definitely/not/staged.txt"]);
+  assert.deepEqual(findings, [
+    { path: "definitely/not/staged.txt", rule: "file could not be read, so it was not checked" },
+  ]);
+});
+
+test("very long lines are scanned in linear time and still flag a secret at the end", () => {
+  for (const unit of ["a", "secret_", "token "]) {
+    const started = Date.now();
+    assert.deepEqual(scanText(unit.repeat(2_000_000 / unit.length)), [], unit);
+    assert.ok(Date.now() - started < 5_000, `scan of repeated ${unit} was too slow`);
+  }
+  const line = `${"x".repeat(2_000_000)} ${fakes["AWS access key id"]}`;
+  assert.equal(scanText(line).length, 1);
 });

@@ -5,12 +5,15 @@
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-const MAX_BYTES = 1_000_000;
+const UNREADABLE_RULE = "file could not be read, so it was not checked";
 const ALLOW_MARKER = "secrets-gate:allow";
 // Committed templates the repo already uses. Everything else named .env* is rejected.
 const ENV_TEMPLATES = new Set([".env.example"]);
 
-const ASSIGNED_NAME = String.raw`[A-Za-z0-9_.-]*(?:secret|token|passw(?:or)?d|passwd|api[_-]?key|private[_-]?key|access[_-]?key)[A-Za-z0-9_-]*`;
+// Affixes are length-bounded, and the unanchored quoted rule has no leading affix at all, so
+// a huge single-line file cannot trigger quadratic backtracking.
+const SECRET_WORD = String.raw`(?:secret|token|passw(?:or)?d|passwd|api[_-]?key|private[_-]?key|access[_-]?key)[A-Za-z0-9_-]{0,64}`;
+const ASSIGNED_NAME = String.raw`[A-Za-z0-9_.-]{0,64}${SECRET_WORD}`;
 const PLACEHOLDER =
   /^(?:your|example|change[-_]?me|placeholder|dummy|fake|redacted|xxx|\*+|<|\$\{|\$\(|%|process\.env|import\.meta)/i;
 
@@ -34,25 +37,27 @@ export const CONTENT_RULES = [
     // A quoted literal, or an unquoted value at the start of a line (`.env` and YAML style).
     name: "secret-looking assignment with a literal value",
     test: (line) => {
-      const quoted = new RegExp(
-        `${ASSIGNED_NAME}["']?\\s*[:=]\\s*["']([^"'\\s]{12,})["']`,
-        "i",
-      ).exec(line);
+      const quoted = new RegExp(`${SECRET_WORD}["']?\\s*[:=]\\s*["']([^"'\\s]{12,})["']`, "gi");
       const bare = new RegExp(
         `^\\s*(?:export\\s+)?${ASSIGNED_NAME}\\s*[:=]\\s*([A-Za-z0-9/+_=~-]{12,})\\s*(?:#.*)?$`,
         "i",
       ).exec(line);
-      const value = quoted?.[1] ?? bare?.[1];
-      if (value === undefined || PLACEHOLDER.test(value)) return false;
-      return !/[({]/.test(value) && new Set(value).size > 3;
+      const values = [...line.matchAll(quoted)].map((match) => match[1]);
+      if (bare !== null) values.push(bare[1]);
+      return values.some(isLiteralSecretValue);
     },
   },
 ];
 
+function isLiteralSecretValue(value) {
+  if (PLACEHOLDER.test(value)) return false;
+  return !/[({]/.test(value) && new Set(value).size > 3;
+}
+
 export function isForbiddenEnvFile(path) {
   const name = path.split("/").pop() ?? "";
   if (ENV_TEMPLATES.has(name)) return false;
-  return name === ".env" || name.startsWith(".env.") || name.endsWith(".env");
+  return name.startsWith(".env") || name.endsWith(".env");
 }
 
 /** Returns findings `{ line, rule }` for the text of one file. */
@@ -69,7 +74,7 @@ export function scanText(text) {
 }
 
 function git(args, options = {}) {
-  return execFileSync("git", args, { maxBuffer: 64 * 1024 * 1024, ...options });
+  return execFileSync("git", args, { maxBuffer: 512 * 1024 * 1024, ...options });
 }
 
 function listFiles(staged) {
@@ -88,9 +93,10 @@ export function checkPaths(paths) {
     try {
       blob = git(["show", `:${path}`]);
     } catch {
+      findings.push({ path, rule: UNREADABLE_RULE });
       continue;
     }
-    if (blob.length > MAX_BYTES || blob.includes(0)) continue;
+    if (blob.includes(0)) continue;
     for (const finding of scanText(blob.toString("utf8"))) findings.push({ path, ...finding });
   }
   return findings;
