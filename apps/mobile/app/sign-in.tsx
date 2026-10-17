@@ -1,6 +1,6 @@
 import { useSignIn } from "@clerk/expo";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { signInView, validateSignInFields, type SignInFieldErrors } from "../lib/sign-in-state";
 
@@ -29,6 +29,12 @@ export default function SignInScreen() {
     errors.fields.code !== null ||
     (errors.global?.length ?? 0) > 0;
 
+  useEffect(() => {
+    if (signIn.status !== "needs_identifier") {
+      void signIn.reset();
+    }
+  }, []);
+
   const view = signInView({
     status: signIn.status,
     submitting: fetchStatus === "fetching",
@@ -42,6 +48,9 @@ export default function SignInScreen() {
     setAttemptFailed(false);
     if (problems.emailAddress !== undefined || problems.password !== undefined) {
       return;
+    }
+    if (signIn.status !== "needs_identifier") {
+      await signIn.reset();
     }
     const result = await signIn.password({ emailAddress, password });
     if (result.error !== null) {
