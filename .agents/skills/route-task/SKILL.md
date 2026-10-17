@@ -12,7 +12,7 @@ description: Choose the model, harness, and reviewer for a Parampara task using 
    - Any task touching the relationship graph, kinship engine, approvals, auth, privacy, media access, or migrations is at least T2.
 4. If the Laya router (`tools/route-task`) exists and `AI_GATEWAY_API_KEY` is configured, run it with the description and compare its answer with your classification. When they differ, take the higher tier. If Laya is unavailable, use your classification. Never block work on Laya.
 5. Pick the default model and harness for the tier, and a reviewer from a different model family for T2 and T3.
-   - For bulk T0, T1, or D work with no sensitive context, prefer a data class B free model, then a cheap paid model, then the default. Never use a free model for T2, T3, review, or security work, or for anything involving secrets or private design rationale.
+   - For bulk T0, T1, or D work with no sensitive context, prefer a data class B free model, then a cheap paid model, then the default. `docs/model-routing.md` owns the free-model rule: free models may implement ordinary work; security-sensitive code goes to a paid model, where security-sensitive is the closed list of authentication and session code, secret or key handling, signed-URL and access-control code, database migrations, and anything that reads or writes personal data; review and security review stay on a different model family.
    - Pick the harness that can reach the chosen model: OpenCode (Zen key), Pi, Hermes, Claude Code, Codex, or Antigravity.
 6. Split mixed tasks: route the high-risk part at its tier and the routine parts lower, with clear interfaces between them.
 7. Escalate one tier if the task fails twice or turns out to touch a T2 area; note the escalation in the PR.

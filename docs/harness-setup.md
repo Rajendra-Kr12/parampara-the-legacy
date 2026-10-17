@@ -12,12 +12,12 @@ Accepted effort values per harness (docs, from Firstmate adapter notes): Claude 
 |---|---|---|---|---|
 | T0 | `claude` | `haiku` | `low` | Paid class A. Free OpenCode Zen class B models (`opencode` harness, `opencode/space-bunny-free` ran in this verification) only for public, non-sensitive, bulk work |
 | T1 | `claude` or `codex` (array, quota-aware) | `claude-sonnet-5-5`; Codex default model | `medium` | Alternates on `opencode`: `opencode/minimax-m3`, `opencode/kimi-k2.7-code` (paid class A) |
-| T2 | `claude` or `codex` | `claude-opus-5-5`; Codex strongest model | `high` | No free models. Reviewer must be the other family |
+| T2 | `claude` or `codex` | `claude-opus-5-5`; Codex strongest model | `high` | A free DeepSeek model may implement non-security-sensitive work on `opencode` only (security-sensitive code stays on paid models); the reviewer must still be the other family (D-055) |
 | T3 | `claude` | `claude-fable-5-1` | `xhigh` | Fall back to Opus 5.5 at `xhigh` |
 | R | `codex` (adversarial review) with `claude` Opus as second opinion | Codex strongest; `claude-opus-5-5` | `high` | Greptile runs on GitHub. `/codex:adversarial-review` stays user-triggered |
 | D | `claude` | `claude-sonnet-5-5` | `low` or `medium` | Free class B or C only for public-source summaries |
 
-Rules to carry over: route up on doubt; high-risk areas (graph, kinship, approvals, auth, privacy, migrations) match a T2 rule before any bulk or free-model rule; never a free model for T2, T3, R. Rules are read in natural language by Firstmate, so write the `when` text from `docs/model-routing.md` task classes, and put the high-risk rule first. A schema-valid file does not prove the harness/model pair works: Firstmate refuses a model a harness listing omits, and effort is only recorded when unsupported.
+Rules to carry over: route up on doubt; high-risk areas (graph, kinship, approvals, auth, privacy, migrations) match a T2 rule before any bulk or free-model rule; never a free model for R (review). T2 and T3 implementation may use the free DeepSeek model on the `opencode` harness only, never for security-sensitive code as defined in `docs/model-routing.md` (D-055). Rules are read in natural language by Firstmate, so write the `when` text from `docs/model-routing.md` task classes, and put the high-risk rule first. A schema-valid file does not prove the harness/model pair works: Firstmate refuses a model a harness listing omits, and effort is only recorded when unsupported.
 
 Dispatchable harnesses (docs, Firstmate `AGENTS.md` section 4): `claude`, `codex`, `opencode`, `pi`, `pi-signed`, `grok`, `kimi`, `cursor`, `omp`, plus `muse`, `gemini`, `rovo`, `agy`, `devin` for crewmates and scouts only. **Hermes is not in the list, so Firstmate cannot dispatch it** (docs); use the manual herdr workflow below. Antigravity is dispatchable in principle. Its Gemini pool was quota-limited when first probed, but its separate Claude and GPT pool answered (see the agy section below), so an agy profile can name a model from that pool; keep agy out of profiles until a pane launch is shown to honor the chosen model.
 
@@ -26,7 +26,7 @@ Dispatchable harnesses (docs, Firstmate `AGENTS.md` section 4): `claude`, `codex
 - **Pi** (observed): only the `nvidia` provider is configured on this machine; no OpenRouter provider. NVIDIA models answered (Nemotron 3 Super, GLM 5.3 Flash), one returned HTTP 410. (docs) OpenRouter needs `OPENROUTER_API_KEY` or `/login`, and `:free` suffixed model IDs are the free ones; free IDs rotate. Custom providers go in `~/.pi/agent/models.json` with a `baseUrl` and model `id`/`api`.
 - **OpenCode Zen as a Pi custom provider**: docs-only, not tried. Zen exposes `https://opencode.ai/zen/v1/chat/completions` (docs), so a `models.json` provider with that `baseUrl` and `api: openai-completions` is plausible for the models documented on that endpoint; Claude and GPT models use other Zen endpoints. Try it with one class B model before relying on it.
 - **Hermes** (docs; local config shows Nous `:free` models as fallbacks, values redacted; the probes ran on its configured default model, whose name I did not record): `hermes model` or `hermes setup --portal` selects Nous Portal, OpenRouter or a compatible endpoint. Nous Portal `:free` offers and OpenRouter `:free` models rotate; check the live list in the tool before relying on one. Not run end to end here.
-- Data classes still apply: free means class B to D in the catalog, public repository content only.
+- Data classes still apply: free models may use classes B, C and D in the catalog, with public repository content only; class C only for low-sensitivity T0/T1/D and class D only for throwaway public text, never review or security work.
 
 ## Herdr setup
 
@@ -52,7 +52,7 @@ Observed 2026-10-11 with agy 1.3.3 from a worktree of this repository. agy's ans
 - **`CLAUDE.md` `@AGENTS.md` import is not processed.** agy can read `CLAUDE.md` as a file but treats `@AGENTS.md` as Claude Code syntax.
 - **`--model` is honored in print mode, but a pane launch fell back to Gemini.** `agy --model claude-sonnet-4-6 --print-timeout 120s --print "<prompt>"` ran on the requested Claude model. A launch inside a Herdr pane was reported to fall back to a Gemini model instead; that pane launch was not reproduced for this note, and the interactive `-i` path was not tested. Verify the model a pane actually runs on before trusting a profile that names a non-Gemini agy model.
 - **Headless permission gap.** In print mode agy's shell-style tool is auto-denied, so directory listing fails unless a `permissions.allow` rule covers it; avoid `--dangerously-skip-permissions`.
-- **Version claim to check.** `docs/model-routing.md` cites `AGENTS.md` support from "v1.20.3+" while the installed agy is 1.3.3; verify the cited version before relying on it.
+- **No minimum version claimed.** The unverified `AGENTS.md` support claim "v1.20.3+" was removed from `docs/model-routing.md`; the installed agy 1.3.3 loads `AGENTS.md`, and no minimum version is documented, so do not rely on a version number.
 
 ## Laya router (`tools/route-task`)
 
