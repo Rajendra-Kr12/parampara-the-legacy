@@ -12,7 +12,7 @@ Model names, availability, pricing, and free quotas change often. The concrete m
 - High-risk work (relationship graph, kinship engine, approvals, auth, privacy, migrations) gets a strong reasoning model **and** an independent reviewer from a different model family.
 - The implementer never acts as the sole reviewer of its own work.
 - No real family data, secrets, or `.env` contents go into any external model prompt, including the Laya router. Routers see only task descriptions.
-- Free models are for public repository content only, and only in the data classes the catalog allows (B for most work, C for low-sensitivity T0/T1/D, D never for review or security work). A free DeepSeek model may implement T2 and T3 work, but only on the `opencode` harness and never on any other harness; free models never do review or security work (that goes to a different model family, e.g. Codex) (D-054).
+- Free models are for public repository content only, and only in the data classes the catalog allows (B for most work, C for low-sensitivity T0/T1/D, D never for review or security work). A free DeepSeek model may implement ordinary T2 and T3 work, but only on the `opencode` harness and never on any other harness. Security-sensitive code never goes to it; a paid model does that work. Security-sensitive is a closed list: (1) authentication and session code, (2) secret or key handling, (3) signed-URL and access-control code, (4) database migrations, (5) any code that reads or writes personal data. Free DeepSeek performs no review or security work, and its data class and training/retention handling are unverified, which is why those areas are excluded. Review and security review go to a different model family (Codex) (D-054).
 - Product rules live in the repository docs, not in any model's memory. Every harness reads `AGENTS.md`.
 
 ## Routing table
@@ -23,8 +23,8 @@ Model IDs and prices are in `docs/model-catalog.md`. "Free" options are subject 
 |---|---|---|---|---|---|
 | T0 | Trivial, reversible | Typos, renames, doc tweaks, config value changes | Claude Haiku 5.5 | OpenCode Zen free models (class B first), GPT 6 Luna, DeepSeek V4 Flash, GLM 5.3 Flash, Hermes or Pi on free OpenRouter/Nous models | OpenCode, Pi, Hermes, any |
 | T1 | Routine implementation inside an approved plan | A screen, a Convex query, form wiring, test cases for existing rules | Claude Sonnet 5.5 | MiniMax M2.7 or M3, Kimi K2.6 or K2.7 Code (paid on Zen), Gemini Pro, Codex default model | Claude Code, Codex, OpenCode, Pi, Antigravity |
-| T2 | High-risk domain or security | Kinship engine, relationship graph, approval thresholds, Clerk/Convex auth, R2 signed URLs, schema migrations | Claude Opus 5.5 | Codex strongest model; a free DeepSeek model may implement on `opencode` only | Claude Code or Codex, reviewed by the other family |
-| T3 | Hardest reasoning / architecture | Cross-cutting design, ambiguous product forks, ADRs, debugging that stalled at T2 | Claude Fable 5.1 | Opus 5.5 with extended thinking; a free DeepSeek model may implement on `opencode` only | Claude Code |
+| T2 | High-risk domain or security | Kinship engine, relationship graph, approval thresholds, Clerk/Convex auth, R2 signed URLs, schema migrations | Claude Opus 5.5 | Codex strongest model; a free DeepSeek model may implement non-security-sensitive work on `opencode` only | Claude Code or Codex, reviewed by the other family |
+| T3 | Hardest reasoning / architecture | Cross-cutting design, ambiguous product forks, ADRs, debugging that stalled at T2 | Claude Fable 5.1 | Opus 5.5 with extended thinking; a free DeepSeek model may implement non-security-sensitive work on `opencode` only | Claude Code |
 | R | Review | PR review, adversarial review before shipment | Greptile (every PR) + Codex adversarial review | Opus 5.5 when Codex implemented the change; DeepSeek V4 Pro as an extra opinion. No free models | GitHub, Codex plugin |
 | D | Research and documentation | Library comparisons, docs updates, scope updates | Claude Sonnet 5.5 | Gemini Pro, class B or C free models for public-source summaries | Any |
 
@@ -73,7 +73,7 @@ Questions asked of Laya:
 - `volume`: choice of `small | bulk` (bulk work such as many tests or boilerplate may go to cheap or free models).
 
 Decision rule:
-1. If `touches_high_risk_area` is true, the minimum tier is T2. R never uses a free model. T2 and T3 may use the free DeepSeek model, but only on the `opencode` harness and with public repository content; check this before any volume-based preference (D-054).
+1. If `touches_high_risk_area` is true, the minimum tier is T2. R never uses a free model. T2 and T3 may use the free DeepSeek model, but only on the `opencode` harness, with public repository content, and never for security-sensitive code (the closed list in Principles); check this before any volume-based preference (D-054).
 2. If `involves_sensitive_context` is true, only class A models are allowed. If the task contains real secrets or family data, stop: the task must be rewritten, not routed.
 3. If the top choice probability is below 0.7, take the higher of the two most likely tiers; when R is one of the two, choose R, and otherwise break ties toward the higher-risk tier (T1 over D, T2 over T1, T3 over T2).
 4. Only for tiers T0, T1 and D (not R, and separate from the step-1 free DeepSeek rule for T2/T3), with `volume = bulk` and no sensitive context, prefer a class B free model, then a cheap paid model, then the default. A task that is itself a review is tier `R`, so this rule does not apply to it. (`needs_independent_review` only says the output must later be reviewed; it does not change the model for the task itself.)
