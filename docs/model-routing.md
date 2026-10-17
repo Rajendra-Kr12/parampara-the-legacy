@@ -48,6 +48,8 @@ Probe run 2026-10-11 from a git worktree of this repository, one non-interactive
 
 Findings: `AGENTS.md` loading is observed for Claude Code, Codex, OpenCode and Pi (heading quoted). All four listed the seven skill names, but the probe asked for names that `AGENTS.md` itself lists, so this shows the names are visible via `AGENTS.md`, not that any `SKILL.md` was discovered: skill file discovery is unconfirmed (docs say each harness searches its skills directory; see Docs say column). Only Claude Code needs the `CLAUDE.md` import and `.claude/skills` symlink per the docs. For Hermes, the first probe reported no instruction files and the observed skill listing (after `hermes skills trust`) showed 6 of 7 skills; the figure 7 comes only from the trust command's own output (tool output, not an observed load), so full loading is not confirmed. agy: the Gemini pool hit a 429 quota error, but the separate Claude and GPT pool answered; findings are in `docs/harness-setup.md`.
 
+The harness also sets the worker's stop condition: a Claude Code worker sets a `/goal` on its step's check with a turn limit, while workers on other harnesses run the same check without `/goal`. The shared check runner, and that convention, are in `docs/checks.md` (D-054).
+
 The same instruction filenames can shadow `AGENTS.md`: never add `AGENTS.override.md`, `.hermes.md`, or a repo-level `CLAUDE.md` with conflicting rules. The existing `CLAUDE.md` only imports `AGENTS.md`.
 
 ## Laya classifier (router)

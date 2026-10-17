@@ -85,7 +85,7 @@ Every sensitive action writes an audit event in the same Convex mutation as the 
 
 ## Feature 1: monorepo scaffold and architecture validation
 
-Sources: scope Feature 1, D-031, D-038, D-041 to D-053. These are the proofs that the stack works end to end; they carry no family data. The executable definition of done for the mobile steps is `pnpm --filter @parampara/mobile run check` (one PASS, FAIL or NOT RUN line per gate, exit 0 only when every runnable gate passed) plus a green dispatched run of `.github/workflows/mobile-e2e.yml` with its artifacts. A device criterion is never ticked from a local run.
+Sources: scope Feature 1, D-031, D-038, D-041 to D-054. These are the proofs that the stack works end to end; they carry no family data. The executable definition of done for the mobile steps is `pnpm --filter @parampara/mobile run check` (the shared runner, `docs/checks.md`, D-054; one PASS, FAIL or NOT RUN line per stage, exit 0 only when every runnable stage passed, run in the `mobile-check` CI job) plus a green dispatched run of `.github/workflows/mobile-e2e.yml` with its artifacts. A device criterion is never ticked from a local run.
 
 ### Web sign-in proof (Step 3)
 - [x] **AC-1.01** [P] A signed-out web visitor sees the sign-in link (`data-testid="sign-in-link"`) and no name. (Playwright, 2026-10-13)
