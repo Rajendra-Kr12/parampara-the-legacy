@@ -4,6 +4,9 @@ appId: dev.parampara.provisional
 ---
 - launchApp:
     clearState: true
+# Captured before the wait so a failing run still uploads the launch state (Maestro also
+# writes a screenshot at the point of failure under ~/.maestro/tests, collected by CI).
+- takeScreenshot: launch-${PLATFORM}
 - extendedWaitUntil:
     visible: "You are signed out."
     timeout: 90000

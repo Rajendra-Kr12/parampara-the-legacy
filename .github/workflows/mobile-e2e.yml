@@ -72,6 +72,11 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       - name: Start an API 34 emulator from the runner's Android SDK
         run: |
+          # adb and the emulator binary do not live on PATH in the runner image, and
+          # GITHUB_PATH only affects later steps, so export for this step too.
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/emulator" >> "$GITHUB_PATH"
           image="system-images;android-34;google_apis;x86_64"
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install emulator "$image" > /dev/null
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n smoke -k "$image" -d pixel_6
@@ -86,6 +91,15 @@ jobs:
           cd e2e-artifacts
           maestro test -e PLATFORM=android --format junit --output junit-android.xml \
             ../apps/mobile/maestro/signed-out.yaml
+      - name: Collect the Maestro debug output
+        if: always()
+        run: |
+          mkdir -p e2e-artifacts
+          # Maestro writes the failure screenshot, the screen hierarchy and device logs
+          # under ~/.maestro/tests; the run's own artifacts are the only place to keep them.
+          if [ -d "$HOME/.maestro/tests" ]; then
+            cp -R "$HOME/.maestro/tests" e2e-artifacts/maestro-debug
+          fi
       - name: Record the device
         if: always()
         run: |
@@ -172,6 +186,15 @@ jobs:
           cd e2e-artifacts
           maestro --device "$SIM_UDID" test -e PLATFORM=ios --format junit --output junit-ios.xml \
             ../apps/mobile/maestro/signed-out.yaml
+      - name: Collect the Maestro debug output
+        if: always()
+        run: |
+          mkdir -p e2e-artifacts
+          # Maestro writes the failure screenshot, the screen hierarchy and device logs
+          # under ~/.maestro/tests; the run's own artifacts are the only place to keep them.
+          if [ -d "$HOME/.maestro/tests" ]; then
+            cp -R "$HOME/.maestro/tests" e2e-artifacts/maestro-debug
+          fi
       - name: Record the device
         if: always()
         run: |
