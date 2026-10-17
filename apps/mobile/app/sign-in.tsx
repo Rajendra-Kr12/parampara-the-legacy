@@ -20,6 +20,7 @@ export default function SignInScreen() {
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<SignInFieldErrors>({});
   const [attemptFailed, setAttemptFailed] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
 
   const rejected =
     attemptFailed ||
@@ -31,6 +32,7 @@ export default function SignInScreen() {
   const view = signInView({
     status: signIn.status,
     submitting: fetchStatus === "fetching",
+    finalizing,
     rejected,
   });
 
@@ -47,6 +49,10 @@ export default function SignInScreen() {
       return;
     }
     if (signIn.status === "complete") {
+      // Clerk reports `complete` before the session is active, so keep the progress
+      // state live through `finalize()` and surface a finalize failure with the same
+      // fixed error. On success `finalize` navigates away, so leave `finalizing` set.
+      setFinalizing(true);
       const finalized = await signIn.finalize({
         navigate: () => {
           router.replace("/");
@@ -54,6 +60,7 @@ export default function SignInScreen() {
       });
       if (finalized.error !== null) {
         setAttemptFailed(true);
+        setFinalizing(false);
       }
     }
   }

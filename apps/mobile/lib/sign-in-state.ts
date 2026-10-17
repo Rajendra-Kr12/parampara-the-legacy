@@ -11,6 +11,9 @@
  *   message (D-050).
  * - Only `status === "complete"` lets the screen finalize the session. A status this
  *   file does not know is never treated as signed in.
+ * - Finalizing the session is its own in-flight step. Clerk can report `complete` before
+ *   the session is active, so progress stays visible while finalization runs and a
+ *   finalize failure shows the same fixed error instead of looking signed in.
  */
 
 /** Fixed message for any refused sign-in. Never Clerk's text (AC-1.23). */
@@ -59,6 +62,12 @@ export interface SignInSignals {
   readonly status: string | undefined;
   /** True while a sign-in request is in flight (`fetchStatus === "fetching"`). */
   readonly submitting: boolean;
+  /**
+   * True while the screen is awaiting `signIn.finalize()`. Clerk can report `complete`
+   * before the session is active, so this keeps the progress state honest through the
+   * last asynchronous step.
+   */
+  readonly finalizing: boolean;
   /** True when the last submit was refused, from Clerk's returned error or parsed errors. */
   readonly rejected: boolean;
 }
@@ -78,12 +87,19 @@ function isFormStatus(status: string): boolean {
 }
 
 export function signInView(signals: SignInSignals): SignInView {
-  const complete = signals.status === "complete";
-  const unsupported = signals.status !== undefined && !complete && !isFormStatus(signals.status);
+  const statusComplete = signals.status === "complete";
+  const unsupported =
+    signals.status !== undefined && !statusComplete && !isFormStatus(signals.status);
+  // A refusal while finalizing (a finalize failure) means the sign-in did not actually
+  // finish, even though Clerk's status already reads "complete". That failure takes
+  // priority, so it is not hidden and the view is not treated as signed in.
+  const failed = signals.rejected && !unsupported;
+  const complete = statusComplete && !failed;
+  const busy = signals.submitting || signals.finalizing;
   return {
-    submitting: signals.submitting && !complete,
+    submitting: busy && !failed,
     complete,
-    unsupportedMessage: !complete && unsupported ? SIGN_IN_UNSUPPORTED_MESSAGE : null,
-    errorMessage: !complete && !unsupported && signals.rejected ? SIGN_IN_ERROR_MESSAGE : null,
+    unsupportedMessage: unsupported ? SIGN_IN_UNSUPPORTED_MESSAGE : null,
+    errorMessage: failed ? SIGN_IN_ERROR_MESSAGE : null,
   };
 }
