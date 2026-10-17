@@ -29,10 +29,12 @@ export default function SignInScreen() {
     errors.fields.code !== null ||
     (errors.global?.length ?? 0) > 0;
 
+  // Mount only: clears a stale attempt left from an earlier visit, never one in progress.
   useEffect(() => {
     if (signIn.status !== "needs_identifier") {
       void signIn.reset();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const view = signInView({

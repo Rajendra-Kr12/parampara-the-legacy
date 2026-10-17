@@ -77,7 +77,7 @@ parampara-the-legacy/
 ```text
 apps/
 ├── web/                      # Next.js (exists)
-└── mobile/                   # Expo (iOS + Android), shell exists; sign-in screen is step 4b
+└── mobile/                   # Expo (iOS + Android), shell and email/password sign-in (steps 4a, 4b)
 ```
 
 Tests sit next to the code they cover, grouped as unit, integration (Convex), end-to-end (web, mobile), and security/authorization tests. Adjust names if the scaffolding tools establish a better convention, and record the change.
