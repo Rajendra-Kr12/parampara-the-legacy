@@ -325,9 +325,9 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequences: Every device-level fix is a CI round trip. The owner sets the two repository variables before the first run. The workflow-policy probe now checks every file in `.github/workflows/`, not only `ci.yml`.
 
 ## D-045: Live mobile sign-in in CI uses a protected Environment (2026-10-13)
-- Status: Accepted (owner decision; used in Step 4b, nothing created yet)
+- Status: Accepted (owner decision; referenced by Step 4b, still nothing created)
 - Decision: The live sign-in proof runs from a manual `workflow_dispatch` job with a protected GitHub Environment that holds the synthetic Clerk test user's credentials. A dispatch-only job does not run for fork pull requests, which refines D-037's note that CI cannot verify a real Clerk sign-in.
-- Consequences: Creating the Environment and its reviewers changes shared repository settings, so the owner does it. Never real family data.
+- Consequences: Creating the Environment and its reviewers changes shared repository settings, so the owner does it. Never real family data. Step 4b gated both `mobile-e2e` jobs on the `mobile-e2e` Environment and added a step that fails with a named-variable error if a credential secret is missing, so a dispatch waits for the required reviewer before either job starts; the Environment and its secrets are still the owner's to create.
 
 ## D-046: iOS 17 is the minimum iOS version (2026-10-13)
 - Status: Accepted (owner decision; revisit before release)
@@ -351,8 +351,9 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequences: `pnpm test` runs Jest next to Vitest. `jest-expo` brings `@react-native/jest-preset` 0.86.3 as a required peer, which pnpm installs automatically.
 
 ## D-050: Step 4b sign-in scope is email and password only (2026-10-13)
-- Status: Accepted (owner decision; applies to Step 4b)
+- Status: Accepted (owner decision; built in Step 4b)
 - Decision: Mobile sign-in in Step 4b supports email and password only. When Clerk asks for Device Trust (`needs_client_trust`) or a second factor (`needs_second_factor`), the app shows a fixed, safe "not supported yet" message. Clerk error text is never shown.
+- Consequences: `apps/mobile/lib/sign-in-state.ts` maps Clerk's status and error signals to one fixed refusal message and the one "not supported yet" message, and only `status === "complete"` lets the screen finalize; a status added later is never treated as signed in. Unit tests pin each mapping. The generic refusal also keeps a wrong password indistinguishable from an unknown account.
 - Must build before real users: Device Trust and MFA handling on mobile. Clerk turns Device Trust on by default for instances created after 2025-11-14, so real users would be blocked on a new phone without it.
 
 ## D-051: Provisional development app ids (2026-10-13)

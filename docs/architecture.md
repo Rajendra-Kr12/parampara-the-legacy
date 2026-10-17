@@ -2,7 +2,7 @@
 
 ## Status
 
-Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `packages/backend`, `apps/web` and the signed-out `apps/mobile` shell exist. The toolchain versions are pinned and confirmed in `docs/decision-log.md` (D-032 to D-040); the web versions are in `apps/web/package.json` and the mobile versions in D-042. The open items at the end are confirmed as those steps ship.
+Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `packages/backend`, `apps/web` and `apps/mobile` exist. The toolchain versions are pinned and confirmed in `docs/decision-log.md` (D-032 to D-040); the web versions are in `apps/web/package.json` and the mobile versions in D-042. The open items at the end are confirmed as those steps ship.
 
 ## Architecture principles
 
@@ -96,7 +96,7 @@ Family metadata (people, edges, claims, stories) is small: a few MB per family, 
 
 ## Open items
 
-- Client apps: `apps/web` exists (Feature 1 step 3, D-041). `apps/mobile` exists as a signed-out shell (step 4a, D-043 to D-053); its sign-in screen is step 4b (email and password only, D-050). Device proofs run on GitHub Actions (D-044) and have not run yet.
+- Client apps: `apps/web` exists (Feature 1 step 3, D-041). `apps/mobile` exists (step 4a shell, D-043 to D-053; step 4b email and password sign-in, D-050). Device proofs run on GitHub Actions (D-044) and have not run yet.
 - Sign-in is in progress. Web sign-in is proven end to end against the Clerk and Convex development instances (Playwright run passed 2026-10-13, recorded in `docs/scope.md`); the mobile proof is step 4b. Mobile Device Trust and MFA handling must be built before real users (D-050). The Clerk development app and the Convex development project both exist, and the Clerk issuer domain is set in the Convex development deployment (D-038).
 - Test stack beyond the shared packages and Convex: Playwright with `@clerk/testing` for web; `jest-expo` for pure mobile modules and Maestro for mobile end to end, no component render library (D-036, D-049). No coverage threshold.
 - CI hardening: `protect-main` has no required status checks, repository-wide action SHA pinning is off, and there is no Turbo remote cache (D-037). The mobile E2E workflow exists but is manual and needs the owner to set its repository variables (D-044). These change shared settings and need owner approval.
