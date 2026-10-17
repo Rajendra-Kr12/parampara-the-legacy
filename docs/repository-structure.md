@@ -35,11 +35,13 @@ parampara-the-legacy/
 ├── .nvmrc
 ├── .prettierignore
 ├── .fallowrc.json            # Fallow code-health report config (non-blocking CI job)
+├── scripts/                  # portable check runner scripts/check.mjs and the secrets gate
 ├── apps/
 │   ├── web/                  # Next.js web sign-in proof (D-041)
 │   └── mobile/               # Expo SDK 57 app shell (D-043): app/ routes, components/,
 │                             # lib/ (public env, device token cache) with Jest tests,
-│                             # maestro/ device flows, scripts/check.mjs and verify-export.mjs
+│                             # maestro/ device flows, scripts/check.mjs (a wrapper over the
+│                             # shared runner) and verify-export.mjs
 ├── packages/
 │   ├── backend/              # Convex project: schema.ts, auth.config.ts, users.me,
 │   │                         # committed convex/_generated/, convex-test tests (D-031)
@@ -62,6 +64,7 @@ parampara-the-legacy/
     ├── agent-workflow.md
     ├── model-routing.md
     ├── harness-setup.md
+    ├── checks.md             # the step check runner and the /goal convention
     ├── model-catalog.md
     ├── decision-log.md
     └── repository-structure.md

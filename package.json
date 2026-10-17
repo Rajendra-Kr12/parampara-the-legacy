@@ -13,6 +13,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test //#test:scripts",
     "test:scripts": "node --test scripts/*.test.mjs",
+    "check": "node scripts/check.mjs",
     "check:secrets": "node scripts/check-secrets.mjs",
     "hooks:install": "git config core.hooksPath .githooks",
     "build": "turbo run build"

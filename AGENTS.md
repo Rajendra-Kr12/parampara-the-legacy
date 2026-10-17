@@ -15,6 +15,7 @@ Parampara: The Legacy is a private family legacy network for web, iOS, and Andro
 | Starting any session | `docs/scope.md` (status and next work) |
 | Planning a feature | `docs/product-requirements.md`, skill `plan-feature` |
 | Writing or checking behavior (done criteria, tests) | `docs/acceptance-criteria.md` |
+| Running or adding a step's check | `docs/checks.md` |
 | Choosing, running, or debugging a harness | `docs/harness-setup.md` |
 | Touching people, relationships, kinship, approvals | `docs/domain-model.md`, skill `relationship-domain-review` |
 | Touching personal data, media, auth, consent | `docs/privacy-and-governance.md`, skill `privacy-security-review` |
