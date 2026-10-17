@@ -111,9 +111,9 @@ jobs:
           mkdir -p e2e-artifacts
           cd e2e-artifacts
           maestro test -e PLATFORM=android \
-            -e E2E_CLERK_USER_USERNAME="$E2E_CLERK_USER_USERNAME" \
-            -e E2E_CLERK_USER_PASSWORD="$E2E_CLERK_USER_PASSWORD" \
-            -e E2E_CLERK_USER_NAME="$E2E_CLERK_USER_NAME" \
+            -e E2E_CLERK_USER_USERNAME="${E2E_CLERK_USER_USERNAME}" \
+            -e E2E_CLERK_USER_PASSWORD="${E2E_CLERK_USER_PASSWORD}" \
+            -e E2E_CLERK_USER_NAME="${E2E_CLERK_USER_NAME}" \
             --format junit --output junit-android-signin.xml \
             ../apps/mobile/maestro/sign-in.yaml
       - name: Record the device
@@ -224,9 +224,9 @@ jobs:
           mkdir -p e2e-artifacts
           cd e2e-artifacts
           maestro --device "$SIM_UDID" test -e PLATFORM=ios \
-            -e E2E_CLERK_USER_USERNAME="$E2E_CLERK_USER_USERNAME" \
-            -e E2E_CLERK_USER_PASSWORD="$E2E_CLERK_USER_PASSWORD" \
-            -e E2E_CLERK_USER_NAME="$E2E_CLERK_USER_NAME" \
+            -e E2E_CLERK_USER_USERNAME="${E2E_CLERK_USER_USERNAME}" \
+            -e E2E_CLERK_USER_PASSWORD="${E2E_CLERK_USER_PASSWORD}" \
+            -e E2E_CLERK_USER_NAME="${E2E_CLERK_USER_NAME}" \
             --format junit --output junit-ios-signin.xml \
             ../apps/mobile/maestro/sign-in.yaml
       - name: Record the device
