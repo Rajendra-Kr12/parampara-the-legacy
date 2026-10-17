@@ -1,10 +1,13 @@
-# Device proofs for apps/mobile (Feature 1 Step 4a; D-043 onward). Each job builds a
-# standalone Release app with embedded JavaScript (no Metro, no Expo Go, no dev
-# client), launches it on a simulator or emulator, and runs the Maestro signed-out
-# smoke. Dispatched by hand only. It needs two public repository variables,
-# EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY and EXPO_PUBLIC_CONVEX_URL (public by design),
-# and no secrets. Native folders are generated here by `expo prebuild` and never
-# committed.
+# Device proofs for apps/mobile (Feature 1 Steps 4a and 4b; D-043 onward). Each job
+# builds a standalone Release app with embedded JavaScript (no Metro, no Expo Go, no
+# dev client), launches it on a simulator or emulator, runs the Maestro signed-out
+# smoke, then runs the live sign-in proof. Dispatched by hand only. It needs two
+# public repository variables, EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY and
+# EXPO_PUBLIC_CONVEX_URL (public by design), and the synthetic Clerk test user's
+# credentials from the protected `mobile-e2e` Environment (D-045), never real family
+# data. The Environment gate means a dispatched run waits for the owner's approval
+# before either job starts. Native folders are generated here by `expo prebuild` and
+# never committed.
 name: mobile-e2e
 
 on:
@@ -33,8 +36,21 @@ jobs:
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    environment: mobile-e2e
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Require the sign-in credentials
+        env:
+          E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
+          E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
+          E2E_CLERK_USER_NAME: ${{ secrets.E2E_CLERK_USER_NAME }}
+        run: |
+          for name in E2E_CLERK_USER_USERNAME E2E_CLERK_USER_PASSWORD E2E_CLERK_USER_NAME; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Set $name in the protected mobile-e2e Environment (docs/scope.md, D-045)."
+              exit 1
+            fi
+          done
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0 (version from packageManager)
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -86,6 +102,20 @@ jobs:
           cd e2e-artifacts
           maestro test -e PLATFORM=android --format junit --output junit-android.xml \
             ../apps/mobile/maestro/signed-out.yaml
+      - name: Run the live sign-in proof
+        env:
+          E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
+          E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
+          E2E_CLERK_USER_NAME: ${{ secrets.E2E_CLERK_USER_NAME }}
+        run: |
+          mkdir -p e2e-artifacts
+          cd e2e-artifacts
+          maestro test -e PLATFORM=android \
+            -e E2E_CLERK_USER_USERNAME="$E2E_CLERK_USER_USERNAME" \
+            -e E2E_CLERK_USER_PASSWORD="$E2E_CLERK_USER_PASSWORD" \
+            -e E2E_CLERK_USER_NAME="$E2E_CLERK_USER_NAME" \
+            --format junit --output junit-android-signin.xml \
+            ../apps/mobile/maestro/sign-in.yaml
       - name: Record the device
         if: always()
         run: |
@@ -106,8 +136,21 @@ jobs:
   ios:
     runs-on: macos-26
     timeout-minutes: 120
+    environment: mobile-e2e
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Require the sign-in credentials
+        env:
+          E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
+          E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
+          E2E_CLERK_USER_NAME: ${{ secrets.E2E_CLERK_USER_NAME }}
+        run: |
+          for name in E2E_CLERK_USER_USERNAME E2E_CLERK_USER_PASSWORD E2E_CLERK_USER_NAME; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Set $name in the protected mobile-e2e Environment (docs/scope.md, D-045)."
+              exit 1
+            fi
+          done
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0 (version from packageManager)
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -172,6 +215,20 @@ jobs:
           cd e2e-artifacts
           maestro --device "$SIM_UDID" test -e PLATFORM=ios --format junit --output junit-ios.xml \
             ../apps/mobile/maestro/signed-out.yaml
+      - name: Run the live sign-in proof
+        env:
+          E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
+          E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
+          E2E_CLERK_USER_NAME: ${{ secrets.E2E_CLERK_USER_NAME }}
+        run: |
+          mkdir -p e2e-artifacts
+          cd e2e-artifacts
+          maestro --device "$SIM_UDID" test -e PLATFORM=ios \
+            -e E2E_CLERK_USER_USERNAME="$E2E_CLERK_USER_USERNAME" \
+            -e E2E_CLERK_USER_PASSWORD="$E2E_CLERK_USER_PASSWORD" \
+            -e E2E_CLERK_USER_NAME="$E2E_CLERK_USER_NAME" \
+            --format junit --output junit-ios-signin.xml \
+            ../apps/mobile/maestro/sign-in.yaml
       - name: Record the device
         if: always()
         run: |

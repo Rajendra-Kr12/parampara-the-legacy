@@ -25,7 +25,9 @@ export default function RootLayout() {
       telemetry={false}
     >
       <ConvexClientProvider convexUrl={publicEnv.values.convexUrl}>
-        <Stack screenOptions={{ title: "Parampara" }} />
+        <Stack screenOptions={{ title: "Parampara" }}>
+          <Stack.Screen name="sign-in" options={{ title: "Sign in" }} />
+        </Stack>
         <StatusBar style="dark" />
       </ConvexClientProvider>
     </ClerkProvider>
