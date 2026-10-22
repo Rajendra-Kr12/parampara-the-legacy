@@ -125,7 +125,9 @@ jobs:
           mkdir -p e2e-artifacts
           adb exec-out screencap -p > e2e-artifacts/failure-android.png || true
           adb logcat -d -t 2000 > e2e-artifacts/logcat-android.txt || true
-          cp -R "$HOME/.maestro/tests" e2e-artifacts/maestro-tests-android || true
+          # Screenshots only: Maestro's command JSON and logs contain the typed credentials.
+          mkdir -p e2e-artifacts/maestro-screenshots-android
+          find "$HOME/.maestro/tests" -name "*.png" -exec cp {} e2e-artifacts/maestro-screenshots-android/ \; || true
       - name: Record the device
         if: always()
         run: |
@@ -246,7 +248,9 @@ jobs:
           xcrun simctl io "$SIM_UDID" screenshot e2e-artifacts/failure-ios.png || true
           xcrun simctl spawn "$SIM_UDID" log show --last 10m --style compact \
             --predicate 'process == "Parampara"' > e2e-artifacts/simulator-log-ios.txt || true
-          cp -R "$HOME/.maestro/tests" e2e-artifacts/maestro-tests-ios || true
+          # Screenshots only: Maestro's command JSON and logs contain the typed credentials.
+          mkdir -p e2e-artifacts/maestro-screenshots-ios
+          find "$HOME/.maestro/tests" -name "*.png" -exec cp {} e2e-artifacts/maestro-screenshots-ios/ \; || true
       - name: Record the device
         if: always()
         run: |
