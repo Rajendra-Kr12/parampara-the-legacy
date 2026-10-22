@@ -87,6 +87,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Start an API 34 emulator from the runner's Android SDK
+        timeout-minutes: 20
         run: |
           # The runner image has adb under platform-tools but not on PATH.
           echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
@@ -96,7 +97,7 @@ jobs:
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n smoke -k "$image" -d pixel_6
           nohup "$ANDROID_HOME/emulator/emulator" -avd smoke -no-window -no-audio -no-boot-anim \
             -no-snapshot -gpu swiftshader_indirect > "$RUNNER_TEMP/emulator.log" 2>&1 &
-          adb wait-for-device
+          timeout 300 adb wait-for-device
           timeout 600 bash -c 'until [ "$(adb shell getprop sys.boot_completed | tr -d "\r")" = "1" ]; do sleep 5; done'
       - name: Run the signed-out smoke
         run: |
@@ -125,6 +126,7 @@ jobs:
           mkdir -p e2e-artifacts
           adb exec-out screencap -p > e2e-artifacts/failure-android.png || true
           adb logcat -d -t 2000 > e2e-artifacts/logcat-android.txt || true
+          cp "$RUNNER_TEMP/emulator.log" e2e-artifacts/emulator-android.log || true
           # Screenshots only: Maestro's command JSON and logs contain the typed credentials.
           mkdir -p e2e-artifacts/maestro-screenshots-android
           find "$HOME/.maestro/tests" -name "*.png" -exec cp {} e2e-artifacts/maestro-screenshots-android/ \; || true
@@ -223,6 +225,9 @@ jobs:
           echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
           echo "SIM_IOS_VERSION=$ios_version" >> "$GITHUB_ENV"
       - name: Run the signed-out smoke
+        env:
+          # The default driver start-up limit was exceeded on the macOS runner (run 39805721790).
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "300000"
         run: |
           xcrun simctl install "$SIM_UDID" apps/mobile/ios/build/Build/Products/Release-iphonesimulator/Parampara.app
           mkdir -p e2e-artifacts
@@ -234,6 +239,7 @@ jobs:
           E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
           E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
           E2E_CLERK_USER_NAME: ${{ secrets.E2E_CLERK_USER_NAME }}
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "300000"
         run: |
           mkdir -p e2e-artifacts
           cd e2e-artifacts
