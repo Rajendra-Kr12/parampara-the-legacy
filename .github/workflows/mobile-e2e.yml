@@ -147,9 +147,16 @@ jobs:
       - name: Build the Release app for the simulator
         working-directory: apps/mobile/ios
         run: |
+          # Sign ad hoc, not CODE_SIGNING_ALLOWED=NO: an unsigned app has no
+          # application-identifier entitlement, so every Keychain call fails with
+          # errSecMissingEntitlement (-34018) and @clerk/expo never finishes loading
+          # (the screen stays on "Checking your sign-in..."). Xcode embeds the simulated
+          # entitlements into an ad-hoc signed build.
           xcodebuild -workspace Parampara.xcworkspace -scheme Parampara -configuration Release \
             -sdk iphonesimulator -destination "generic/platform=iOS Simulator" \
-            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+            -derivedDataPath build CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=YES DEVELOPMENT_TEAM="" build
+          codesign -d --entitlements :- build/Build/Products/Release-iphonesimulator/Parampara.app 2>&1 | head -20
       - name: Install Maestro
         run: |
           curl -fsSL -o "$RUNNER_TEMP/maestro.zip" \
