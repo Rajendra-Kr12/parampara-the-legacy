@@ -1,6 +1,7 @@
 import { api } from "@parampara/backend/api";
 import { Show, useClerk } from "@clerk/expo";
 import { Authenticated, AuthLoading, Unauthenticated, useConvexAuth, useQuery } from "convex/react";
+import { AuthDiagnostics } from "../components/auth-diagnostics";
 import { Button, StyleSheet, Text, View } from "react-native";
 
 /**
@@ -23,6 +24,7 @@ export default function HomeScreen() {
         <MyName />
         <SignOut />
       </Authenticated>
+      <AuthDiagnostics />
     </View>
   );
 }

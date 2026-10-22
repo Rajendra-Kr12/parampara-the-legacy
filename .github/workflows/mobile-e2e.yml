@@ -28,6 +28,8 @@ env:
   MAESTRO_SHA256: "5384593cb4e7a106489e75a821d157dd43f4e438df6bc308b72e82c685e1283a"
   EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY }}
   EXPO_PUBLIC_CONVEX_URL: ${{ vars.EXPO_PUBLIC_CONVEX_URL }}
+  # Shows non-identifying Clerk/Convex auth state names on screen and in the log.
+  EXPO_PUBLIC_AUTH_DIAGNOSTICS: "1"
 
 jobs:
   android:
@@ -230,6 +232,14 @@ jobs:
           if [ -d "$HOME/.maestro/tests" ]; then
             cp -R "$HOME/.maestro/tests" e2e-artifacts/maestro-debug
           fi
+      - name: Collect the simulator app log and screen text
+        if: always()
+        run: |
+          mkdir -p e2e-artifacts
+          xcrun simctl spawn "$SIM_UDID" log show --last 15m --style compact \
+            --predicate 'eventMessage CONTAINS "auth-diag" OR process == "Parampara"' \
+            > e2e-artifacts/ios-app.log 2>&1 || true
+          maestro --device "$SIM_UDID" hierarchy > e2e-artifacts/ios-hierarchy.json 2>&1 || true
       - name: Record the device
         if: always()
         run: |

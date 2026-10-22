@@ -10,6 +10,7 @@
  */
 import type { TokenCache } from "@clerk/expo";
 import * as SecureStore from "expo-secure-store";
+import { describeError, recordDiagnostic } from "./auth-diagnostics";
 
 /** The part of expo-secure-store this cache uses, so tests can pass a fake. */
 export interface SecureStoreLike {
@@ -26,8 +27,11 @@ export function createDeviceTokenCache(store: SecureStoreLike): TokenCache {
   return {
     async getToken(key) {
       try {
-        return await store.getItemAsync(key, secureStoreOptions);
-      } catch {
+        const value = await store.getItemAsync(key, secureStoreOptions);
+        recordDiagnostic(`tokenCache.get ok found=${value !== null}`);
+        return value;
+      } catch (error) {
+        recordDiagnostic(`tokenCache.get threw ${describeError(error)}`);
         // An unreadable item (for example after a Keychain reset) is dropped so
         // Clerk starts a fresh sign-in instead of failing on every launch.
         try {
@@ -38,8 +42,14 @@ export function createDeviceTokenCache(store: SecureStoreLike): TokenCache {
         return null;
       }
     },
-    saveToken(key, token) {
-      return store.setItemAsync(key, token, secureStoreOptions);
+    async saveToken(key, token) {
+      try {
+        await store.setItemAsync(key, token, secureStoreOptions);
+        recordDiagnostic("tokenCache.save ok");
+      } catch (error) {
+        recordDiagnostic(`tokenCache.save threw ${describeError(error)}`);
+        throw error;
+      }
     },
     clearToken(key) {
       return store.deleteItemAsync(key, secureStoreOptions);
