@@ -182,6 +182,10 @@ jobs:
           echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
           echo "SIM_IOS_VERSION=$ios_version" >> "$GITHUB_ENV"
       - name: Run the signed-out smoke
+        env:
+          # Building and starting Maestro's XCTest driver took over 2 minutes on a cold
+          # runner, longer than Maestro's default wait ("Device became unreachable").
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "420000"
         run: |
           xcrun simctl install "$SIM_UDID" apps/mobile/ios/build/Build/Products/Release-iphonesimulator/Parampara.app
           mkdir -p e2e-artifacts
