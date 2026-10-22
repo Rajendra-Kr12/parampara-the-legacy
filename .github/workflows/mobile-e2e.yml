@@ -186,9 +186,11 @@ jobs:
       - name: Build the Release app for the simulator
         working-directory: apps/mobile/ios
         run: |
+          # Ad-hoc sign ("-") so the entitlements are embedded: unsigned, Clerk's native layer
+          # cannot open the keychain (error -34018) and the app never leaves "Checking your sign-in...".
           xcodebuild -workspace Parampara.xcworkspace -scheme Parampara -configuration Release \
             -sdk iphonesimulator -destination "generic/platform=iOS Simulator" \
-            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+            -derivedDataPath build CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=YES build
       - name: Install Maestro
         run: |
           curl -fsSL -o "$RUNNER_TEMP/maestro.zip" \
