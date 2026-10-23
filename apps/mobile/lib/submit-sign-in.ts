@@ -11,8 +11,8 @@
 export type SubmitOutcome = "failed" | "finalized" | "pending";
 
 export interface SubmitSteps {
-  /** Clears a stale attempt before a new one (a no-op on a fresh attempt). */
-  readonly resetIfNeeded: () => Promise<void>;
+  /** Clears a stale attempt before a new one (a no-op, with no error, on a fresh attempt). */
+  readonly resetIfNeeded: () => Promise<{ readonly error: unknown }>;
   readonly submitPassword: () => Promise<{ readonly error: unknown }>;
   /** Read after the password call, never captured earlier, so it is Clerk's live status. */
   readonly readStatus: () => string;
@@ -23,7 +23,13 @@ export interface SubmitSteps {
 
 export async function submitSignIn(steps: SubmitSteps): Promise<SubmitOutcome> {
   try {
-    await steps.resetIfNeeded();
+    const reset = await steps.resetIfNeeded();
+    // Finalizing trusts `complete` after the password call, and Clerk's call returns no
+    // status to tie it to. So prove the attempt started clean: a failed reset, or a status
+    // other than `needs_identifier`, could be a leftover `complete` from an earlier attempt.
+    if (reset.error !== null || steps.readStatus() !== "needs_identifier") {
+      return "failed";
+    }
     const submitted = await steps.submitPassword();
     if (submitted.error !== null) {
       return "failed";

@@ -1,11 +1,19 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import { submitSignIn, type SubmitSteps } from "./submit-sign-in";
 
-function steps(overrides: Partial<SubmitSteps> = {}): SubmitSteps {
+/**
+ * A fresh attempt reads `needs_identifier` until the password call, then `statusAfter`.
+ * Overrides replace single steps, so a test can pin a leftover status or a failure.
+ */
+function steps(statusAfter = "complete", overrides: Partial<SubmitSteps> = {}): SubmitSteps {
+  let submitted = false;
   return {
-    resetIfNeeded: () => Promise.resolve(),
-    submitPassword: () => Promise.resolve({ error: null }),
-    readStatus: () => "complete",
+    resetIfNeeded: () => Promise.resolve({ error: null }),
+    submitPassword: () => {
+      submitted = true;
+      return Promise.resolve({ error: null });
+    },
+    readStatus: () => (submitted ? statusAfter : "needs_identifier"),
     beginFinalizing: () => undefined,
     finalize: () => Promise.resolve({ error: null }),
     ...overrides,
@@ -13,32 +21,20 @@ function steps(overrides: Partial<SubmitSteps> = {}): SubmitSteps {
 }
 
 describe("submitSignIn", () => {
-  it("finalizes once when Clerk reports complete", async () => {
+  it("finalizes once when a clean attempt reports complete", async () => {
     const beginFinalizing = jest.fn();
     const finalize = jest.fn(() => Promise.resolve({ error: null }));
-    await expect(submitSignIn(steps({ beginFinalizing, finalize }))).resolves.toBe("finalized");
+    await expect(submitSignIn(steps("complete", { beginFinalizing, finalize }))).resolves.toBe(
+      "finalized",
+    );
     expect(beginFinalizing).toHaveBeenCalledTimes(1);
     expect(finalize).toHaveBeenCalledTimes(1);
-  });
-
-  it("reads the status after the password call, not before", async () => {
-    let status = "needs_identifier";
-    const outcome = await submitSignIn(
-      steps({
-        submitPassword: () => {
-          status = "complete";
-          return Promise.resolve({ error: null });
-        },
-        readStatus: () => status,
-      }),
-    );
-    expect(outcome).toBe("finalized");
   });
 
   it("fails without finalizing when Clerk returns an error", async () => {
     const finalize = jest.fn(() => Promise.resolve({ error: null }));
     const outcome = await submitSignIn(
-      steps({
+      steps("complete", {
         submitPassword: () => Promise.resolve({ error: new Error("bad password") }),
         finalize,
       }),
@@ -50,43 +46,72 @@ describe("submitSignIn", () => {
   it("stays pending and never finalizes for a step the app does not support", async () => {
     const finalize = jest.fn(() => Promise.resolve({ error: null }));
     for (const status of ["needs_client_trust", "needs_second_factor", "a_future_status"]) {
-      await expect(submitSignIn(steps({ readStatus: () => status, finalize }))).resolves.toBe(
-        "pending",
-      );
+      await expect(submitSignIn(steps(status, { finalize }))).resolves.toBe("pending");
     }
     expect(finalize).not.toHaveBeenCalled();
   });
 
   it("fails when finalize returns an error", async () => {
     const outcome = await submitSignIn(
-      steps({ finalize: () => Promise.resolve({ error: new Error("session not active") }) }),
+      steps("complete", {
+        finalize: () => Promise.resolve({ error: new Error("session not active") }),
+      }),
     );
     expect(outcome).toBe("failed");
   });
 
+  describe("a leftover status from an earlier attempt", () => {
+    it("fails and never calls the password step when the reset returns an error", async () => {
+      const submitPassword = jest.fn(() => Promise.resolve({ error: null }));
+      const finalize = jest.fn(() => Promise.resolve({ error: null }));
+      const outcome = await submitSignIn(
+        steps("complete", {
+          resetIfNeeded: () => Promise.resolve({ error: new Error("reset refused") }),
+          submitPassword,
+          finalize,
+        }),
+      );
+      expect(outcome).toBe("failed");
+      expect(submitPassword).not.toHaveBeenCalled();
+      expect(finalize).not.toHaveBeenCalled();
+    });
+
+    it("fails and never finalizes when `complete` survives the reset", async () => {
+      const submitPassword = jest.fn(() => Promise.resolve({ error: null }));
+      const finalize = jest.fn(() => Promise.resolve({ error: null }));
+      const outcome = await submitSignIn(
+        steps("complete", { readStatus: () => "complete", submitPassword, finalize }),
+      );
+      expect(outcome).toBe("failed");
+      expect(submitPassword).not.toHaveBeenCalled();
+      expect(finalize).not.toHaveBeenCalled();
+    });
+
+    it("does not finalize when a new password call returns no error but does not complete", async () => {
+      const finalize = jest.fn(() => Promise.resolve({ error: null }));
+      const outcome = await submitSignIn(steps("needs_identifier", { finalize }));
+      expect(outcome).toBe("pending");
+      expect(finalize).not.toHaveBeenCalled();
+    });
+  });
+
   it("fails instead of throwing when the reset rejects", async () => {
     const outcome = await submitSignIn(
-      steps({
-        resetIfNeeded: () => Promise.reject(new Error("network")),
-      }),
+      steps("complete", { resetIfNeeded: () => Promise.reject(new Error("network")) }),
     );
     expect(outcome).toBe("failed");
   });
 
   it("fails instead of throwing when the password call rejects", async () => {
     const outcome = await submitSignIn(
-      steps({
-        submitPassword: () => Promise.reject(new Error("network")),
-      }),
+      steps("complete", { submitPassword: () => Promise.reject(new Error("network")) }),
     );
     expect(outcome).toBe("failed");
   });
 
   it("fails instead of throwing when finalize rejects", async () => {
     const outcome = await submitSignIn(
-      steps({
-        finalize: () => Promise.reject(new Error("keychain")),
-      }),
+      steps("complete", { finalize: () => Promise.reject(new Error("keychain")) }),
     );
     expect(outcome).toBe("failed");
   });

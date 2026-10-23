@@ -56,11 +56,8 @@ export default function SignInScreen() {
     // live through `finalize()`. A refusal or a thrown failure shows the same fixed error
     // and unlocks the form; on success `finalize` navigates away, so `finalizing` stays set.
     const outcome = await submitSignIn({
-      resetIfNeeded: async () => {
-        if (signIn.status !== "needs_identifier") {
-          await signIn.reset();
-        }
-      },
+      resetIfNeeded: () =>
+        signIn.status === "needs_identifier" ? Promise.resolve({ error: null }) : signIn.reset(),
       submitPassword: () => signIn.password({ emailAddress, password }),
       readStatus: () => signIn.status,
       beginFinalizing: () => {
