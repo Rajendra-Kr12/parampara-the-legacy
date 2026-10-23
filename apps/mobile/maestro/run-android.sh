@@ -2,7 +2,9 @@
 # Runs inside reactivecircus/android-emulator-runner (the emulator only lives for the
 # duration of that step), so the install, both Maestro flows and the evidence capture
 # all happen here. Run from the repository root with the E2E_CLERK_USER_* variables set.
-set -uo pipefail
+# -e stops at the first failing command, so a failed signed-out flow can never be hidden
+# by a passing sign-in flow; the EXIT trap still collects evidence and keeps the status.
+set -euo pipefail
 
 ROOT="$PWD"
 OUT="$ROOT/e2e-artifacts"
