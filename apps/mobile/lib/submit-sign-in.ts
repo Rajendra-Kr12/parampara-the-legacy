@@ -45,3 +45,17 @@ export async function submitSignIn(steps: SubmitSteps): Promise<SubmitOutcome> {
     return "failed";
   }
 }
+
+/**
+ * The reset the sign-in screen fires on mount, to clear an attempt left from an earlier
+ * visit. It is never awaited by the screen, so a rejection is swallowed here rather than
+ * left unhandled. That is safe: `submitSignIn` resets again and refuses to go on unless
+ * the attempt then starts clean, so a failed mount-time reset cannot sign anyone in.
+ */
+export async function clearStaleAttempt(reset: () => Promise<unknown>): Promise<void> {
+  try {
+    await reset();
+  } catch {
+    // Handled by the clean-start check in `submitSignIn`.
+  }
+}

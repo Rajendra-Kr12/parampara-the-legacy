@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import { submitSignIn, type SubmitSteps } from "./submit-sign-in";
+import { clearStaleAttempt, submitSignIn, type SubmitSteps } from "./submit-sign-in";
 
 /**
  * A fresh attempt reads `needs_identifier` until the password call, then `statusAfter`.
@@ -114,5 +114,25 @@ describe("submitSignIn", () => {
       steps("complete", { finalize: () => Promise.reject(new Error("keychain")) }),
     );
     expect(outcome).toBe("failed");
+  });
+});
+
+describe("clearStaleAttempt", () => {
+  it("calls the reset once", async () => {
+    const reset = jest.fn(() => Promise.resolve({ error: null }));
+    await clearStaleAttempt(reset);
+    expect(reset).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves instead of rejecting when the reset rejects", async () => {
+    await expect(
+      clearStaleAttempt(() => Promise.reject(new Error("keychain"))),
+    ).resolves.toBeUndefined();
+  });
+
+  it("resolves when the reset returns an error", async () => {
+    await expect(
+      clearStaleAttempt(() => Promise.resolve({ error: new Error("refused") })),
+    ).resolves.toBeUndefined();
   });
 });

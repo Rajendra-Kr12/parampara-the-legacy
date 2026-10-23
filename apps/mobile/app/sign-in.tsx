@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { signInView, validateSignInFields, type SignInFieldErrors } from "../lib/sign-in-state";
-import { submitSignIn } from "../lib/submit-sign-in";
+import { clearStaleAttempt, submitSignIn } from "../lib/submit-sign-in";
 
 /**
  * Email and password sign-in (Step 4b; scope D-050). A custom Clerk Core 3 flow, not
@@ -33,7 +33,7 @@ export default function SignInScreen() {
   // Mount only: clears a stale attempt left from an earlier visit, never one in progress.
   useEffect(() => {
     if (signIn.status !== "needs_identifier") {
-      void signIn.reset();
+      void clearStaleAttempt(() => signIn.reset());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
