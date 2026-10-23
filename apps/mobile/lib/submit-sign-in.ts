@@ -1,0 +1,41 @@
+/**
+ * The sign-in submit sequence as a pure async function (Step 4b, D-050), so the Jest
+ * unit tests can drive every failure path without a render library or a Clerk instance.
+ *
+ * Clerk calls can reject as well as return `{ error }` (a dropped network, a keychain
+ * failure). Any rejection is treated as a refused attempt, so the screen always gets
+ * an outcome, shows the one fixed error and unlocks the form instead of staying busy.
+ */
+
+/** What the screen does next: show the fixed error, leave finalizing set, or wait. */
+export type SubmitOutcome = "failed" | "finalized" | "pending";
+
+export interface SubmitSteps {
+  /** Clears a stale attempt before a new one (a no-op on a fresh attempt). */
+  readonly resetIfNeeded: () => Promise<void>;
+  readonly submitPassword: () => Promise<{ readonly error: unknown }>;
+  /** Read after the password call, never captured earlier, so it is Clerk's live status. */
+  readonly readStatus: () => string;
+  /** Called once Clerk reports `complete`, before finalization starts. */
+  readonly beginFinalizing: () => void;
+  readonly finalize: () => Promise<{ readonly error: unknown }>;
+}
+
+export async function submitSignIn(steps: SubmitSteps): Promise<SubmitOutcome> {
+  try {
+    await steps.resetIfNeeded();
+    const submitted = await steps.submitPassword();
+    if (submitted.error !== null) {
+      return "failed";
+    }
+    // Only `complete` finalizes; any other status is shown by the screen's view state.
+    if (steps.readStatus() !== "complete") {
+      return "pending";
+    }
+    steps.beginFinalizing();
+    const finalized = await steps.finalize();
+    return finalized.error === null ? "finalized" : "failed";
+  } catch {
+    return "failed";
+  }
+}

@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { signInView, validateSignInFields, type SignInFieldErrors } from "../lib/sign-in-state";
+import { submitSignIn } from "../lib/submit-sign-in";
 
 /**
  * Email and password sign-in (Step 4b; scope D-050). A custom Clerk Core 3 flow, not
@@ -51,28 +52,30 @@ export default function SignInScreen() {
     if (problems.emailAddress !== undefined || problems.password !== undefined) {
       return;
     }
-    if (signIn.status !== "needs_identifier") {
-      await signIn.reset();
-    }
-    const result = await signIn.password({ emailAddress, password });
-    if (result.error !== null) {
+    // Clerk reports `complete` before the session is active, so keep the progress state
+    // live through `finalize()`. A refusal or a thrown failure shows the same fixed error
+    // and unlocks the form; on success `finalize` navigates away, so `finalizing` stays set.
+    const outcome = await submitSignIn({
+      resetIfNeeded: async () => {
+        if (signIn.status !== "needs_identifier") {
+          await signIn.reset();
+        }
+      },
+      submitPassword: () => signIn.password({ emailAddress, password }),
+      readStatus: () => signIn.status,
+      beginFinalizing: () => {
+        setFinalizing(true);
+      },
+      finalize: () =>
+        signIn.finalize({
+          navigate: () => {
+            router.replace("/");
+          },
+        }),
+    });
+    if (outcome === "failed") {
       setAttemptFailed(true);
-      return;
-    }
-    if (signIn.status === "complete") {
-      // Clerk reports `complete` before the session is active, so keep the progress
-      // state live through `finalize()` and surface a finalize failure with the same
-      // fixed error. On success `finalize` navigates away, so leave `finalizing` set.
-      setFinalizing(true);
-      const finalized = await signIn.finalize({
-        navigate: () => {
-          router.replace("/");
-        },
-      });
-      if (finalized.error !== null) {
-        setAttemptFailed(true);
-        setFinalizing(false);
-      }
+      setFinalizing(false);
     }
   }
 
