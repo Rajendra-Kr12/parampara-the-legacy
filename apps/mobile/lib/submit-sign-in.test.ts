@@ -1,5 +1,11 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import { clearStaleAttempt, submitSignIn, type SubmitSteps } from "./submit-sign-in";
+import {
+  clearStaleAttempt,
+  createSubmitGuard,
+  submitSignIn,
+  type SubmitOutcome,
+  type SubmitSteps,
+} from "./submit-sign-in";
 
 /**
  * A fresh attempt reads `needs_identifier` until the password call, then `statusAfter`.
@@ -134,5 +140,68 @@ describe("clearStaleAttempt", () => {
     await expect(
       clearStaleAttempt(() => Promise.resolve({ error: new Error("refused") })),
     ).resolves.toBeUndefined();
+  });
+});
+
+describe("createSubmitGuard", () => {
+  /** A task that stays in flight until the test calls `settle`. */
+  function pending(): { task: () => Promise<SubmitOutcome>; settle: (o: SubmitOutcome) => void } {
+    let settle: (o: SubmitOutcome) => void = () => undefined;
+    const task = () =>
+      new Promise<SubmitOutcome>((resolve) => {
+        settle = resolve;
+      });
+    return {
+      task,
+      settle: (o) => {
+        settle(o);
+      },
+    };
+  }
+
+  it("ignores a second submit while the first is in flight, without running it", async () => {
+    const guard = createSubmitGuard();
+    const first = pending();
+    const second = jest.fn(() => Promise.resolve<SubmitOutcome>("finalized"));
+    const firstRun = guard.run(first.task);
+    await expect(guard.run(second)).resolves.toBe("ignored");
+    expect(second).not.toHaveBeenCalled();
+    first.settle("failed");
+    await expect(firstRun).resolves.toBe("failed");
+  });
+
+  it("takes the lock before the task's first await", async () => {
+    const guard = createSubmitGuard();
+    const first = pending();
+    void guard.run(first.task);
+    await expect(guard.run(() => Promise.resolve<SubmitOutcome>("failed"))).resolves.toBe(
+      "ignored",
+    );
+  });
+
+  it.each<SubmitOutcome>(["failed", "pending"])("unlocks after a %s outcome", async (outcome) => {
+    const guard = createSubmitGuard();
+    await expect(guard.run(() => Promise.resolve(outcome))).resolves.toBe(outcome);
+    await expect(guard.run(() => Promise.resolve<SubmitOutcome>("pending"))).resolves.toBe(
+      "pending",
+    );
+  });
+
+  it("stays locked after a finalized outcome so the session is never finalized twice", async () => {
+    const guard = createSubmitGuard();
+    await expect(guard.run(() => Promise.resolve<SubmitOutcome>("finalized"))).resolves.toBe(
+      "finalized",
+    );
+    await expect(guard.run(() => Promise.resolve<SubmitOutcome>("failed"))).resolves.toBe(
+      "ignored",
+    );
+  });
+
+  it("unlocks when the task rejects", async () => {
+    const guard = createSubmitGuard();
+    await expect(guard.run(() => Promise.reject(new Error("boom")))).rejects.toThrow("boom");
+    await expect(guard.run(() => Promise.resolve<SubmitOutcome>("pending"))).resolves.toBe(
+      "pending",
+    );
   });
 });

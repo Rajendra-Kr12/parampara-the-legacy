@@ -1,9 +1,9 @@
 import { useSignIn } from "@clerk/expo";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { signInView, validateSignInFields, type SignInFieldErrors } from "../lib/sign-in-state";
-import { clearStaleAttempt, submitSignIn } from "../lib/submit-sign-in";
+import { clearStaleAttempt, createSubmitGuard, submitSignIn } from "../lib/submit-sign-in";
 
 /**
  * Email and password sign-in (Step 4b; scope D-050). A custom Clerk Core 3 flow, not
@@ -22,6 +22,7 @@ export default function SignInScreen() {
   const [fieldErrors, setFieldErrors] = useState<SignInFieldErrors>({});
   const [attemptFailed, setAttemptFailed] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
+  const guard = useRef(createSubmitGuard()).current;
 
   const rejected =
     attemptFailed ||
@@ -46,29 +47,32 @@ export default function SignInScreen() {
   });
 
   async function submit() {
-    const problems = validateSignInFields({ emailAddress, password });
-    setFieldErrors(problems);
-    setAttemptFailed(false);
-    if (problems.emailAddress !== undefined || problems.password !== undefined) {
-      return;
-    }
-    // Clerk reports `complete` before the session is active, so keep the progress state
-    // live through `finalize()`. A refusal or a thrown failure shows the same fixed error
-    // and unlocks the form; on success `finalize` navigates away, so `finalizing` stays set.
-    const outcome = await submitSignIn({
-      resetIfNeeded: () =>
-        signIn.status === "needs_identifier" ? Promise.resolve({ error: null }) : signIn.reset(),
-      submitPassword: () => signIn.password({ emailAddress, password }),
-      readStatus: () => signIn.status,
-      beginFinalizing: () => {
-        setFinalizing(true);
-      },
-      finalize: () =>
-        signIn.finalize({
-          navigate: () => {
-            router.replace("/");
-          },
-        }),
+    // The lock is taken before any await, so a second quick tap is ignored outright.
+    const outcome = await guard.run(async () => {
+      const problems = validateSignInFields({ emailAddress, password });
+      setFieldErrors(problems);
+      setAttemptFailed(false);
+      if (problems.emailAddress !== undefined || problems.password !== undefined) {
+        return "pending";
+      }
+      // Clerk reports `complete` before the session is active, so keep the progress state
+      // live through `finalize()`. A refusal or a thrown failure shows the same fixed error
+      // and unlocks the form; on success `finalize` navigates away, so `finalizing` stays set.
+      return submitSignIn({
+        resetIfNeeded: () =>
+          signIn.status === "needs_identifier" ? Promise.resolve({ error: null }) : signIn.reset(),
+        submitPassword: () => signIn.password({ emailAddress, password }),
+        readStatus: () => signIn.status,
+        beginFinalizing: () => {
+          setFinalizing(true);
+        },
+        finalize: () =>
+          signIn.finalize({
+            navigate: () => {
+              router.replace("/");
+            },
+          }),
+      });
     });
     if (outcome === "failed") {
       setAttemptFailed(true);

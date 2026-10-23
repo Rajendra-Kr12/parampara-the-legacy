@@ -59,3 +59,36 @@ export async function clearStaleAttempt(reset: () => Promise<unknown>): Promise<
     // Handled by the clean-start check in `submitSignIn`.
   }
 }
+
+/** What `run` reports: the task's outcome, or `ignored` when another submit was in flight. */
+export type GuardedOutcome = SubmitOutcome | "ignored";
+
+/**
+ * A synchronous re-entry lock for the submit button. The button only disables once Clerk
+ * reports `fetching`, which is after the first await, so two quick taps could otherwise
+ * run two sequences against the same mutable Clerk attempt. `run` takes the lock before
+ * any await and releases it on every outcome except `finalized`: after a successful
+ * finalize the screen navigates away, and keeping the lock stops a second finalize.
+ */
+export function createSubmitGuard(): {
+  run: (task: () => Promise<SubmitOutcome>) => Promise<GuardedOutcome>;
+} {
+  let busy = false;
+  return {
+    async run(task) {
+      if (busy) {
+        return "ignored";
+      }
+      busy = true;
+      let outcome: SubmitOutcome = "failed";
+      try {
+        outcome = await task();
+        return outcome;
+      } finally {
+        if (outcome !== "finalized") {
+          busy = false;
+        }
+      }
+    },
+  };
+}
