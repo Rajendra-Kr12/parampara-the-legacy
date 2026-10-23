@@ -1,0 +1,67 @@
+# Step 4b device proof: the live sign-in flow with the synthetic Clerk test user.
+# Run by .github/workflows/mobile-e2e.yml with `-e PLATFORM=ios|android` and the
+# E2E_CLERK_USER_* values from the protected `mobile-e2e` Environment. It writes one
+# screenshot per step to the working directory (the run's e2e-artifacts folder).
+# Never point this at a real account.
+appId: dev.parampara.provisional
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "sign-in-link"
+- assertVisible:
+    id: "sign-in-email"
+- takeScreenshot: sign-in-form-${PLATFORM}
+- tapOn:
+    id: "sign-in-email"
+- inputText: "${E2E_CLERK_USER_USERNAME}"
+- tapOn:
+    id: "sign-in-password"
+- inputText: "${E2E_CLERK_USER_PASSWORD}"
+- tapOn:
+    id: "sign-in-submit"
+# The name comes from the Convex users.me query, so this proves the Clerk token was
+# accepted by the Convex backend, not just that Clerk returned a session (AC-1.20).
+- extendedWaitUntil:
+    visible:
+      id: "my-name"
+      text: "${E2E_CLERK_USER_NAME}"
+    timeout: 30000
+- takeScreenshot: signed-in-name-${PLATFORM}
+# Relaunch without clearing state: the Clerk token is restored from the device-only
+# secure store, so the session survives a cold start (AC-1.21).
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "my-name"
+      text: "${E2E_CLERK_USER_NAME}"
+    timeout: 30000
+- takeScreenshot: restored-${PLATFORM}
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible: "You are signed out."
+    timeout: 30000
+- assertNotVisible:
+    id: "my-name"
+- takeScreenshot: signed-out-again-${PLATFORM}
+# A wrong password shows one fixed generic message, never Clerk's text, and no name
+# (AC-1.23).
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "sign-in-email"
+- inputText: "${E2E_CLERK_USER_USERNAME}"
+- tapOn:
+    id: "sign-in-password"
+- inputText: "not-the-right-password"
+- tapOn:
+    id: "sign-in-submit"
+- extendedWaitUntil:
+    visible:
+      id: "sign-in-error"
+    timeout: 30000
+- assertNotVisible:
+    id: "my-name"
+- takeScreenshot: wrong-password-${PLATFORM}

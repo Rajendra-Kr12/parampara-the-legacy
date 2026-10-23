@@ -325,9 +325,9 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequences: Every device-level fix is a CI round trip. The owner sets the two repository variables before the first run. The workflow-policy probe now checks every file in `.github/workflows/`, not only `ci.yml`.
 
 ## D-045: Live mobile sign-in in CI uses a protected Environment (2026-10-13)
-- Status: Accepted (owner decision; used in Step 4b, nothing created yet)
+- Status: Accepted (owner decision; referenced by Step 4b, still nothing created)
 - Decision: The live sign-in proof runs from a manual `workflow_dispatch` job with a protected GitHub Environment that holds the synthetic Clerk test user's credentials. A dispatch-only job does not run for fork pull requests, which refines D-037's note that CI cannot verify a real Clerk sign-in.
-- Consequences: Creating the Environment and its reviewers changes shared repository settings, so the owner does it. Never real family data.
+- Consequences: Creating the Environment and its reviewers changes shared repository settings, so the owner does it. Never real family data. Step 4b gated both `mobile-e2e` jobs on the `mobile-e2e` Environment and added a step that fails with a named-variable error if a credential secret is missing, so a dispatch waits for the required reviewer before either job starts; the Environment and its secrets are still the owner's to create.
 
 ## D-046: iOS 17 is the minimum iOS version (2026-10-13)
 - Status: Accepted (owner decision; revisit before release)
@@ -351,8 +351,9 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequences: `pnpm test` runs Jest next to Vitest. `jest-expo` brings `@react-native/jest-preset` 0.86.3 as a required peer, which pnpm installs automatically.
 
 ## D-050: Step 4b sign-in scope is email and password only (2026-10-13)
-- Status: Accepted (owner decision; applies to Step 4b)
+- Status: Accepted (owner decision; built in Step 4b)
 - Decision: Mobile sign-in in Step 4b supports email and password only. When Clerk asks for Device Trust (`needs_client_trust`) or a second factor (`needs_second_factor`), the app shows a fixed, safe "not supported yet" message. Clerk error text is never shown.
+- Consequences: `apps/mobile/lib/sign-in-state.ts` maps Clerk's status and error signals to one fixed refusal message and the one "not supported yet" message, and only `status === "complete"` lets the screen finalize; a status added later is never treated as signed in. Unit tests pin each mapping. The generic refusal also keeps a wrong password indistinguishable from an unknown account.
 - Must build before real users: Device Trust and MFA handling on mobile. Clerk turns Device Trust on by default for instances created after 2025-11-14, so real users would be blocked on a new phone without it.
 
 ## D-051: Provisional development app ids (2026-10-13)
@@ -387,3 +388,10 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Context: The owner chose the free DeepSeek model for implementation work, run on the OpenCode harness, with Codex performing reviews, because review and security work must go to a different model family than the implementer. This replaces the earlier blanket rule that no free model may do T2 or T3 work.
 - Decision: Implementation may use the free DeepSeek model, but only on the `opencode` harness and nowhere else, and with public repository content only. Free models never perform review or security work; T2 and T3 reviews go to Codex, a different model family from DeepSeek. The blanket ban on free models for T2 and T3 is replaced by this narrower rule; the ban on free models for R (review) and security work stays.
 - Consequence: `docs/model-routing.md`, `docs/harness-setup.md` and `AGENTS.md` now state the narrowed rule. `docs/model-catalog.md` has no separate row for a free DeepSeek model: add one only after a trial, per the catalog's verification rule. The `route-task` skill points to `docs/model-routing.md` for the free-model rule.
+
+## D-056: Run the Android device proof through android-emulator-runner (2026-10-23)
+- Status: Accepted (Feature 1 Step 4b, branch `feat/para-mobile-auth`); the owner chose this option on 2026-10-23
+- Context: The hand-built emulator setup in `mobile-e2e.yml` failed repeatedly: `adb` missing from PATH, then an AVD that `avdmanager` never created (`Unknown AVD name`), with the cause unproven.
+- Decision: The Android job uses `reactivecircus/android-emulator-runner`, pinned to the v2.38.0 commit `a421e43855164a8197daf9d8d40fe71c6996bb0d` (Apache-2.0, not archived), with the `default` (AOSP) system image, API 34, x86_64, 4 GB RAM and 4 cores. The install and both Maestro flows run in `apps/mobile/maestro/run-android.sh` because the emulator only lives for that one step. Only Maestro PNG screenshots are uploaded, never its logs, which contain the typed credentials after substitution.
+- Why the image: on the Google APIs image a slow software-rendered emulator showed a "Pixel Launcher isn't responding" dialog over the app and Maestro could not see it. The AOSP image with more RAM passed. The cause is inferred from one failing and one passing run, not proven.
+- Consequences: One third-party action is added, pinned by commit hash like the others. The workflow stays manual-only and gated by the protected `mobile-e2e` Environment (D-045). The repository is public, so standard runners cost nothing; making it private or using larger runners would bill and needs the owner's approval first.

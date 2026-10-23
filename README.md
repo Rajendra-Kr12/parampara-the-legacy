@@ -2,7 +2,7 @@
 
 A private family legacy network for web, iOS, and Android. Parampara preserves family relationships across maternal and paternal branches, deceased profiles, memories, stories, photos, and audio, with Telugu and other Indian kinship terms, verified relationships, and privacy by default.
 
-**Status:** early scaffold: workspace tooling, the Convex auth backend (`packages/backend`), the web sign-in proof (`apps/web`) and the Expo mobile app shell (`apps/mobile`, signed-out only; mobile sign-in is Step 4b) exist. See `docs/scope.md`.
+**Status:** early scaffold: workspace tooling, the Convex auth backend (`packages/backend`), the web sign-in proof (`apps/web`) and the Expo mobile app (`apps/mobile`, with email and password sign-in whose device proof has not run yet) exist. See `docs/scope.md`.
 
 ## Index
 
