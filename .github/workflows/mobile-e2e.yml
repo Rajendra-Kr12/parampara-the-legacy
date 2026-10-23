@@ -12,6 +12,12 @@ name: mobile-e2e
 
 on:
   workflow_dispatch:
+    inputs:
+      platform:
+        description: Which device proof to run
+        type: choice
+        options: [both, ios, android]
+        default: both
 
 permissions:
   contents: read
@@ -34,6 +40,7 @@ env:
 
 jobs:
   android:
+    if: inputs.platform != 'ios'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     environment: mobile-e2e
@@ -122,11 +129,17 @@ jobs:
             ../apps/mobile/maestro/sign-in.yaml
       - name: Capture failure evidence
         if: failure()
+        timeout-minutes: 5
         run: |
           mkdir -p e2e-artifacts
-          adb exec-out screencap -p > e2e-artifacts/failure-android.png || true
-          adb logcat -d -t 2000 > e2e-artifacts/logcat-android.txt || true
+          # File copies first: adb blocks forever when no emulator ever connected.
           cp "$RUNNER_TEMP/emulator.log" e2e-artifacts/emulator-android.log || true
+          { ls -l /dev/kvm; "$ANDROID_HOME/emulator/emulator" -accel-check; adb devices -l; } \
+            > e2e-artifacts/emulator-diagnostics.txt 2>&1 || true
+          echo "--- emulator log (tail) ---"; tail -40 "$RUNNER_TEMP/emulator.log" || true
+          echo "--- diagnostics ---"; cat e2e-artifacts/emulator-diagnostics.txt || true
+          timeout 20 adb exec-out screencap -p > e2e-artifacts/failure-android.png || true
+          timeout 20 adb logcat -d -t 2000 > e2e-artifacts/logcat-android.txt || true
           # Screenshots only: Maestro's command JSON and logs contain the typed credentials.
           mkdir -p e2e-artifacts/maestro-screenshots-android
           find "$HOME/.maestro/tests" -name "*.png" -exec cp {} e2e-artifacts/maestro-screenshots-android/ \; || true
@@ -148,6 +161,7 @@ jobs:
           if-no-files-found: warn
 
   ios:
+    if: inputs.platform != 'android'
     runs-on: macos-26
     timeout-minutes: 120
     environment: mobile-e2e
