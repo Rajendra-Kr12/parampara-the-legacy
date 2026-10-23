@@ -4,7 +4,9 @@
 # all happen here. Run from the repository root with the E2E_CLERK_USER_* variables set.
 set -uo pipefail
 
-mkdir -p e2e-artifacts
+ROOT="$PWD"
+OUT="$ROOT/e2e-artifacts"
+mkdir -p "$OUT"
 
 # Maestro's default 15 s driver start-up limit is too short on a CI emulator.
 export MAESTRO_DRIVER_STARTUP_TIMEOUT=120000
@@ -22,22 +24,22 @@ collect_evidence() {
     echo "### Android"
     echo "- device: $(adb shell getprop ro.product.model | tr -d '\r')"
     echo "- API level: $(adb shell getprop ro.build.version.sdk | tr -d '\r')"
-    echo "- expo: $(node -p "require('./apps/mobile/node_modules/expo/package.json').version")"
-  } | tee e2e-artifacts/device-android.md >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+    echo "- expo: $(node -p "require('$ROOT/apps/mobile/node_modules/expo/package.json').version")"
+  } | tee "$OUT/device-android.md" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
   if [ "$status" -ne 0 ]; then
-    timeout 20 adb exec-out screencap -p > e2e-artifacts/failure-android.png || true
-    timeout 20 adb logcat -d -t 2000 > e2e-artifacts/logcat-android.txt || true
+    timeout 20 adb exec-out screencap -p > "$OUT/failure-android.png" || true
+    timeout 20 adb logcat -d -t 2000 > "$OUT/logcat-android.txt" || true
     # Screenshots only: Maestro's command JSON and logs contain the typed credentials.
-    mkdir -p e2e-artifacts/maestro-screenshots-android
-    find "$HOME/.maestro/tests" -name "*.png" -exec cp {} e2e-artifacts/maestro-screenshots-android/ \; || true
+    mkdir -p "$OUT/maestro-screenshots-android"
+    find "$HOME/.maestro/tests" -name "*.png" -exec cp {} "$OUT/maestro-screenshots-android/" \; || true
   fi
   exit "$status"
 }
 trap collect_evidence EXIT
 
-adb install apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+adb install "$ROOT"/apps/mobile/android/app/build/outputs/apk/release/app-release.apk
 
-cd e2e-artifacts
+cd "$OUT"
 maestro test -e PLATFORM=android --format junit --output junit-android.xml \
   ../apps/mobile/maestro/signed-out.yaml
 maestro test -e PLATFORM=android \
