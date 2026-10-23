@@ -2,7 +2,12 @@ import { useSignIn } from "@clerk/expo";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { signInView, validateSignInFields, type SignInFieldErrors } from "../lib/sign-in-state";
+import {
+  normalizeEmail,
+  signInView,
+  validateSignInFields,
+  type SignInFieldErrors,
+} from "../lib/sign-in-state";
 import { clearStaleAttempt, createSubmitGuard, submitSignIn } from "../lib/submit-sign-in";
 
 /**
@@ -61,7 +66,8 @@ export default function SignInScreen() {
       return submitSignIn({
         resetIfNeeded: () =>
           signIn.status === "needs_identifier" ? Promise.resolve({ error: null }) : signIn.reset(),
-        submitPassword: () => signIn.password({ emailAddress, password }),
+        submitPassword: () =>
+          signIn.password({ emailAddress: normalizeEmail(emailAddress), password }),
         readStatus: () => signIn.status,
         beginFinalizing: () => {
           setFinalizing(true);

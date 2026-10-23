@@ -43,9 +43,14 @@ export interface SignInFieldErrors {
  * The email check is deliberately loose: Clerk is the authority on whether an
  * address exists or is in use.
  */
+/** The one form of the email that is both validated and sent to Clerk. */
+export function normalizeEmail(emailAddress: string): string {
+  return emailAddress.trim();
+}
+
 export function validateSignInFields(fields: SignInFields): SignInFieldErrors {
   const errors: { emailAddress?: string; password?: string } = {};
-  const emailAddress = fields.emailAddress.trim();
+  const emailAddress = normalizeEmail(fields.emailAddress);
   if (emailAddress === "") {
     errors.emailAddress = SIGN_IN_EMAIL_REQUIRED;
   } else if (!/^\S+@\S+\.\S+$/.test(emailAddress)) {

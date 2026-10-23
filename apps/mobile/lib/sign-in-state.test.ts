@@ -5,6 +5,7 @@ import {
   SIGN_IN_ERROR_MESSAGE,
   SIGN_IN_PASSWORD_REQUIRED,
   SIGN_IN_UNSUPPORTED_MESSAGE,
+  normalizeEmail,
   signInView,
   validateSignInFields,
   type SignInSignals,
@@ -16,6 +17,13 @@ const idle: SignInSignals = {
   finalizing: false,
   rejected: false,
 };
+
+describe("normalizeEmail", () => {
+  it("trims surrounding whitespace so the validated value is the one submitted", () => {
+    expect(normalizeEmail("  a@b.co \n")).toBe("a@b.co");
+    expect(validateSignInFields({ emailAddress: "  a@b.co ", password: "x" })).toEqual({});
+  });
+});
 
 describe("validateSignInFields", () => {
   it("asks for an email and a password when both are empty", () => {
