@@ -400,3 +400,57 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Status: Accepted (owner decision, branch `feat/para-model-routing-update`); amends D-055 and the Greptile cadence in the earlier Greptile decision
 - Decision: Greptile reviews at major milestones only: each PR is reviewed once and fixes are batched, instead of every PR. The free DeepSeek model may implement safe tasks on the `opencode` or `agy` harness, and Codex or Claude reviews the result before merge. Auth and session, secret or key handling, signed URLs and access control, migrations, and personal-data code use paid models only.
 - Consequence: `docs/model-routing.md` owns the rule; `AGENTS.md`, `docs/harness-setup.md`, `docs/agent-workflow.md` and `docs/architecture.md` point to or summarize it.
+
+## D-058: Stated relationships are typed edges or a kin_stated record, never free text (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0); the edge model still gets an independent Codex read against `relationship-domain-review` before F2-1 starts
+- Context: AC-2.07 has Kiran invite Hari "as cousin", but the graph stores typed edges and derives labels (D-002, `docs/domain-model.md`), and a cousin is not a primitive edge. The foundation item "Confirm supported relationship types and constraints" was open.
+- Decision: An inviter or invitee states a relationship from a closed list in one of two forms:
+  - **Direct types**, stored as typed edges between canonical person ids: parent-child (one directed edge type, read as parent or child from either end) and partner. Whether sibling is its own edge type or is derived from shared parents is decided with Feature 3's edge model; until then sibling is not a direct type.
+  - **`kin_stated`**, for supported non-direct terms such as cousin or uncle (and sibling until Feature 3 decides it): a record of who stated what about whom, with its own relationship state. It is confirmed exactly like a direct type, but it is not an edge, is never used as a graph path, and never produces a derived kinship label. Feature 3 may later derive the matching path and reconcile the record with it.
+  - Free text is never accepted. A term outside both lists is rejected (AC-2.29).
+- Constraints: a self-relationship and any stated edge that would make a person their own ancestor are rejected (AC-2.30). A stated relationship that conflicts with an established `accepted` relationship is not accepted by confirmation alone (AC-2.31); until Feature 5 exists it returns a fixed "needs review" result and nothing changes.
+- Consequences: The closed lists live in `packages/domain` (F2-1). Choosing this wrongly would force a rewrite of Features 3 and 5, which is why the independent review comes before F2-1.
+
+## D-059: Founding a family group (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
+- Context: AC-2.10 says nobody completes registration into a family group without a relationship confirmed by the other party, but the first member of a new group has nobody to confirm them.
+- Decision: Any account in the `verified` account state (AC-2.01) may found a family group. The founder becomes the group's first member and its administrator without a confirmed relationship; this is the single recorded exception to AC-2.10, and every later member joins through a confirmed relationship. The schema allows an account several memberships, but behavior is one active group per account until Features 3 and 8 settle cross-group identity. Founding a group is rate limited, with the limit in the same config file as the invitation limits (D-061).
+- Consequences: The founder's membership and role are written in the same mutation as the group, with an audit event. Founding grants no right in any other group (AC-2.28).
+
+## D-060: Email invitations only in Feature 2 (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
+- Decision: Feature 2 sends invitations by email only. Phone invitations wait for the SMS provider and the India DLT registration decision (`docs/architecture.md` open items). The invitation keeps a `channel` field so phone can be added without a schema rewrite.
+- Consequences: AC-2.06, AC-2.11 and AC-2.19 now read "email (phone when available)". Where FR-02 requires a phone or email for a profile created on someone's behalf, Feature 2 requires an email.
+
+## D-061: Invitation expiry and abuse limits (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0); reversible
+- Decision: An invitation expires 14 days after it is sent. Re-inviting the same contact to the same group while an invitation is pending refreshes the existing one and restarts its expiry (AC-2.20). An inviter may have at most 20 open invitations and may send at most 10 new invitations per day. All of these values live in one config file, and tests read them from there (AC-2.16).
+- Consequences: Changing a value is a config change plus a decision-log note, not a code change.
+
+## D-062: Profiles created on someone's behalf (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
+- Decision:
+  - Required: name and the person's contact (an email in Feature 2, D-060). Date of birth may be a birth year only. Address is optional and is recorded as a last known address.
+  - Contact and address typed by the creator are visible to the creator only until the person claims the profile. On claim they belong to the subject, who reviews them before the profile is shown to anyone else.
+  - Minors are rejected with a fixed "not supported yet" message until Feature 8 defines guardian-managed profiles. This settles the conflict between AC-2.12 (contact required) and AC-8.11 (a minor may have no contact).
+- Consequences: Read with D-017 and FR-02, which say profiles created by others take a last known address; this decision makes that address optional for living profiles created on someone's behalf. If the owner reads D-017 as making it mandatory, revisit before F2-9.
+
+## D-063: Invitation email through our own adapter (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
+- Decision: Invitations are sent through a custom notification adapter behind an interface, with a test fake, not through Clerk invitations. Clerk invitations cover only new sign-ups, have no SMS, and do not let us own the token, while AC-2.18 needs our own hashed token.
+- Consequences: The provider, its cost, and the sender domain are the owner's choice at F2-6, and the provider key is set by the owner; no agent reads it.
+
+## D-064: Pick the i18n and styling approaches at the start of F2-4 (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
+- Decision: The i18n approach shared by Next.js and Expo (required by D-025) and the styling approach (`docs/architecture.md` open items) are each chosen in a small decision PR at the start of F2-4, before any sign-up or profile screen is built. Any new dependency they bring needs owner approval.
+- Consequences: If the owner declines both, the fallback is a typed string-key table with English values only, and Telugu waits for Feature 4.
+
+## D-065: Mobile Device Trust and MFA before the first real invitee (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
+- Decision: Mobile Device Trust and MFA handling (left out of Step 4b by D-050) is built before the first real person is invited. It gates the pilot, not Feature 2 "done", and is settled in F2-11.
+- Consequences: Until then an invitee signing in on a second device sees the fixed "not supported yet" message.
+
+## D-066: Invitee signs up with a different email (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
+- Decision: An invitation is accepted only by an account that has verified the invited email (AC-2.19). An invitee signed in with another address is refused with one fixed message, "sign in with the address the invitation was sent to", which never reveals the invited address; the inviter may send a fresh invitation.
+- Consequences: The same refusal is used whether the address is wrong, unverified, or unknown, so it cannot be used to probe addresses (AC-2.15).

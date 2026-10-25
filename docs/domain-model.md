@@ -10,6 +10,96 @@ Store relationships as typed edges between canonical person IDs. The model must 
 
 All valid paths must remain available. A marriage between relatives can cause a person to be related through maternal and paternal branches at once; this is legitimate, not necessarily a data error.
 
+### Stated relationships (D-058)
+
+When an inviter states a relationship, or an invitee discloses one, it comes from a closed list in one of two forms, never free text:
+
+- **Direct type**, stored as a typed edge: parent-child (one directed edge type) and partner. Sibling is decided with Feature 3's edge model.
+- **`kin_stated`**, for supported non-direct terms such as cousin or uncle: a record of who stated what about whom, with its own relationship state. It is confirmed like a direct type but is not an edge, is never a graph path, and never produces a derived label until Feature 3 can derive and reconcile it.
+
+A self-relationship, a stated edge that would make a person their own ancestor, and an unsupported term are rejected. A statement that conflicts with an established `accepted` relationship is not accepted by confirmation alone; it becomes a Feature 5 claim, and until Feature 5 exists it returns a fixed "needs review" result with no state change.
+
+## Family groups, membership, roles, invitations
+
+A family group is the unit of membership and access. Roles are scoped to one group (AC-2.28): a role in group A gives nothing in group B. Account state (D-003) is derived at call time from the verified identity and is never one of the states below. Every transition in this section writes an audit event in the same Convex mutation as the state change, and the backend rejects any transition not drawn here.
+
+Feature 2 builds the transitions marked F2. The others are recorded so Feature 2 does not block them; they are built by the feature named.
+
+### Family group
+
+```mermaid
+stateDiagram-v2
+    [*] --> active : verified account founds the group (F2, D-059)
+    active --> closed : closure and retention (Feature 8, not F2)
+    closed --> [*]
+```
+
+- Founding is rate limited (D-059). The founder's membership and administrator role are written in the same mutation as the group.
+- One active group per account in Feature 2; the schema allows several memberships (D-059).
+
+### Membership
+
+```mermaid
+stateDiagram-v2
+    [*] --> active : founder (F2, single exception to AC-2.10, D-059)
+    [*] --> pending : invitee signs in through an invitation (F2)
+    pending --> active : the other party confirms the relationship (F2)
+    pending --> ended : invitation rejected or expired (F2)
+    active --> ended : leaves or is removed (Feature 8, not F2)
+    ended --> [*]
+```
+
+- A pending member sees only their own profile, the pending invitation, and the inviter's display name (AC-2.22). They cannot invite, propose claims, or review (AC-2.24), and direct backend calls for anything else are denied (AC-2.23).
+- `pending` to `active` happens in the same mutation that accepts the invitation and writes the edge or `kin_stated` record.
+- An ended membership is never reactivated; joining again takes a fresh invitation.
+
+### Role
+
+Roles attach only to an `active` membership; a pending membership has no role.
+
+```mermaid
+stateDiagram-v2
+    [*] --> member : membership becomes active through an invitation (F2)
+    [*] --> administrator : founder (F2, D-059)
+    member --> administrator : granted by another administrator (later, not F2)
+    administrator --> member : revoked by another administrator (later, not F2)
+    member --> [*] : membership ends
+    administrator --> [*] : membership ends
+```
+
+- Reviewer, contributor, and guardian roles (`docs/privacy-and-governance.md`) are added by Features 5, 7, and 8.
+- Administrator gives no blanket access to private records (`docs/privacy-and-governance.md`). Nobody grants a role to themselves.
+- Granting, revoking, and the rule for the last administrator of a group are decided before they are built.
+
+### Invitation
+
+```mermaid
+stateDiagram-v2
+    [*] --> awaitingInvitee : inviter states a relationship
+    [*] --> awaitingDisclosure : inviter asks the invitee to disclose
+    awaitingInvitee --> accepted : invitee confirms (AC-2.07)
+    awaitingInvitee --> awaitingInviter : invitee corrects (AC-2.08)
+    awaitingDisclosure --> awaitingInviter : invitee discloses (AC-2.09)
+    awaitingInviter --> accepted : inviter confirms
+    awaitingInviter --> rejected : inviter declines
+    awaitingInvitee --> rejected : invitee rejects (AC-2.21)
+    awaitingDisclosure --> rejected : invitee rejects (AC-2.21)
+    awaitingInviter --> rejected : invitee rejects (AC-2.21)
+    awaitingInvitee --> expired : expiry passes (AC-2.16)
+    awaitingDisclosure --> expired : expiry passes
+    awaitingInviter --> expired : expiry passes
+    accepted --> [*]
+    rejected --> [*]
+    expired --> [*]
+```
+
+- `awaitingInvitee`, `awaitingDisclosure`, and `awaitingInviter` are the sub-states of `pending` (AC-2.06). Only the other party to the invitation confirms: never the person who made the last statement (AC-2.26) and never a third party (AC-2.25).
+- `accepted` writes the typed edge or `kin_stated` record with relationship state `accepted`, activates the membership, and writes the audit event, all in one mutation. `rejected` and `expired` create no edge or record (AC-2.21).
+- Re-inviting the same contact to the same group while pending refreshes the invitation and restarts its expiry instead of creating a second one (AC-2.20). Expiry is 14 days and the limits are in config (D-061).
+- `accepted`, `rejected`, and `expired` are terminal. Using the link of a terminal invitation is rejected with no state change (AC-2.16, AC-2.17); a fresh invitation is a new record.
+- A confirmation that conflicts with an established `accepted` relationship leaves the invitation where it is and returns the fixed "needs review" result (AC-2.31, D-058).
+- Feature 2 sends invitations by email only; the invitation records its `channel` (D-060). The accepting account must have verified the invited contact (AC-2.19, D-066).
+
 ## Kinship terminology
 
 Kinship terms are derived from graph paths plus locale/custom configuration. The default display preference favors the paternal-side label when several valid labels apply, unless the viewer has chosen another valid label. The preferred label is a presentation setting, never the source of truth for the graph.

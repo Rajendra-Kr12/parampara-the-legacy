@@ -120,12 +120,12 @@ Sources: FR-01, FR-02, D-003, D-007, D-017; scope Feature 2.
 - [ ] **AC-2.05** [P] Names are stored and displayed in Unicode, including Telugu script; a Telugu-script name and a Latin transliteration are stored as name variants of the same person (Kiran and కిరణ్).
 
 ### Invitations
-- [ ] **AC-2.06** [P] A registered member can invite a relative by email or phone, either stating the claimed relationship or asking the invitee to disclose it. The invitation is `pending` and the invitee receives a link.
+- [ ] **AC-2.06** [P] A registered member can invite a relative by email (phone when available, D-060), either stating the claimed relationship or asking the invitee to disclose it. The invitation is `pending` and the invitee receives a link.
 - [ ] **AC-2.07** [P] Inviter-states path: Kiran invites Hari as "cousin"; when Hari confirms, the relationship becomes `accepted` and Hari becomes a registered member.
 - [ ] **AC-2.08** [P] Invitee-corrects path: Hari changes the stated relationship; the corrected claim goes back to Kiran, and only Kiran's confirmation makes it `accepted`.
 - [ ] **AC-2.09** [P] Invitee-discloses path: the invitation carries no stated relationship; Hari discloses one; it becomes `accepted` only when Kiran confirms it.
-- [ ] **AC-2.10** [F] Nobody completes registration into a family group without a disclosed relationship confirmed by the other party. An invitee who signs in but has not had a relationship confirmed stays a pending member.
-- [ ] **AC-2.11** [P] A member creating a profile for a living person who cannot register themselves now (for example Gopal) must enter that person's phone or email; the system sends that contact an invitation link.
+- [ ] **AC-2.10** [F] Nobody completes registration into a family group without a disclosed relationship confirmed by the other party. An invitee who signs in but has not had a relationship confirmed stays a pending member. The founder of a new family group is the single recorded exception (D-059).
+- [ ] **AC-2.11** [P] A member creating a profile for a living person who cannot register themselves now (for example Gopal) must enter that person's email (phone when available, D-060); the system sends that contact an invitation link.
 - [ ] **AC-2.12** [F] Creating a profile for a living person without a phone or email is rejected. (Deceased profiles follow Feature 6 and need no contact.)
 - [ ] **AC-2.13** [P] When Gopal registers through the link, he claims the existing Gopal person record; no second person record is created.
 - [ ] **AC-2.14** [P] Inviting a contact that already belongs to a registered account links the invitation to that account's existing person record and creates no duplicate.
@@ -135,7 +135,7 @@ Sources: FR-01, FR-02, D-003, D-007, D-017; scope Feature 2.
 - [ ] **AC-2.16** [F] An expired invitation link is rejected with no state change; the inviter can send a fresh invitation. The expiry period is a configured value and the test uses that value.
 - [ ] **AC-2.17** [F] A link that was already used is rejected on second use (replay protection), even by the same invitee.
 - [ ] **AC-2.18** [F] A tampered or guessed token is rejected. Tokens have at least 128 bits of randomness and are stored hashed, never in plain text.
-- [ ] **AC-2.19** [A] An invitation sent to one email or phone cannot be accepted by an account that has not verified that same email or phone.
+- [ ] **AC-2.19** [A] An invitation sent to one email (phone when available, D-060) cannot be accepted by an account that has not verified that same contact.
 - [ ] **AC-2.20** [F] Re-inviting the same contact to the same family group while an invitation is pending does not create a second pending invitation; it refreshes or resends the existing one.
 - [ ] **AC-2.21** [P] The invitee can reject the invitation. The invitation becomes `rejected`, no relationship edge is created, the inviter is told it was declined, and an audit event is written.
 
