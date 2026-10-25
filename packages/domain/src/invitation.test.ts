@@ -325,6 +325,17 @@ describe("invitation state machine", () => {
       });
     });
 
+    it("D-070 AC-2.16 a fresh invitation after expiry opens without reading the old record", () => {
+      // openInvitation takes only the inviter's emails, the contact and the request.
+      const fresh = openInvitation({
+        inviterVerifiedEmails: kiran.verifiedEmails,
+        inviteeEmail: "hari@example.com",
+        request: { kind: "askToDisclose" },
+        nowMs: expiresAt,
+      });
+      expect(fresh.ok && fresh.state).toBe("awaitingDisclosure");
+    });
+
     it("AC-2.20 re-inviting refreshes a pending invitation and restarts the configured expiry", () => {
       const later = sentAt + 3 * dayMs;
       expect(refreshInvitation(invitation(), later)).toEqual({

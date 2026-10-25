@@ -489,3 +489,8 @@ Record durable product and architecture decisions here. Add date, status, contex
   - Email matching: trim and lower-case the whole address, ASCII only, and no provider-specific rewriting (Gmail dots and `+` tags are kept).
   - Registry v1 display labels: the English label equals each code, and the romanized Telugu terms named in `docs/domain-model.md` (mama, babai, atta, pinni) map to `uncle` or `aunt`, marked unvalidated until native speakers check them.
 - Consequences: Changing a value is a change to `policy-config.ts` plus a note here. F2-5 calls `can()` and the invitation state machine instead of writing its own checks.
+
+## D-070: Invitations are viewable only while pending (2026-10-25)
+- Status: Accepted (2026-10-25, captain decision, option B, after the Codex review of PR 28)
+- Decision: `invitation.view` allows either party only while the invitation is pending and not past its expiry. The invitee also needs a pending membership in the invitation's group; the inviter needs an active one. Accepted, rejected and expired invitations are not viewable by either party.
+- Reason: the inviter learns the outcome through a notification (AC-2.21) and sends a fresh invitation after expiry (AC-2.16); neither needs the old record, so keeping closed invitations out of view is the narrower rule.

@@ -218,15 +218,14 @@ const rules: { readonly [A in Action]: Rule<A> } = {
   "person.readPrivateDetails": (actor, person) => requireOwnPerson(actor, person),
   "person.updateOwnProfile": (actor, person) => requireOwnPerson(actor, person),
   "invitation.create": (actor, group) => requireActiveMember(actor, group.groupId),
-  // The invitee sees only the current, pending invitation (AC-2.22); the inviter sees
-  // their invitations, including a declined one (AC-2.21), only while an active member.
+  // Both parties see only the current, pending invitation (D-070). The invitee needs a
+  // pending membership in its group (AC-2.22) and the inviter an active one; outcomes
+  // reach the inviter by notification (AC-2.21) and an expired invitation is replaced
+  // by a fresh one (AC-2.16), neither of which reads the old record.
   "invitation.view": (actor, invitation, context) => {
     const party = partyOf(invitation, actor);
     if (party === null) {
       return deny("not_a_party");
-    }
-    if (party === "inviter") {
-      return requireActiveMember(actor, invitation.groupId);
     }
     const state = effectiveInvitationState(invitation, context.nowMs);
     if (state === "expired") {
@@ -235,7 +234,9 @@ const rules: { readonly [A in Action]: Rule<A> } = {
     if (!isPendingInvitationState(state)) {
       return deny("invitation_closed");
     }
-    // Only the invitation tied to the invitee's pending membership in that group.
+    if (party === "inviter") {
+      return requireActiveMember(actor, invitation.groupId);
+    }
     return membershipIn(actor, invitation.groupId)?.state === "pending"
       ? allow
       : deny("not_a_member");

@@ -306,6 +306,21 @@ describe("can(actor, action, resource)", () => {
         "not_a_member",
       ],
       [
+        "D-070 active inviter views an invitation the invitee declined",
+        () => check(kiran, "invitation.view", invitation({ state: "rejected" })),
+        "invitation_closed",
+      ],
+      [
+        "D-070 active inviter views an accepted invitation",
+        () => check(kiran, "invitation.view", invitation({ state: "accepted" })),
+        "invitation_closed",
+      ],
+      [
+        "D-070 AC-2.16 active inviter views an invitation past its configured expiry",
+        () => check(kiran, "invitation.view", invitation({ expiresAt: now })),
+        "invitation_expired",
+      ],
+      [
         "AC-2.27 an inviter whose membership ended views their invitation",
         () =>
           check(
@@ -460,10 +475,6 @@ describe("can(actor, action, resource)", () => {
       [
         "AC-2.06 active inviter views their pending invitation",
         () => check(kiran, "invitation.view", invitation()),
-      ],
-      [
-        "AC-2.21 active inviter views an invitation the invitee declined",
-        () => check(kiran, "invitation.view", invitation({ state: "rejected" })),
       ],
       [
         "AC-2.07 invitee confirms the inviter's statement",
