@@ -214,8 +214,8 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Status: Observation recorded; budget-cap item closed by D-067 (2026-10-25)
 - Context: The `tools/route-task` router (PR #5) was only covered by automated tests. On 2026-10-12 the owner ran the live check from `tools/route-task/README.md` for the task 'Classify a docs update'.
 - Observation: `routingPath` was `laya` and the tier was T1. The static table in `docs/model-routing.md` gives D for the same task. The owner reported this; it was not re-run when this was recorded. It is an observation only: no routing rule, table, or catalog row was changed, and one sample does not show which answer is better.
-- Open: Before 2026-10-31 the owner sets an AI Gateway budget cap and decides whether to keep paid Laya or self-host. After that date the router defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
-- Resolved by D-067 (2026-10-25): static routing only; no budget cap, no paid Laya, no self-host, and no code change.
+- Question (resolved by D-067, 2026-10-25): Before 2026-10-31 the owner sets an AI Gateway budget cap and decides whether to keep paid Laya or self-host. After that date the router defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`. This was the state when this entry was written, not an open item today.
+- Resolution: static routing only; no budget cap, no paid Laya, no self-host, and no code change (D-067).
 
 ## D-031: Convex auth backend choices (2026-10-12)
 - Status: Accepted (Feature 1 step 2, branch `feat/para-auth-backend`)
