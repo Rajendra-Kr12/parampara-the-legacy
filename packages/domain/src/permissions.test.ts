@@ -301,6 +301,11 @@ describe("can(actor, action, resource)", () => {
         "invitation_expired",
       ],
       [
+        "AC-2.22 an account pending in group A views its pending invitation into group B",
+        () => check(hari, "invitation.view", invitation({ groupId: "group-b" })),
+        "not_a_member",
+      ],
+      [
         "AC-2.27 an inviter whose membership ended views their invitation",
         () =>
           check(

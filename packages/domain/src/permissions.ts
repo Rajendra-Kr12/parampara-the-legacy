@@ -232,7 +232,13 @@ const rules: { readonly [A in Action]: Rule<A> } = {
     if (state === "expired") {
       return deny("invitation_expired");
     }
-    return isPendingInvitationState(state) ? allow : deny("invitation_closed");
+    if (!isPendingInvitationState(state)) {
+      return deny("invitation_closed");
+    }
+    // Only the invitation tied to the invitee's pending membership in that group.
+    return membershipIn(actor, invitation.groupId)?.state === "pending"
+      ? allow
+      : deny("not_a_member");
   },
   "invitation.resend": (actor, invitation, context) => {
     if (partyOf(invitation, actor) !== "inviter") {
