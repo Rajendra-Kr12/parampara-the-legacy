@@ -86,7 +86,7 @@ Make multi-harness development safe and cheap before application code: routing, 
 - [ ] Confirm Greptile detects the config and posts a review on PR #1.
 - [x] Add GitHub Actions CI (format, lint, typecheck, test, build) (2026-10-12, `.github/workflows/ci.yml`, D-037).
 - [x] Enforce the hard rules from the 2026-10-13 adoption note with hooks (2026-10-13, D-042): `scripts/check-secrets.mjs` run by a `secrets` CI job and an opt-in `.githooks/pre-commit` (`pnpm run hooks:install`), plus a `route-task` CI job and a router test proving a refused task never reaches the key loader or Laya. Step 4 planning is a separate PR.
-- [ ] Require the CI job names (now including `secrets` and `route-task`) in the `protect-main` ruleset and turn on repository-wide action SHA pinning (plan step 5; owner approval needed; open decision alongside D-037 and D-043).
+- [x] Require the CI job names (now including `secrets` and `route-task`) in the `protect-main` ruleset and turn on repository-wide action SHA pinning (plan step 5; owner approval needed; open decision alongside D-037 and D-043).
 
 ## Feature 1: monorepo scaffold and architecture validation
 
@@ -111,7 +111,7 @@ Scaffold the Turborepo with web, mobile, Convex, and shared packages, proving on
 - [ ] Wire Clerk to Convex on both clients; verify sign-in on web (done 2026-10-13), iOS simulator and Android emulator (step 4b).
 - [ ] Before real users: mobile Device Trust and MFA handling (D-050); real app ids (D-051); revisit the iOS 17 minimum (D-046).
 - [x] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger (`docs/coding-standards.md`).
-- [ ] Step 5 `chore/ci-required-checks`: make the CI job names (including `secrets` and `route-task`) required on `protect-main` and turn on repository-wide action SHA pinning (owner approval needed; D-037).
+- [x] Step 5 `chore/ci-required-checks`: make the CI job names (including `secrets` and `route-task`) required on `protect-main` and turn on repository-wide action SHA pinning (owner approval needed; D-037).
 - [x] Step 6 `chore/para-fallow` (PR #11): Fallow as a pinned devDependency with a non-blocking CI job (D-039, implemented as D-040).
 - [x] Step 7 `docs/scope-feature-1`: documentation updated to match what steps 1 and 2 shipped (2026-10-12).
 - [ ] Resolve data-residency open item before any real data.
