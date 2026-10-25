@@ -27,8 +27,8 @@ During implementation, maintain a short checklist below the feature. After imple
 ## Current status (2026-10-12)
 
 - Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021); approval, story, language, and dispute-timer rules decided (D-023 to D-029) with testable criteria in `docs/acceptance-criteria.md`.
-- Feature 0 tooling merged: harness verification and Firstmate tier-dispatch map (PR #3) and the `tools/route-task` Laya router with static fallback (PR #5). Remaining Feature 0 items are owner actions, a Greptile check, a re-probe of Antigravity, free-model trials, and making the new CI job names required on `protect-main`.
-- Feature 1 in progress: step 1 (workspace tooling and CI) merged in PR #8; step 2 (`packages/backend`, the Convex auth backend) merged in PR #9 (D-031). Step 3 (`apps/web`, the web sign-in proof) merged in PR #12 (branch `feat/para-web-auth`); its live sign-in proof passed on 2026-10-13 against the Clerk and Convex dev instances. Step 4 (the Expo mobile app) was planned and approved on 2026-10-13 (D-043 to D-052) and split into 4a, the app shell that runs signed out (branch `fm/para-mobile-shell`, in review), and 4b, email and password sign-in with a live proof on both platforms (branch `feat/para-mobile-auth`, in review). The Step 4b live device proof passed on both platforms on 2026-10-23 (see Verification). Step 5 is the remaining work of the approved scaffold plan.
+- Feature 0 tooling merged: harness verification and Firstmate tier-dispatch map (PR #3) and the `tools/route-task` Laya router with static fallback (PR #5). Remaining Feature 0 items are owner actions, a Greptile check, a re-probe of Antigravity, and free-model trials (the required CI checks on `protect-main` were applied in Step 5).
+- Feature 1 in progress: step 1 (workspace tooling and CI) merged in PR #8; step 2 (`packages/backend`, the Convex auth backend) merged in PR #9 (D-031). Step 3 (`apps/web`, the web sign-in proof) merged in PR #12 (branch `feat/para-web-auth`); its live sign-in proof passed on 2026-10-13 against the Clerk and Convex dev instances. Step 4 (the Expo mobile app) was planned and approved on 2026-10-13 (D-043 to D-052) and split into 4a, the app shell that runs signed out (branch `fm/para-mobile-shell`, in review), and 4b, email and password sign-in with a live proof on both platforms (branch `feat/para-mobile-auth`, in review). The Step 4b live device proof passed on both platforms on 2026-10-23 (see Verification). Step 5 (required CI checks and action SHA pinning) was applied on 2026-10-25.
 - Time-sensitive: Laya is free on Vercel AI Gateway only through 2026-10-31. The owner's budget-cap decision for paid Laya (keep paid or self-host) is still open and due before that date.
 - Owner live check of the Laya router (2026-10-12), reported by the owner and not re-run for this update: for the task 'Classify a docs update' it returned `routingPath: laya` with tier T1, while the static table gives D. This is an observation only; no routing rule or table was changed.
 
@@ -86,7 +86,7 @@ Make multi-harness development safe and cheap before application code: routing, 
 - [ ] Confirm Greptile detects the config and posts a review on PR #1.
 - [x] Add GitHub Actions CI (format, lint, typecheck, test, build) (2026-10-12, `.github/workflows/ci.yml`, D-037).
 - [x] Enforce the hard rules from the 2026-10-13 adoption note with hooks (2026-10-13, D-042): `scripts/check-secrets.mjs` run by a `secrets` CI job and an opt-in `.githooks/pre-commit` (`pnpm run hooks:install`), plus a `route-task` CI job and a router test proving a refused task never reaches the key loader or Laya. Step 4 planning is a separate PR.
-- [ ] Require the CI job names (now including `secrets` and `route-task`) in the `protect-main` ruleset and turn on repository-wide action SHA pinning (plan step 5; owner approval needed; open decision alongside D-037 and D-043).
+- [x] Require the CI job names (now including `secrets` and `route-task`) in the `protect-main` ruleset and turn on repository-wide action SHA pinning (plan step 5; owner approval needed; open decision alongside D-037 and D-043).
 
 ## Feature 1: monorepo scaffold and architecture validation
 
@@ -111,7 +111,7 @@ Scaffold the Turborepo with web, mobile, Convex, and shared packages, proving on
 - [ ] Wire Clerk to Convex on both clients; verify sign-in on web (done 2026-10-13), iOS simulator and Android emulator (step 4b).
 - [ ] Before real users: mobile Device Trust and MFA handling (D-050); real app ids (D-051); revisit the iOS 17 minimum (D-046).
 - [x] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger (`docs/coding-standards.md`).
-- [ ] Step 5 `chore/ci-required-checks`: make the CI job names (including `secrets` and `route-task`) required on `protect-main` and turn on repository-wide action SHA pinning (owner approval needed; D-037).
+- [x] Step 5 `chore/ci-required-checks`: make the CI job names (including `secrets` and `route-task`) required on `protect-main` and turn on repository-wide action SHA pinning (owner approval needed; D-037).
 - [x] Step 6 `chore/para-fallow` (PR #11): Fallow as a pinned devDependency with a non-blocking CI job (D-039, implemented as D-040).
 - [x] Step 7 `docs/scope-feature-1`: documentation updated to match what steps 1 and 2 shipped (2026-10-12).
 - [ ] Resolve data-residency open item before any real data.
