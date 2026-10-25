@@ -402,14 +402,18 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequence: `docs/model-routing.md` owns the rule; `AGENTS.md`, `docs/harness-setup.md`, `docs/agent-workflow.md` and `docs/architecture.md` point to or summarize it.
 
 ## D-058: Stated relationships are typed edges or a kin_stated record, never free text (2026-10-25)
-- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0); the edge model still gets an independent Codex read against `relationship-domain-review` before F2-1 starts
-- Context: AC-2.07 has Kiran invite Hari "as cousin", but the graph stores typed edges and derives labels (D-002, `docs/domain-model.md`), and a cousin is not a primitive edge. The foundation item "Confirm supported relationship types and constraints" was open.
-- Decision: An inviter or invitee states a relationship from a closed list in one of two forms:
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0; amended 2026-10-25 following independent Codex review finding)
+- Context: AC-2.07 has Kiran invite Hari "as cousin", but the graph stores typed edges and derives labels (D-002, `docs/domain-model.md`), and a cousin is not a primitive edge. The foundation item "Confirm supported relationship types and constraints" was open. An independent Codex review found that the non-direct "closed list" lacked an authoritative vocabulary and `kin_stated` record contract, leaving room for implementer-invented strings or free-form variants before F2-1.
+- Decision: An inviter or invitee states a relationship from an authoritative closed registry in one of two forms, never free text:
   - **Direct types**, stored as typed edges between canonical person ids: parent-child (one directed edge type, read as parent or child from either end) and partner. Whether sibling is its own edge type or is derived from shared parents is decided with Feature 3's edge model; until then sibling is not a direct type.
-  - **`kin_stated`**, for supported non-direct terms such as cousin or uncle (and sibling until Feature 3 decides it): a record of who stated what about whom, with its own relationship state. It is confirmed exactly like a direct type, but it is not an edge, is never used as a graph path, and never produces a derived kinship label. Feature 3 may later derive the matching path and reconcile the record with it.
-  - Free text is never accepted. A term outside both lists is rejected (AC-2.29).
+  - **`kin_stated`**, for supported non-direct terms, governed by a normative closed set (versioned canonical term registry v1 in `packages/domain`):
+    - **Normative closed set (canonical term codes)**: `sibling` (explicitly kept in the temporary non-direct set until the Feature 3 decision), `cousin`, `uncle`, `aunt`, `nephew`, `niece`.
+    - **Record contract**: `kin_stated` stores canonical person ids for both people (`subject_person_id` and `target_person_id`), a canonical term code (`term_code`, never user text or locale display string), the stating actor (`stating_actor_id`), the relationship state (`state`), and the invitation linkage (`invitation_id`) for provenance and auditability.
+    - **Display mapping**: locale-specific display text (e.g. English labels or Telugu kinship terms) maps to canonical codes and cannot create new codes.
+    - Like direct types, `kin_stated` is confirmed by the other party, but it is not an edge, is never used as a graph path, and never produces a derived kinship label. Feature 3 may later derive the matching path and reconcile the record with it.
+  - **Unsupported terms and free text**: Free text is never accepted. An unsupported term or variant (e.g. "mom's brother", "maternal uncle", "uncle by marriage") is rejected without accepting the invitation or creating any relationship record (neither a typed edge nor a `kin_stated` record) (AC-2.29, AC-2.32).
 - Constraints: a self-relationship and any stated edge that would make a person their own ancestor are rejected (AC-2.30). A stated relationship that conflicts with an established `accepted` relationship is not accepted by confirmation alone (AC-2.31); until Feature 5 exists it returns a fixed "needs review" result and nothing changes.
-- Consequences: The closed lists live in `packages/domain` (F2-1). Choosing this wrongly would force a rewrite of Features 3 and 5, which is why the independent review comes before F2-1.
+- Consequences: The versioned canonical term registry and `kin_stated` record contract live in `packages/domain` (F2-1). Choosing this wrongly would force a rewrite of Features 3 and 5, which is why the independent review comes before F2-1.
 
 ## D-059: Founding a family group (2026-10-25)
 - Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)

@@ -12,12 +12,16 @@ All valid paths must remain available. A marriage between relatives can cause a 
 
 ### Stated relationships (D-058)
 
-When an inviter states a relationship, or an invitee discloses one, it comes from a closed list in one of two forms, never free text:
+When an inviter states a relationship, or an invitee discloses one, it comes from an authoritative closed registry in one of two forms, never free text:
 
-- **Direct type**, stored as a typed edge: parent-child (one directed edge type) and partner. Sibling is decided with Feature 3's edge model.
-- **`kin_stated`**, for supported non-direct terms such as cousin or uncle: a record of who stated what about whom, with its own relationship state. It is confirmed like a direct type but is not an edge, is never a graph path, and never produces a derived label until Feature 3 can derive and reconcile it.
+- **Direct type**, stored as a typed edge between canonical person IDs: parent-child (one directed edge type, read as parent or child from either end) and partner. Sibling is decided with Feature 3's edge model; until then sibling is not a direct type.
+- **`kin_stated`**, for supported non-direct terms from a normative closed set (versioned canonical term registry v1 in `packages/domain`):
+  - **Normative closed set (canonical term codes)**: `sibling` (explicitly kept in the temporary non-direct set until the Feature 3 decision), `cousin`, `uncle`, `aunt`, `nephew`, `niece`.
+  - **Record contract**: stores canonical person IDs for both people (`subject_person_id` and `target_person_id`), a canonical term code (`term_code`, never user text or locale display string), the stating actor (`stating_actor_id`), the relationship state (`state`), and the invitation linkage (`invitation_id`) for provenance and auditability.
+  - **Display mapping**: locale-specific display text (e.g. English labels or Telugu kinship terms) maps to canonical codes and cannot create new codes.
+  - It is confirmed like a direct type, but is not an edge, is never a graph path, and never produces a derived label until Feature 3 can derive and reconcile it.
 
-A self-relationship, a stated edge that would make a person their own ancestor, and an unsupported term are rejected. A statement that conflicts with an established `accepted` relationship is not accepted by confirmation alone; it becomes a Feature 5 claim, and until Feature 5 exists it returns a fixed "needs review" result with no state change.
+A self-relationship, a stated edge that would make a person their own ancestor (AC-2.30), and an unsupported term or variant (e.g. "mom's brother", "maternal uncle", "uncle by marriage", or arbitrary free text) are rejected without accepting the invitation or creating any relationship record (neither a typed edge nor a `kin_stated` record) (AC-2.29, AC-2.32). A statement that conflicts with an established `accepted` relationship is not accepted by confirmation alone; it becomes a Feature 5 claim, and until Feature 5 exists it returns a fixed "needs review" result with no state change (AC-2.31).
 
 ## Family groups, membership, roles, invitations
 

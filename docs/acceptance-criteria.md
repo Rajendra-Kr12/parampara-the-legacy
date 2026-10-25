@@ -152,6 +152,7 @@ Sources: FR-01, FR-02, D-003, D-007, D-017; scope Feature 2.
 - [ ] **AC-2.29** [R] A stated relationship that is not a supported relationship type is rejected.
 - [ ] **AC-2.30** [R] A stated relationship that would make a person their own ancestor (for example Kiran states Hari is both her parent and her child, or a self-relationship) is rejected.
 - [ ] **AC-2.31** [R] A stated relationship that conflicts with an established `accepted` relationship (for example a different father for Kiran than Ravi) is not accepted by the invitee's confirmation alone; until Feature 5 exists it returns a fixed "needs review" result and nothing changes (D-058); once Feature 5 exists it becomes a claim with the stricter review for parent-child changes.
+- [ ] **AC-2.32** [R] An unsupported term or variant (e.g. "mom's brother", "maternal uncle", "uncle by marriage", or arbitrary free text) is rejected without accepting the invitation, advancing invitation state, or creating any relationship record (neither a typed edge nor a `kin_stated` record); the invitation state remains unchanged (D-058).
 
 ---
 
