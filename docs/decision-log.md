@@ -309,7 +309,7 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Status: Accepted (branch `fm/para-hard-rule-hooks`; adopts item 1 of the 2026-10-13 adoption note)
 - Context: `AGENTS.md` carried "never commit secrets or `.env`" and "never send real family data to an external model" as prose. Both can be tested by tooling.
 - Decision: `scripts/check-secrets.mjs` (`pnpm run check:secrets`) fails on tracked `.env*` files other than `.env.example` and on obvious secret patterns. It runs in a new `secrets` CI job and in an opt-in `.githooks/pre-commit` installed with `pnpm run hooks:install`. A new `route-task` CI job runs the router tests, including one proving a refused task never reaches the key loader or the Laya client. The enforcement ledger in `docs/coding-standards.md` is the owner of what each check covers and its limits; `AGENTS.md` keeps prose only for rules a hook cannot test.
-- Consequences: The checks are pattern-based and cannot detect other real family data. The local hook is opt-in, so CI is the gate. Making `secrets` and `route-task` required checks on `protect-main` is an open owner decision, alongside D-037; no repository setting was changed.
+- Consequences: The checks are pattern-based and cannot detect other real family data. The local hook is opt-in, so CI is the gate. Making `secrets` and `route-task` required checks on `protect-main` was an open owner decision at the time; applied in Step 5 (see `docs/coding-standards.md`).
 
 ## D-043: Mobile stack: Expo SDK 57 with @clerk/expo 4.10.1 (2026-10-13)
 - Status: Accepted (Feature 1 Step 4 plan, decided by the owner; built in Step 4a, branch `fm/para-mobile-shell`)
