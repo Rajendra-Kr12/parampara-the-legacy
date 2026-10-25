@@ -35,7 +35,7 @@ stateDiagram-v2
 ```
 
 - Founding is rate limited (D-059). The founder's membership and administrator role are written in the same mutation as the group.
-- One active group per account in Feature 2; the schema allows several memberships (D-059).
+- One active group per account in Feature 2; the schema allows several memberships (D-059). Accepting an invitation to a second group while the account holds an active membership is refused (see Membership).
 
 ### Membership
 
@@ -52,6 +52,7 @@ stateDiagram-v2
 - A pending member sees only their own profile, the pending invitation, and the inviter's display name (AC-2.22). They cannot invite, propose claims, or review (AC-2.24), and direct backend calls for anything else are denied (AC-2.23).
 - `pending` to `active` happens in the same mutation that accepts the invitation and writes the edge or `kin_stated` record.
 - An ended membership is never reactivated; joining again takes a fresh invitation.
+- An account with an `active` membership cannot accept an invitation to another group (D-059). The attempt is refused with a fixed message that names no group and reveals no member data, nothing changes, and the invitation stays `pending` until it expires or is declined. There is no leave-and-switch, multi-group, or transfer behavior in Feature 2.
 
 ### Role
 
@@ -98,6 +99,7 @@ stateDiagram-v2
 - Re-inviting the same contact to the same group while pending refreshes the invitation and restarts its expiry instead of creating a second one (AC-2.20). Expiry is 14 days and the limits are in config (D-061).
 - `accepted`, `rejected`, and `expired` are terminal. Using the link of a terminal invitation is rejected with no state change (AC-2.16, AC-2.17); a fresh invitation is a new record.
 - A confirmation that conflicts with an established `accepted` relationship leaves the invitation where it is and returns the fixed "needs review" result (AC-2.31, D-058).
+- Accepting while the accepting account already holds an active membership in another group is refused with a fixed, non-revealing message; the invitation stays `pending` (D-059).
 - Feature 2 sends invitations by email only; the invitation records its `channel` (D-060). The accepting account must have verified the invited contact (AC-2.19, D-066).
 
 ## Kinship terminology

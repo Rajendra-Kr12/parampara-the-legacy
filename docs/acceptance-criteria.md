@@ -126,7 +126,7 @@ Sources: FR-01, FR-02, D-003, D-007, D-017; scope Feature 2.
 - [ ] **AC-2.09** [P] Invitee-discloses path: the invitation carries no stated relationship; Hari discloses one; it becomes `accepted` only when Kiran confirms it.
 - [ ] **AC-2.10** [F] Nobody completes registration into a family group without a disclosed relationship confirmed by the other party. An invitee who signs in but has not had a relationship confirmed stays a pending member. The founder of a new family group is the single recorded exception (D-059).
 - [ ] **AC-2.11** [P] A member creating a profile for a living person who cannot register themselves now (for example Gopal) must enter that person's email (phone when available, D-060); the system sends that contact an invitation link.
-- [ ] **AC-2.12** [F] Creating a profile for a living person without a phone or email is rejected. (Deceased profiles follow Feature 6 and need no contact.)
+- [ ] **AC-2.12** [F] Creating a profile for a living person without an email (phone when available, D-060) is rejected. (Deceased profiles follow Feature 6 and need no contact.)
 - [ ] **AC-2.13** [P] When Gopal registers through the link, he claims the existing Gopal person record; no second person record is created.
 - [ ] **AC-2.14** [P] Inviting a contact that already belongs to a registered account links the invitation to that account's existing person record and creates no duplicate.
 - [ ] **AC-2.15** [P] The inviter sees the same response whether or not the contact already has an account, so invitations cannot be used to discover who is registered.
@@ -151,7 +151,7 @@ Sources: FR-01, FR-02, D-003, D-007, D-017; scope Feature 2.
 ### Invalid relationship paths at invitation
 - [ ] **AC-2.29** [R] A stated relationship that is not a supported relationship type is rejected.
 - [ ] **AC-2.30** [R] A stated relationship that would make a person their own ancestor (for example Kiran states Hari is both her parent and her child, or a self-relationship) is rejected.
-- [ ] **AC-2.31** [R] A stated relationship that conflicts with an established `accepted` relationship (for example a different father for Kiran than Ravi) is not accepted by the invitee's confirmation alone; it becomes a Feature 5 claim with the stricter review for parent-child changes.
+- [ ] **AC-2.31** [R] A stated relationship that conflicts with an established `accepted` relationship (for example a different father for Kiran than Ravi) is not accepted by the invitee's confirmation alone; until Feature 5 exists it returns a fixed "needs review" result and nothing changes (D-058); once Feature 5 exists it becomes a claim with the stricter review for parent-child changes.
 
 ---
 
