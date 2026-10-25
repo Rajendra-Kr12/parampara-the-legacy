@@ -10,6 +10,63 @@ Store relationships as typed edges between canonical person IDs. The model must 
 
 All valid paths must remain available. A marriage between relatives can cause a person to be related through maternal and paternal branches at once; this is legitimate, not necessarily a data error.
 
+### Optional graph index (Feature 3 readiness)
+
+Feature 3 may add a graph database as an index beside Convex. This section defines only the seam: it adds no schema, dependency, deployment, or client behavior, and leaves the Feature 3 edge model, traversal limits, duplicate-merge workflow, and index choice open. Adding an index is a separate decision, and its provider and dependency need owner approval before use. Convex stays the only system of record for people, edges, states, and approvals.
+
+#### Who owns what
+
+| Concern | Owner |
+|---|---|
+| Canonical entity types, relationship types and states, graph validation (self-edge, ancestry cycle, spouse of an ancestor or descendant), who may confirm a stated relationship, capability rules | `packages/domain`, pure TypeScript |
+| Walking accepted paths and deriving kinship labels, with the paternal-side default | `packages/kinship-engine`, pure TypeScript |
+| Persistence, authorization, transactions, audit events, projection | `packages/backend` (Convex) |
+| Path and neighbour lookup over an optional index | the graph index, behind one read-only port |
+
+The index owns no rule. A decision made in `packages/domain` is never replaced by a graph query, and `packages/kinship-engine` derives labels from a returned path, never from a stored label or a provider's query language.
+
+#### The read-only port
+
+A graph index is reached only through one port, `GraphIndexRead`, implemented by an adapter in `packages/backend`:
+
+- `paths(fromPersonId, toPersonId, { maxDepth, maxPaths })` returns the accepted edges forming each path plus a `truncated` flag, and never searches past the configured limits (AC-3.07).
+- `neighbors(personId, { edgeTypes, maxResults })` returns adjacent accepted edges for expansion screens and duplicate checks.
+- `health()` reports whether the index is populated and fresh enough to answer reads.
+
+Port rules:
+
+- Inputs and outputs use canonical person IDs and domain types from `packages/domain`. No graph-provider type crosses the port.
+- A result carries edge IDs, endpoint IDs, edge type, relationship state, family group ID, and a source version. It carries no names, contact details, addresses, story text, evidence, or media keys.
+- The port is read-only: no upsert, delete, label, approval, raw-query, or arbitrary traversal method. Application code cannot change family data through it or skip a Convex mutation.
+
+#### One-way feeding
+
+Convex commits, then a projector in `packages/backend` feeds the index. Feeding uses a separate internal projection interface, never the read port. Only accepted direct edges are projected: pending, rejected, and otherwise unaccepted edges never enter the index, and a transition out of `accepted` removes the indexed edge. The index is rebuildable from Convex alone, so index content that does not match these rules is wrong, not merely stale.
+
+```mermaid
+flowchart LR
+    client["web, iOS, Android"] -->|"typed Convex API only"| convex["Convex: source of truth, authorization, audit"]
+    convex -->|"idempotent projection event after commit"| projector["projector in packages/backend"]
+    projector -->|"upsert or remove by canonical ID and version"| index["graph index: disposable read model"]
+    convex -->|"authorized read via GraphIndexRead"| index
+```
+
+- The mutation commits and writes its audit event first. A client never writes to the index, and the index never triggers a Convex mutation.
+- Projection events are idempotent and versioned, so retries, replays, and a full backfill from Convex produce the same index. The index is disposable and can be rebuilt from empty; removing an entry there deletes nothing in Convex.
+- Index lag is expected. A read that must be current (confirmation, approval, merge validation) reads Convex. A path or neighbour read may use the index, and the response says when the index may be behind.
+- A failed projection is retried and reported. It never blocks a Convex commit that already succeeded, and it never makes the index an authority.
+
+Because a Convex query cannot call an external service, the adapter is invoked from a Convex action that authorizes the caller with an internal query first.
+
+#### What must not leak
+
+- The index is not a second source of truth: approval state, verification state, privacy decisions, and audit history are never stored or decided there as authority.
+- Clients never reach the index directly. There is no public index endpoint or client credential, and neither `EXPO_PUBLIC_*` nor `NEXT_PUBLIC_*` may hold one. Every read passes a Convex function that authorizes the caller (AC-3.18 to AC-3.20), so a member of family group B cannot read group A edges through the index.
+- Only identifiers and edge structure enter the index: no contact details, exact addresses, evidence, media keys, story text, invitation tokens, or Clerk identifiers. Index credentials and provider errors stay server-side and are never returned to users.
+- `kin_stated` records are never projected as edges or paths (D-058). Sibling stays out of the edge model until Feature 3 decides it, and a derived label is never written back as a relationship fact.
+- Pending and rejected edges are never projected. Their parties and reviewers read them from Convex, where the authorization rule is applied before anything is returned; the port never widens it.
+- AI services never write the index and are never given raw index access.
+
 ### Stated relationships (D-058)
 
 When an inviter states a relationship, or an invitee discloses one, it comes from a closed list in one of two forms, never free text:
