@@ -218,8 +218,22 @@ const rules: { readonly [A in Action]: Rule<A> } = {
   "person.readPrivateDetails": (actor, person) => requireOwnPerson(actor, person),
   "person.updateOwnProfile": (actor, person) => requireOwnPerson(actor, person),
   "invitation.create": (actor, group) => requireActiveMember(actor, group.groupId),
-  "invitation.view": (actor, invitation) =>
-    partyOf(invitation, actor) === null ? deny("not_a_party") : allow,
+  // The invitee sees only the current, pending invitation (AC-2.22); the inviter sees
+  // their invitations, including a declined one (AC-2.21), only while an active member.
+  "invitation.view": (actor, invitation, context) => {
+    const party = partyOf(invitation, actor);
+    if (party === null) {
+      return deny("not_a_party");
+    }
+    if (party === "inviter") {
+      return requireActiveMember(actor, invitation.groupId);
+    }
+    const state = effectiveInvitationState(invitation, context.nowMs);
+    if (state === "expired") {
+      return deny("invitation_expired");
+    }
+    return isPendingInvitationState(state) ? allow : deny("invitation_closed");
+  },
   "invitation.resend": (actor, invitation, context) => {
     if (partyOf(invitation, actor) !== "inviter") {
       return deny("not_a_party");

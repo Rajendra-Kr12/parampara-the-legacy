@@ -281,6 +281,46 @@ describe("can(actor, action, resource)", () => {
         "not_a_party",
       ],
       [
+        "AC-2.22 pending invitee views an old rejected invitation",
+        () => check(hari, "invitation.view", invitation({ state: "rejected" })),
+        "invitation_closed",
+      ],
+      [
+        "AC-2.22 pending invitee views an old accepted invitation",
+        () => check(hari, "invitation.view", invitation({ state: "accepted" })),
+        "invitation_closed",
+      ],
+      [
+        "AC-2.22 AC-2.16 pending invitee views an invitation stored as expired",
+        () => check(hari, "invitation.view", invitation({ state: "expired" })),
+        "invitation_expired",
+      ],
+      [
+        "AC-2.22 AC-2.16 pending invitee views an invitation past its configured expiry",
+        () => check(hari, "invitation.view", invitation({ expiresAt: now })),
+        "invitation_expired",
+      ],
+      [
+        "AC-2.27 an inviter whose membership ended views their invitation",
+        () =>
+          check(
+            account("kiran", [{ groupId: "group-a", state: "ended" }]),
+            "invitation.view",
+            invitation(),
+          ),
+        "not_a_member",
+      ],
+      [
+        "AC-2.24 an inviter whose membership is pending views their invitation",
+        () =>
+          check(
+            account("kiran", [{ groupId: "group-a", state: "pending" }]),
+            "invitation.view",
+            invitation(),
+          ),
+        "membership_pending",
+      ],
+      [
         "AC-2.28 group A administrator invites into group B",
         () => check(kiran, "invitation.create", groupB),
         "not_a_member",
@@ -403,6 +443,22 @@ describe("can(actor, action, resource)", () => {
       [
         "AC-2.22 pending member views their pending invitation",
         () => check(hari, "invitation.view", invitation()),
+      ],
+      [
+        "AC-2.22 pending invitee views their current invitation awaiting their reply",
+        () => check(hari, "invitation.view", awaitingInviter),
+      ],
+      [
+        "AC-2.22 pending invitee views their current invitation awaiting disclosure",
+        () => check(hari, "invitation.view", awaitingDisclosure),
+      ],
+      [
+        "AC-2.06 active inviter views their pending invitation",
+        () => check(kiran, "invitation.view", invitation()),
+      ],
+      [
+        "AC-2.21 active inviter views an invitation the invitee declined",
+        () => check(kiran, "invitation.view", invitation({ state: "rejected" })),
       ],
       [
         "AC-2.07 invitee confirms the inviter's statement",
