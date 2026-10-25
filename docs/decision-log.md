@@ -211,10 +211,11 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7, "Story approval", AC-7.18, AC-7.25, AC-7.26).
 
 ## D-030: Laya live check and budget cap (2026-10-12)
-- Status: Observation recorded; budget-cap decision open
+- Status: Observation recorded; budget-cap item closed by D-067 (2026-10-25)
 - Context: The `tools/route-task` router (PR #5) was only covered by automated tests. On 2026-10-12 the owner ran the live check from `tools/route-task/README.md` for the task 'Classify a docs update'.
 - Observation: `routingPath` was `laya` and the tier was T1. The static table in `docs/model-routing.md` gives D for the same task. The owner reported this; it was not re-run when this was recorded. It is an observation only: no routing rule, table, or catalog row was changed, and one sample does not show which answer is better.
 - Open: Before 2026-10-31 the owner sets an AI Gateway budget cap and decides whether to keep paid Laya or self-host. After that date the router defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
+- Resolved by D-067 (2026-10-25): static routing only; no budget cap, no paid Laya, no self-host, and no code change.
 
 ## D-031: Convex auth backend choices (2026-10-12)
 - Status: Accepted (Feature 1 step 2, branch `feat/para-auth-backend`)
@@ -444,7 +445,7 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequences: The provider, its cost, and the sender domain are the owner's choice at F2-6, and the provider key is set by the owner; no agent reads it.
 
 ## D-064: Pick the i18n and styling approaches at the start of F2-4 (2026-10-25)
-- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0); settled by D-068 for F2-4
 - Decision: The i18n approach shared by Next.js and Expo (required by D-025) and the styling approach (`docs/architecture.md` open items) are each chosen in a small decision PR at the start of F2-4, before any sign-up or profile screen is built. Any new dependency they bring needs owner approval.
 - Consequences: If the owner declines both, the fallback is a typed string-key table with English values only, and Telugu waits for Feature 4.
 
@@ -457,3 +458,21 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-0)
 - Decision: An invitation is accepted only by an account that has verified the invited email (AC-2.19). An invitee signed in with another address is refused with one fixed message, "sign in with the address the invitation was sent to", which never reveals the invited address; the inviter may send a fresh invitation.
 - Consequences: The same refusal is used whether the address is wrong, unverified, or unknown, so it cannot be used to probe addresses (AC-2.15).
+
+## D-067: Static task routing only, no paid or self-hosted Laya (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25); closes the open item in D-030
+- Context: D-030 left the AI Gateway budget cap and the choice between paid Laya and self-hosting open before the promotional free period ends on 2026-10-31. The router already stops calling Laya from 2026-11-01 unless `ROUTE_TASK_ENABLE_PAID_LAYA=true` (`PROMOTION_END` in `tools/route-task/src/router.ts`).
+- Decision: Parampara uses the static routing table in `docs/model-routing.md` only. No AI Gateway budget cap is set, paid Laya is not enabled, and Laya is not self-hosted. `ROUTE_TASK_ENABLE_PAID_LAYA` stays unset, including from 2026-11-01; setting it later is a new owner decision, not a configuration change.
+- Rationale: Static routing costs nothing, keeps task descriptions inside the local environment, and applies Parampara's deterministic high-risk rules exactly. The one live check on record (D-030) put a documentation task in T1 where the static table gives D, so the external classifier has not shown an advantage. Core work must not depend on an external classifier.
+- Consequences: No code, dependency, or CI change. The router's existing cutoff already returns `routingPath: "static"` with `fallbackReason: "laya-disabled-after-promotion"` from 2026-11-01. The live-check steps in `tools/route-task/README.md` remain usable only while the promotional free period lasts. The Feature 0 owner item in `docs/scope.md` is closed.
+- Reference: the decision follows the Laya decision scout report (`para-laya-decision-scout`, held in the Firstmate task data outside this repository); nothing from it is copied here.
+
+## D-068: i18n and styling approach for F2-4 (2026-10-25)
+- Status: Accepted (owner decision 2026-10-25, Feature 2 step F2-4); settles D-064 and Q7 of the Feature 2 plan
+- Context: D-064 required the i18n approach shared by Next.js and Expo (D-025) and the styling approach to be chosen in a small decision PR at the start of F2-4, before any sign-up or profile screen. Open question Q7 of the Feature 2 plan asked which approaches to use.
+- Decision:
+  - **i18n**: a pure TypeScript package `@parampara/i18n` in `packages/i18n`, with an English catalog `en` and a Telugu catalog `te` typed `Record<keyof typeof en, string>`. A key present in `en` and missing in `te` fails typecheck; that covers the Telugu side of AC-4.17, which requires the build or CI to fail when a key is missing in either language.
+  - **Styling**: a pure TypeScript package `@parampara/tokens` in `packages/tokens` holds the shared design tokens. Web consumes them through Tailwind CSS v4; mobile uses React Native `StyleSheet`. No component library or native styling runtime is added.
+- Rationale: Both packages are plain TypeScript with no UI, Convex, or provider imports, so Next.js, Expo, and later the invitation email (D-063) can share one catalog and one token source. The Telugu catalog type turns a missing translation into a compile error instead of a review miss.
+- Consequences: The two packages and the web Tailwind v4 wiring are the foundation of F2-4 and are built before the screens; any new dependency they need (Tailwind v4 and its PostCSS packages on web) still needs owner approval at owner gate 4. This decision creates no package itself. `packages/i18n` must not import UI or Convex, and Feature 4's kinship catalogue stays separate from the interface strings.
+- Reference: the choice follows the F2-4 i18n and styling scout report (`para-f2-4-i18n-styling-scout`, held in the Firstmate task data outside this repository); nothing from it is copied here.

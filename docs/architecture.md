@@ -101,8 +101,8 @@ Family metadata (people, edges, claims, stories) is small: a few MB per family, 
 - Test stack beyond the shared packages and Convex: Playwright with `@clerk/testing` for web; `jest-expo` for pure mobile modules and Maestro for mobile end to end, no component render library (D-036, D-049). No coverage threshold.
 - CI hardening: `protect-main` requires the CI job checks and repository-wide action SHA pinning is on (Step 5; see `docs/coding-standards.md`). There is no Turbo remote cache (D-037). The mobile E2E workflow exists but is manual and needs the owner to set its repository variables (D-044). Changing shared settings needs owner approval.
 - Convex codegen drift check: `convex codegen` needs `CONVEX_DEPLOYMENT`, so a drift job is still to be designed.
-- i18n approach shared by Next.js and Expo, which D-025 requires Feature 1 to pick; CI should fail on a missing translation key.
-- Styling approach shared across web and mobile (for example NativeWind or Tamagui).
+- i18n approach shared by Next.js and Expo: decided 2026-10-25 (D-068), pure TypeScript `@parampara/i18n` with `en` and `te` catalogs; the `te` catalog is typed against `en`, so a missing Telugu key fails typecheck (AC-4.17).
+- Styling approach shared across web and mobile: decided 2026-10-25 (D-068), `@parampara/tokens` consumed through Tailwind CSS v4 on web and `StyleSheet` on mobile.
 - Data residency: confirm Convex and R2 regions and obligations under India's DPDP Act before storing real data.
 - Clerk SMS OTP cost and availability for Indian numbers; email-link limits on Expo native.
 - Notification provider (email/SMS/push).
