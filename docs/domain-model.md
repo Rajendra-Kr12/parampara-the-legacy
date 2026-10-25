@@ -41,7 +41,7 @@ Port rules:
 
 #### One-way feeding
 
-Convex commits, then a projector in `packages/backend` feeds the index. Feeding uses a separate internal projection interface, never the read port.
+Convex commits, then a projector in `packages/backend` feeds the index. Feeding uses a separate internal projection interface, never the read port. Only accepted direct edges are projected: pending, rejected, and otherwise unaccepted edges never enter the index, and a transition out of `accepted` removes the indexed edge. The index is rebuildable from Convex alone, so index content that does not match these rules is wrong, not merely stale.
 
 ```mermaid
 flowchart LR
@@ -64,7 +64,7 @@ Because a Convex query cannot call an external service, the adapter is invoked f
 - Clients never reach the index directly. There is no public index endpoint or client credential, and neither `EXPO_PUBLIC_*` nor `NEXT_PUBLIC_*` may hold one. Every read passes a Convex function that authorizes the caller (AC-3.18 to AC-3.20), so a member of family group B cannot read group A edges through the index.
 - Only identifiers and edge structure enter the index: no contact details, exact addresses, evidence, media keys, story text, invitation tokens, or Clerk identifiers. Index credentials and provider errors stay server-side and are never returned to users.
 - `kin_stated` records are never projected as edges or paths (D-058). Sibling stays out of the edge model until Feature 3 decides it, and a derived label is never written back as a relationship fact.
-- Pending and rejected edges are not returned to anyone except their parties and reviewers. The Convex query applies that rule before the port is called, and the port never widens it.
+- Pending and rejected edges are never projected. Their parties and reviewers read them from Convex, where the authorization rule is applied before anything is returned; the port never widens it.
 - AI services never write the index and are never given raw index access.
 
 ### Stated relationships (D-058)
