@@ -45,7 +45,8 @@ const forbiddenPackages = [
 
 /**
  * Domain packages stay pure TypeScript: no UI framework, Convex, Clerk or app
- * imports. Add this block to packages/domain and packages/kinship-engine.
+ * imports. Add this block to packages/domain, packages/kinship-engine and
+ * packages/validation.
  */
 export const domainPurity = [
   {

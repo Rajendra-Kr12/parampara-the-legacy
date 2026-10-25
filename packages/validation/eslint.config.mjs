@@ -1,3 +1,3 @@
-import { base } from "@parampara/config/eslint";
+import { base, domainPurity } from "@parampara/config/eslint";
 
-export default base;
+export default [...base, ...domainPurity];
