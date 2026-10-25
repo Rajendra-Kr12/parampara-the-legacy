@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted direction (2026-10-10, D-019; extended 2026-10-11, D-022). The static routing table below is usable today by any human or lead agent. The Laya classifier script is implemented in `tools/route-task` (usage in its README); the owner's live check (2026-10-12) and the open budget-cap decision for paid Laya are recorded in D-030 and `docs/scope.md`.
+Accepted direction (2026-10-10, D-019; extended 2026-10-11, D-022). The static routing table below is usable today by any human or lead agent. The Laya classifier script is implemented in `tools/route-task` (usage in its README); the owner's live check (2026-10-12) is recorded in D-030, and D-067 (2026-10-25) settles the budget question as static routing only.
 
 Model names, availability, pricing, and free quotas change often. The concrete model list, prices, and data-handling classes live in `docs/model-catalog.md`; verify them before relying on this table.
 
@@ -57,7 +57,8 @@ The same instruction filenames can shadow `AGENTS.md`: never add `AGENTS.overrid
 [Laya](https://vercel.com/changelog/laya-decision-model-now-available-on-ai-gateway-free-through-october-31) by Convai Innovations is a fast, open-weight **decision/classification** model. It does not write code. Parampara uses it only to classify a task description into a tier and a data class, then maps that to the catalog.
 
 - Access: Vercel AI Gateway via the AI SDK `experimental_evaluate` call, model ID `convaiinnovations/laya`.
-- Cost: free through **2026-10-31** on the Boundless provider. After that, `convaiinnovations/laya-free` stops serving and `convaiinnovations/laya` is billed. Re-check pricing before November 2026 and set a budget cap in AI Gateway.
+- Cost: free through **2026-10-31** on the Boundless provider. After that, `convaiinnovations/laya-free` stops serving and `convaiinnovations/laya` is billed. D-067 keeps the router off this path: no budget cap is set and paid Laya stays disabled.
+- Decision: static routing only (D-067, 2026-10-25). From 2026-11-01 the router returns the static decision with `fallbackReason: "laya-disabled-after-promotion"` unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`; that flag stays unset, and setting it is a new owner decision, not a configuration change.
 - Self-hosting: weights are Apache 2.0 on Hugging Face (use the official Convai repository, not mirrors).
 - Credentials: `AI_GATEWAY_API_KEY` in a gitignored `.env.local`. Never commit it, never paste it into prompts or docs. `.env.example` lists the variable name only.
 

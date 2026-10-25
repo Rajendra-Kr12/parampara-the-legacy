@@ -56,7 +56,7 @@ Observed 2026-10-11 with agy 1.3.3 from a worktree of this repository. agy's ans
 
 ## Laya router (`tools/route-task`)
 
-The Laya router is merged. It classifies a task description into a tier and data class and selects an allowed catalog model, falling back to the static routing table when Laya cannot run (`routingPath: "static"` with a `fallbackReason`). Setup and options are in `tools/route-task/README.md`.
+The Laya router is merged. It classifies a task description into a tier and data class and selects an allowed catalog model, falling back to the static routing table when Laya cannot run (`routingPath: "static"` with a `fallbackReason`). Setup and options are in `tools/route-task/README.md`. The owner decided static routing only (D-067, 2026-10-25), so the router stays on that path after 2026-10-31 unless the owner later sets `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
 
 Run the live check (not part of automated tests), from the repository root, with `AI_GATEWAY_API_KEY` in the gitignored `.env.local` (never print or commit it):
 
@@ -73,4 +73,4 @@ npm --prefix tools/route-task run route -- --task "Classify a public documentati
 - Hermes: model self-report was inconsistent (one probe said no instruction files, one quoted the `AGENTS.md` heading); repeat with a second model if exact loading matters.
 - agy: re-run the probe in `docs/model-routing.md` after the Gemini quota resets; still open are a controlled marker test that `AGENTS.md` is loaded, whether a triggered skill loads, and a reproducible pane launch showing which model runs.
 - Pi + Zen custom provider, and Pi on OpenRouter free models: not tried.
-- Laya classifier: implemented in `tools/route-task`; open owner items are tracked in `docs/scope.md` (Feature 0).
+- Laya classifier: implemented in `tools/route-task`; the routing decision is static only (D-067), and any remaining Feature 0 owner items are tracked in `docs/scope.md` (Feature 0).

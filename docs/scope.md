@@ -29,7 +29,7 @@ During implementation, maintain a short checklist below the feature. After imple
 - Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021); approval, story, language, and dispute-timer rules decided (D-023 to D-029) with testable criteria in `docs/acceptance-criteria.md`.
 - Feature 0 tooling merged: harness verification and Firstmate tier-dispatch map (PR #3) and the `tools/route-task` Laya router with static fallback (PR #5). Remaining Feature 0 items are owner actions, a Greptile check, a re-probe of Antigravity, and free-model trials (the required CI checks on `protect-main` were applied in Step 5).
 - Feature 1 in progress: step 1 (workspace tooling and CI) merged in PR #8; step 2 (`packages/backend`, the Convex auth backend) merged in PR #9 (D-031). Step 3 (`apps/web`, the web sign-in proof) merged in PR #12 (branch `feat/para-web-auth`); its live sign-in proof passed on 2026-10-13 against the Clerk and Convex dev instances. Step 4 (the Expo mobile app) was planned and approved on 2026-10-13 (D-043 to D-052) and split into 4a, the app shell that runs signed out (branch `fm/para-mobile-shell`, in review), and 4b, email and password sign-in with a live proof on both platforms (branch `feat/para-mobile-auth`, in review). The Step 4b live device proof passed on both platforms on 2026-10-23 (see Verification). Step 5 (required CI checks and action SHA pinning) was applied on 2026-10-25.
-- Time-sensitive: Laya is free on Vercel AI Gateway only through 2026-10-31. The owner's budget-cap decision for paid Laya (keep paid or self-host) is still open and due before that date.
+- Time-sensitive: Laya was free on Vercel AI Gateway only through 2026-10-31. Decided 2026-10-25 (D-067): static routing only, with no budget cap, no paid Laya, and no self-host; the router already falls back to static on 2026-11-01 unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
 - Owner live check of the Laya router (2026-10-12), reported by the owner and not re-run for this update: for the task 'Classify a docs update' it returned `routingPath: laya` with tier T1, while the static table gives D. This is an observation only; no routing rule or table was changed.
 
 ## At a glance
@@ -38,7 +38,7 @@ During implementation, maintain a short checklist below the feature. After imple
 |---|---|---|---|
 | 0 | Agent tooling: Laya router, Greptile, CI | Foundation | In progress |
 | 1 | Monorepo scaffold and architecture validation | Foundation | Partly done (docs, decisions, workspace tooling, CI, Convex auth backend) |
-| 2 | Identity, family groups, invitations | P0 | Planned (decisions D-058 to D-066; F2-0 in review) |
+| 2 | Identity, family groups, invitations | P0 | Planned (decisions D-058 to D-066; F2-0 in review; F2-4 i18n and styling chosen in D-068) |
 | 3 | Canonical person records and relationship graph | P0 | Not started |
 | 4 | Kinship terminology and preferred labels | P0 | Not started |
 | 5 | Relationship claims, approvals, audit trail | P0 | Not started |
@@ -72,7 +72,7 @@ Make multi-harness development safe and cheap before application code: routing, 
 ### Checklist
 - [x] Implement `tools/route-task` Laya classifier per `docs/model-routing.md`, with static-table fallback (2026-10-11). Covered by automated tests; see the live-check item below. After 2026-10-31 it defaults to static routing unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
 - [x] Owner: run the live Laya check from `tools/route-task/README.md` (2026-10-12: `routingPath: laya`, tier T1 for 'Classify a docs update'; the static table says D, so the two paths differ on this task; observation only, as reported by the owner).
-- [ ] Owner: set an AI Gateway budget cap and decide before 2026-10-31 whether to keep paid Laya or self-host. Still open.
+- [x] Owner: AI Gateway budget cap and paid-Laya decision (2026-10-25, D-067): static routing only; no budget cap, no paid Laya, no self-host. No code change, because the router already defaults to static after 2026-10-31 unless `ROUTE_TASK_ENABLE_PAID_LAYA=true`.
 - [x] Map routing tiers to Firstmate dispatch profiles and document the herdr setup in `docs/harness-setup.md` (2026-10-11). The map is a proposal; no Firstmate config file was changed, and herdr lifecycle commands were not run.
 - [x] Read official docs for OpenCode, Pi, and Hermes on instruction and skill loading (2026-10-11).
 - [x] Run Claude Code, Codex, OpenCode, Pi, and Hermes once in this repo; `AGENTS.md` loading observed for the first four, skill names visible via `AGENTS.md` but skill file discovery unconfirmed, Hermes only partly confirmed. Results in `docs/model-routing.md` (2026-10-11).
@@ -175,7 +175,7 @@ Plan approved by the owner on 2026-10-25 with all recommended defaults (D-058 to
 - [ ] F2-1 pure domain rules in `packages/domain` and `packages/validation`: invitation and relationship state machines, who may confirm, stated-relationship validation (D-058), contact normalization, token and expiry policy as data, the pending-member capability matrix, and one `can(actor, action, resource)` module. Criteria: AC-2.10, 2.16 (policy), 2.22, 2.24 (policy), 2.25, 2.26, 2.29, 2.30.
 - [ ] F2-2 additive schema and append-only audit events: `persons` with name variants, `privateProfiles`, `familyGroups`, `memberships`, `invitations`, minimal `relationshipEdges`, `auditEvents`, optional `personId` on `users`. Owner gate 2: regenerate `_generated/` (D-031).
 - [ ] F2-3 account, profile, and group backend (slice 2a): `ensureUser`, account state derived from verified identity claims, self-registration profile, `createFamilyGroup` (D-059). Criteria: AC-2.01 to 2.05, 2.27, 2.28. Owner gate 3: Clerk JWT template email claims, mandatory email verification, regenerate `_generated/`.
-- [ ] F2-4 sign-up, profile, and create-group screens on web and mobile, after the i18n and styling decision PRs (D-064). Owner gate 4: any new dependency.
+- [ ] F2-4 sign-up, profile, and create-group screens on web and mobile, starting with the D-068 foundation: `@parampara/i18n` (en and te catalogs, with the Telugu catalog typed so a missing key fails typecheck) and `@parampara/tokens`, with Tailwind CSS v4 on web and `StyleSheet` on mobile. Owner gate 4: any new dependency.
 - [ ] F2-5 invitation core backend (slice 2b, highest risk): create, preview, accept, correct, disclose, confirm, reject, resend; hashed tokens of at least 128 bits; email only (D-060); expiry and limits from config (D-061); different-email refusal (D-066). Criteria: AC-2.06 to 2.10, 2.14 to 2.26, 2.29 to 2.31. Owner gate 5: Codex adversarial review and regenerate `_generated/`.
 - [ ] F2-6 email delivery through our own adapter (D-063). Owner gate 6: provider, sender domain, and keys set by the owner.
 - [ ] F2-7 invite, accept, correct, disclose, and reject screens on web and mobile, and the pending-member home (AC-2.22).
