@@ -112,7 +112,7 @@ Scaffold the Turborepo with web, mobile, Convex, and shared packages, proving on
 - [ ] Before real users: mobile Device Trust and MFA handling (D-050); real app ids (D-051); revisit the iOS 17 minimum (D-046).
 - [x] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger (`docs/coding-standards.md`).
 - [ ] Step 5 `chore/ci-required-checks`: make the CI job names (including `secrets` and `route-task`) required on `protect-main` and turn on repository-wide action SHA pinning (owner approval needed; D-037).
-- [ ] Step 6 `chore/para-fallow` (PR #11): Fallow as a pinned devDependency with a non-blocking CI job (D-039, implemented as D-040).
+- [x] Step 6 `chore/para-fallow` (PR #11): Fallow as a pinned devDependency with a non-blocking CI job (D-039, implemented as D-040).
 - [x] Step 7 `docs/scope-feature-1`: documentation updated to match what steps 1 and 2 shipped (2026-10-12).
 - [ ] Resolve data-residency open item before any real data.
 
