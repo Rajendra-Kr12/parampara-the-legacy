@@ -25,7 +25,7 @@ Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `
 | Backend and database | Convex | TypeScript end to end, transactional mutations, realtime sync, generated typed API for both apps, no ORM needed, open-source self-host option |
 | Auth | Clerk | Free tier covers 50,000 monthly retained users (Feb 2026); SDKs for Next.js and Expo; official Convex integration |
 | Media | Cloudflare R2 behind a storage adapter | ~$0.015/GB-month, no egress fees, S3-compatible so B2 or S3 can replace it by configuration |
-| PR review | Greptile + Codex adversarial review | Greptile on every PR; Codex before shipment |
+| PR review | Greptile + Codex adversarial review | Greptile at major milestones; Codex before shipment |
 | CI | GitHub Actions | Format, lint, typecheck, test, build on every PR; plus a non-blocking Fallow code-health report (D-040) |
 
 Clerk and Greptile also appear in `adrianhajdin/llm-arena`; they were chosen here on their own merits (D-021). llm-arena's Prisma, PostHog, and Arcjet choices were not adopted.

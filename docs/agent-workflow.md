@@ -12,7 +12,7 @@ Coordinate specialized agents across Claude Code, Codex, OpenCode, Pi, Hermes, A
 - **Pi**: minimal terminal harness; reads `AGENTS.md` and `.agents/skills`; documented as a Firstmate harness.
 - **Hermes Agent** (Nous Research): reads `AGENTS.md`; project skills in `.agents/skills` load only after `hermes skills trust`. Not in Firstmate's documented harness list, so Firstmate cannot dispatch it; see `docs/harness-setup.md` for the manual herdr-pane workflow.
 - **Codex plugin for Claude Code**: `/codex:adversarial-review` (user-triggered only) and `/codex:review`.
-- **Greptile**: automated PR review on GitHub (free Starter plan: 1 developer, 50 credits per month). Reviews once when a PR opens; comment `@greptileai` on a PR to request a re-review. Review rules live in `.greptile/`; update them when `AGENTS.md` or the domain rules change.
+- **Greptile**: automated PR review on GitHub (free Starter plan: 1 developer, 50 credits per month). Reviews at major milestones only: each PR is reviewed once and fixes are batched; comment `@greptileai` on a PR to request a re-review. Review rules live in `.greptile/`; update them when `AGENTS.md` or the domain rules change.
 
 ## Plan-before-build gate
 
@@ -43,7 +43,7 @@ Logical roles (responsibilities, not always-on agents):
 1. `git switch main && git pull`, then `git switch -c feat/<slug>`.
 2. Implement in small commits. No agent co-author trailers.
 3. Run repository checks; push the branch; open a PR using the template.
-4. Greptile reviews automatically. For shipments, the user runs `/codex:adversarial-review --base main`.
+4. Greptile reviews at major milestones only. For shipments, the user runs `/codex:adversarial-review --base main`.
 5. Resolve all review conversations, update `docs/scope.md`, then merge (squash). `main` rejects direct pushes.
 
 ## Safety controls
