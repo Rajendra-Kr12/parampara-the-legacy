@@ -477,8 +477,8 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Consequences: The two packages and the web Tailwind v4 wiring are the foundation of F2-4 and are built before the screens; any new dependency they need (Tailwind v4 and its PostCSS packages on web) still needs owner approval at owner gate 4. This decision creates no package itself. `packages/i18n` must not import UI or Convex, and Feature 4's kinship catalogue stays separate from the interface strings.
 - Reference: the choice follows the F2-4 i18n and styling scout report (`para-f2-4-i18n-styling-scout`, held in the Firstmate task data outside this repository); nothing from it is copied here.
 
-## D-067: Domain rule choices left open by D-058 to D-066 (2026-10-25)
-- Status: Proposed (Feature 2 step F2-1, branch `feat/para-f2-1-domain-rules`); each item is reversible and needs owner confirmation
+## D-069: Domain rule choices left open by D-058 to D-066 (2026-10-25)
+- Status: Accepted (2026-10-25, captain-confirmed; Feature 2 step F2-1, branch `feat/para-f2-1-domain-rules`); each item is reversible
 - Context: Building the F2-1 domain rules needed a few values and edge cases that the accepted decisions do not settle.
 - Decision:
   - Founding limit: one group per account in any 24 hours (`groupFoundingPolicy` in `packages/domain/src/policy-config.ts`). D-059 requires a limit but names no value; with one active group per account, the limit only matters once leaving a group exists (Feature 8).
