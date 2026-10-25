@@ -38,7 +38,7 @@ During implementation, maintain a short checklist below the feature. After imple
 |---|---|---|---|
 | 0 | Agent tooling: Laya router, Greptile, CI | Foundation | In progress |
 | 1 | Monorepo scaffold and architecture validation | Foundation | Partly done (docs, decisions, workspace tooling, CI, Convex auth backend) |
-| 2 | Identity, family groups, invitations | P0 | Not started |
+| 2 | Identity, family groups, invitations | P0 | Planned (decisions D-058 to D-066; F2-0 in review) |
 | 3 | Canonical person records and relationship graph | P0 | Not started |
 | 4 | Kinship terminology and preferred labels | P0 | Not started |
 | 5 | Relationship claims, approvals, audit trail | P0 | Not started |
@@ -57,7 +57,7 @@ P0/P1 express sequencing priority, not exclusion from the agreed MVP.
 - [x] Inspect current repository (2026-10-10: documentation only, no code, no CI, no package manager yet).
 - [x] Decide web/mobile monorepo strategy (D-014: Turborepo + Next.js + Expo).
 - [x] Decide backend, authentication, and media storage (D-014, D-015). Hosting regions and migrations approach: open.
-- [ ] Confirm supported relationship types and constraints.
+- [x] Confirm supported relationship types and constraints (D-058: direct types as typed edges, other terms as `kin_stated`, never free text).
 - [x] Deceased-profile threshold when three eligible relatives are unavailable (D-016).
 - [x] Define close-relative eligibility (who counts as close for each claim type) (D-023).
 - [x] Define review thresholds for new claims versus changes to established parent-child or marriage relationships (D-023).
@@ -166,13 +166,24 @@ Step 3 (2026-10-12):
 ## Feature 2: identity, family groups, invitations
 
 ### Intended behavior
-Members create or claim profiles, invite relatives by email or phone, state a claimed relationship, and allow the invitee to confirm or correct it. Pending members have limited access. Account verification is not proof of kinship. Nobody completes registration without a disclosed relationship confirmed by the other party: the invitee confirms the relation the inviter stated, or the inviter confirms the relation the invitee disclosed. Profiles created on someone's behalf require their phone or email so they can register through the invitation link. Required profile fields follow FR-02 (D-017).
+Members create or claim profiles, invite relatives by email (phone when available, D-060), state a claimed relationship, and allow the invitee to confirm or correct it. Pending members have limited access. Account verification is not proof of kinship. Nobody completes registration without a disclosed relationship confirmed by the other party: the invitee confirms the relation the inviter stated, or the inviter confirms the relation the invitee disclosed. Profiles created on someone's behalf require their email (phone when available) so they can register through the invitation link. Required profile fields follow FR-02 (D-017).
 
 ### Checklist
-- [ ] Define account lifecycle and family membership.
-- [ ] Define secure invitation expiry, replay protection, and acceptance.
-- [ ] Implement pending/verified/rejected relationship states.
-- [ ] Test expired links, duplicate invitations, invitee rejection, and limited access.
+Plan approved by the owner on 2026-10-25 with all recommended defaults (D-058 to D-066). Four vertical slices, each working on web, iOS, and Android: 2a identity and my family group (F2-2 to F2-4), 2b invite and confirm (F2-5 to F2-8), 2c invite on behalf and claim (F2-9, F2-10), 2d hardening and release (F2-11). Every owner gate below returns to the owner for approval. Almost every step touches the security-sensitive list in `docs/model-routing.md`, so implementation uses paid models with a Codex review.
+
+- [ ] F2-0 `feat/para-f2-0-decisions` (in review): decisions D-058 to D-066, these steps, the family group, membership, role, and invitation state diagrams in `docs/domain-model.md`, and the AC-2.06, AC-2.10, AC-2.11, AC-2.19 wording. Docs only. Owner gate 1; before approval Codex reads the stated-relationship edge model (D-058) against `relationship-domain-review`.
+- [ ] F2-1 pure domain rules in `packages/domain` and `packages/validation`: invitation and relationship state machines, who may confirm, stated-relationship validation (D-058), contact normalization, token and expiry policy as data, the pending-member capability matrix, and one `can(actor, action, resource)` module. Criteria: AC-2.10, 2.16 (policy), 2.22, 2.24 (policy), 2.25, 2.26, 2.29, 2.30.
+- [ ] F2-2 additive schema and append-only audit events: `persons` with name variants, `privateProfiles`, `familyGroups`, `memberships`, `invitations`, minimal `relationshipEdges`, `auditEvents`, optional `personId` on `users`. Owner gate 2: regenerate `_generated/` (D-031).
+- [ ] F2-3 account, profile, and group backend (slice 2a): `ensureUser`, account state derived from verified identity claims, self-registration profile, `createFamilyGroup` (D-059). Criteria: AC-2.01 to 2.05, 2.27, 2.28. Owner gate 3: Clerk JWT template email claims, mandatory email verification, regenerate `_generated/`.
+- [ ] F2-4 sign-up, profile, and create-group screens on web and mobile, after the i18n and styling decision PRs (D-064). Owner gate 4: any new dependency.
+- [ ] F2-5 invitation core backend (slice 2b, highest risk): create, preview, accept, correct, disclose, confirm, reject, resend; hashed tokens of at least 128 bits; email only (D-060); expiry and limits from config (D-061); different-email refusal (D-066). Criteria: AC-2.06 to 2.10, 2.14 to 2.26, 2.29 to 2.31. Owner gate 5: Codex adversarial review and regenerate `_generated/`.
+- [ ] F2-6 email delivery through our own adapter (D-063). Owner gate 6: provider, sender domain, and keys set by the owner.
+- [ ] F2-7 invite, accept, correct, disclose, and reject screens on web and mobile, and the pending-member home (AC-2.22).
+- [ ] F2-8 two-user device proof on web, iOS, and Android. Owner gate 7: second synthetic Clerk user and the development deploy key as a protected Environment secret.
+- [ ] F2-9 invite on behalf and claim backend (slice 2c, D-062). Criteria: AC-2.11 to 2.14. Owner gate 8: Codex adversarial review plus both review skills, regenerate `_generated/`.
+- [ ] F2-10 on-behalf and claim screens and end-to-end tests on all three platforms.
+- [ ] F2-11 hardening and release (slice 2d): registry test that every public Convex function has a declared policy and denial tests, attack sweep, parity check, mobile Device Trust and MFA (D-065), `adversarial-release-review`, `update-scope`. Owner gate 9: Codex adversarial review; no open critical or high finding.
+- [ ] Before any real person is invited: data residency, retention policy, Device Trust and MFA (D-065), and real app ids (D-051). Until then every record is synthetic.
 
 ## Feature 3: canonical person records and relationship graph
 
