@@ -13,7 +13,7 @@
 
 ## Access control
 
-Enforce access in the backend/data layer, not just in client rendering. Test both allowed and denied access. Every API and media-access path must apply the same policy.
+Enforce access in the backend/data layer, not just in client rendering. Test both allowed and denied access. Every API and media-access path must apply the same policy: the single `can(actor, action, resource, context)` module in `packages/domain/src/permissions.ts`. Add a rule there, never as an inline check in a Convex function or a client.
 
 ### Users table (`packages/backend/convex/schema.ts`)
 

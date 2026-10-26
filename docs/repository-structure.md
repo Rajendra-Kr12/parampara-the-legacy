@@ -47,9 +47,9 @@ parampara-the-legacy/
 │   │                         # committed convex/_generated/, convex-test tests (D-031)
 │   ├── config/               # shared tsconfig, ESLint, Prettier, enforcement probes
 │   │   └── probes/           # node --test probes for the enforcement ledger
-│   ├── domain/               # pure TS (trivial test so far)
+│   ├── domain/               # pure TS: invitation, relationship and membership rules, single can() in permissions.ts (D-069)
 │   ├── kinship-engine/       # pure TS (trivial test so far)
-│   └── validation/           # shared input validation: requirePublicUrl for both apps (D-048)
+│   └── validation/           # shared input validation: requirePublicUrl for both apps (D-048), email normalization and validation (D-069)
 ├── tools/
 │   └── route-task/           # Laya task router (Feature 0); npm, not in the pnpm workspace
 └── docs/

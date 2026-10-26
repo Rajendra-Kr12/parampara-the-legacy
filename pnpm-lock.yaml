@@ -358,6 +358,10 @@ importers:
         version: 2.9.1
 
   packages/domain:
+    dependencies:
+      '@parampara/validation':
+        specifier: workspace:*
+        version: link:../validation
     devDependencies:
       '@parampara/config':
         specifier: workspace:*

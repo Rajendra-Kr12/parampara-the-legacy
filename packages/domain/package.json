@@ -12,6 +12,9 @@
     "test": "vitest run",
     "build": "tsc --noEmit -p tsconfig.build.json"
   },
+  "dependencies": {
+    "@parampara/validation": "workspace:*"
+  },
   "devDependencies": {
     "@parampara/config": "workspace:*",
     "eslint": "9.39.5",

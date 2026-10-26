@@ -476,3 +476,21 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Rationale: Both packages are plain TypeScript with no UI, Convex, or provider imports, so Next.js, Expo, and later the invitation email (D-063) can share one catalog and one token source. The Telugu catalog type turns a missing translation into a compile error instead of a review miss.
 - Consequences: The two packages and the web Tailwind v4 wiring are the foundation of F2-4 and are built before the screens; any new dependency they need (Tailwind v4 and its PostCSS packages on web) still needs owner approval at owner gate 4. This decision creates no package itself. `packages/i18n` must not import UI or Convex, and Feature 4's kinship catalogue stays separate from the interface strings.
 - Reference: the choice follows the F2-4 i18n and styling scout report (`para-f2-4-i18n-styling-scout`, held in the Firstmate task data outside this repository); nothing from it is copied here.
+
+## D-069: Domain rule choices left open by D-058 to D-066 (2026-10-25)
+- Status: Accepted (2026-10-25, captain-confirmed; Feature 2 step F2-1, branch `feat/para-f2-1-domain-rules`); each item is reversible
+- Context: Building the F2-1 domain rules needed a few values and edge cases that the accepted decisions do not settle.
+- Decision:
+  - Founding limit: one group per account in any 24 hours (`groupFoundingPolicy` in `packages/domain/src/policy-config.ts`). D-059 requires a limit but names no value; with one active group per account, the limit only matters once leaving a group exists (Feature 8).
+  - An account with a pending membership cannot found a group. A pending member may do nothing beyond the pending-member capabilities (AC-2.22, AC-2.24); declining the invitation lifts the block.
+  - Inverse terms: Feature 2 records no gender, so the derived inverse of `uncle` or `aunt` is "nephew or niece", and of `nephew` or `niece` is "uncle or aunt". `docs/domain-model.md` calls these "inverse pairs"; nothing is stored either way.
+  - A partner edge between a person and their own ancestor or descendant is rejected, as listed under graph validation in `docs/domain-model.md`. Partners who are cousins stay valid.
+  - Inviting one of the inviter's own verified emails is refused.
+  - Email matching: trim and lower-case the whole address, ASCII only, and no provider-specific rewriting (Gmail dots and `+` tags are kept).
+  - Registry v1 display labels: the English label equals each code, and the romanized Telugu terms named in `docs/domain-model.md` (mama, babai, atta, pinni) map to `uncle` or `aunt`, marked unvalidated until native speakers check them.
+- Consequences: Changing a value is a change to `policy-config.ts` plus a note here. F2-5 calls `can()` and the invitation state machine instead of writing its own checks.
+
+## D-070: Invitations are viewable only while pending (2026-10-25)
+- Status: Accepted (2026-10-25, captain decision, option B, after the Codex review of PR 28)
+- Decision: `invitation.view` allows either party only while the invitation is pending and not past its expiry. The invitee also needs a pending membership in the invitation's group; the inviter needs an active one. Accepted, rejected and expired invitations are not viewable by either party.
+- Reason: the inviter learns the outcome through a notification (AC-2.21) and sends a fresh invitation after expiry (AC-2.16); neither needs the old record, so keeping closed invitations out of view is the narrower rule.
